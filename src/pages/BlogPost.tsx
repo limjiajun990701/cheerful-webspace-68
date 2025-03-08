@@ -2,8 +2,9 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { CalendarIcon, Edit, ArrowLeft } from "lucide-react";
-import { getBlogPostById, BlogPost } from "../utils/blogData";
+import { getBlogPostById } from "../utils/blogData";
 import { isAuthenticated } from "../utils/authUtils";
+import type { BlogPost as BlogPostType } from "../utils/blogData";
 
 // Simple markdown renderer - in a real app, use a library like react-markdown
 const renderMarkdown = (markdown: string) => {
@@ -20,7 +21,7 @@ const renderMarkdown = (markdown: string) => {
 
 const BlogPost = () => {
   const { id } = useParams<{ id: string }>();
-  const [post, setPost] = useState<BlogPost | null>(null);
+  const [post, setPost] = useState<BlogPostType | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();

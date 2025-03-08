@@ -1,4 +1,5 @@
 
+import { BriefcaseIcon, GraduationCap } from "lucide-react";
 import ExperienceCard from "../components/ExperienceCard";
 
 const experienceData = [
