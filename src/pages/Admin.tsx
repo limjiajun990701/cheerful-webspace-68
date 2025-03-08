@@ -9,7 +9,7 @@ import { Textarea } from "../components/ui/textarea";
 import { Card, CardContent } from "../components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { requireAuth, logout } from "../utils/authUtils";
-import { getAllBlogPosts, BlogPost, createBlogPost, updateBlogPost, deleteBlogPost } from "../utils/blogData";
+import { getAllBlogPosts, BlogPost, addBlogPost, updateBlogPost, deleteBlogPost } from "../utils/blogData";
 import { useToast } from "../hooks/use-toast";
 
 const Admin = () => {
@@ -84,23 +84,42 @@ const Admin = () => {
         .map(tag => tag.trim())
         .filter(tag => tag !== "");
 
-      const postData = {
-        title,
-        content,
-        imageUrl: imageUrl || undefined,
-        tags: tagArray,
-      };
+      // Create an excerpt from the content
+      const excerpt = content.substring(0, 150) + (content.length > 150 ? '...' : '');
+      
+      const date = new Date().toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
 
       if (editingId) {
         // Update existing post
-        await updateBlogPost(editingId, postData as BlogPost);
+        await updateBlogPost({
+          id: editingId,
+          title,
+          content,
+          imageUrl: imageUrl || undefined,
+          tags: tagArray,
+          date,
+          excerpt
+        });
+        
         toast({
           title: "Success",
           description: "Blog post updated successfully!",
         });
       } else {
         // Create new post
-        await createBlogPost(postData as BlogPost);
+        await addBlogPost({
+          title,
+          content,
+          imageUrl: imageUrl || undefined,
+          tags: tagArray,
+          date,
+          excerpt
+        });
+        
         toast({
           title: "Success",
           description: "New blog post created successfully!",
