@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Plus, Save, Trash } from "lucide-react";
 import AdminBlogCard from "../components/AdminBlogCard";
+import AdminProjectCard from "../components/AdminProjectCard";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
@@ -10,26 +11,43 @@ import { Card, CardContent } from "../components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { requireAuth, logout } from "../utils/authUtils";
 import { getAllBlogPosts, BlogPost, addBlogPost, updateBlogPost, deleteBlogPost } from "../utils/blogData";
+import { getAllProjects, Project, addProject, updateProject, deleteProject } from "../utils/projectData";
 import { useToast } from "../hooks/use-toast";
 
 const Admin = () => {
+  // Blog states
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [tags, setTags] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
+  
+  // Project states
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [projectTitle, setProjectTitle] = useState("");
+  const [projectDescription, setProjectDescription] = useState("");
+  const [projectImageUrl, setProjectImageUrl] = useState("");
+  const [projectTags, setProjectTags] = useState("");
+  const [projectLiveUrl, setProjectLiveUrl] = useState("");
+  const [projectGithubUrl, setProjectGithubUrl] = useState("");
+  const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
+  
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState("posts");
 
   useEffect(() => {
     requireAuth(() => {
       loadPosts();
+      loadProjects();
       
-      // Check if we're editing a post from the URL
+      // Check URL params for editing
       const editId = searchParams.get("edit");
-      if (editId) {
+      const editType = searchParams.get("type");
+      
+      if (editId && editType === "post") {
         const postToEdit = posts.find(post => post.id === editId);
         if (postToEdit) {
           setEditingId(editId);
@@ -37,10 +55,23 @@ const Admin = () => {
           setContent(postToEdit.content);
           setImageUrl(postToEdit.imageUrl || "");
           setTags(postToEdit.tags.join(", "));
+          setActiveTab("editor");
+        }
+      } else if (editId && editType === "project") {
+        const projectToEdit = projects.find(project => project.id === editId);
+        if (projectToEdit) {
+          setEditingProjectId(editId);
+          setProjectTitle(projectToEdit.title);
+          setProjectDescription(projectToEdit.description);
+          setProjectImageUrl(projectToEdit.imageUrl || "");
+          setProjectTags(projectToEdit.tags.join(", "));
+          setProjectLiveUrl(projectToEdit.liveUrl || "");
+          setProjectGithubUrl(projectToEdit.githubUrl || "");
+          setActiveTab("project-editor");
         }
       }
     });
-  }, [searchParams]);
+  }, [searchParams, posts, projects]);
 
   const loadPosts = async () => {
     try {
@@ -55,17 +86,32 @@ const Admin = () => {
     }
   };
 
+  const loadProjects = async () => {
+    try {
+      const allProjects = await getAllProjects();
+      setProjects(allProjects);
+    } catch (error) {
+      toast({
+        title: "Error Loading Projects",
+        description: "Failed to load projects. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleLogout = () => {
     logout();
     navigate("/admin/login");
   };
 
+  // Blog post handlers
   const handleEditPost = (post: BlogPost) => {
     setEditingId(post.id);
     setTitle(post.title);
     setContent(post.content);
     setImageUrl(post.imageUrl || "");
     setTags(post.tags.join(", "));
+    setActiveTab("editor");
   };
 
   const handleSavePost = async () => {
@@ -127,8 +173,9 @@ const Admin = () => {
       }
 
       // Reset form and reload posts
-      resetForm();
+      resetPostForm();
       loadPosts();
+      setActiveTab("posts");
     } catch (error) {
       toast({
         title: "Error",
@@ -148,7 +195,7 @@ const Admin = () => {
       loadPosts();
       
       if (editingId === id) {
-        resetForm();
+        resetPostForm();
       }
     } catch (error) {
       toast({
@@ -159,12 +206,117 @@ const Admin = () => {
     }
   };
 
-  const resetForm = () => {
+  const resetPostForm = () => {
     setEditingId(null);
     setTitle("");
     setContent("");
     setImageUrl("");
     setTags("");
+  };
+
+  // Project handlers
+  const handleEditProject = (project: Project) => {
+    setEditingProjectId(project.id);
+    setProjectTitle(project.title);
+    setProjectDescription(project.description);
+    setProjectImageUrl(project.imageUrl || "");
+    setProjectTags(project.tags.join(", "));
+    setProjectLiveUrl(project.liveUrl || "");
+    setProjectGithubUrl(project.githubUrl || "");
+    setActiveTab("project-editor");
+  };
+
+  const handleSaveProject = async () => {
+    if (!projectTitle || !projectDescription) {
+      toast({
+        title: "Missing Fields",
+        description: "Title and description are required.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const tagArray = projectTags
+        .split(",")
+        .map(tag => tag.trim())
+        .filter(tag => tag !== "");
+
+      if (editingProjectId) {
+        // Update existing project
+        await updateProject({
+          id: editingProjectId,
+          title: projectTitle,
+          description: projectDescription,
+          imageUrl: projectImageUrl || undefined,
+          tags: tagArray,
+          liveUrl: projectLiveUrl || undefined,
+          githubUrl: projectGithubUrl || undefined
+        });
+        
+        toast({
+          title: "Success",
+          description: "Project updated successfully!",
+        });
+      } else {
+        // Create new project
+        await addProject({
+          title: projectTitle,
+          description: projectDescription,
+          imageUrl: projectImageUrl || undefined,
+          tags: tagArray,
+          liveUrl: projectLiveUrl || undefined,
+          githubUrl: projectGithubUrl || undefined
+        });
+        
+        toast({
+          title: "Success",
+          description: "New project created successfully!",
+        });
+      }
+
+      // Reset form and reload projects
+      resetProjectForm();
+      loadProjects();
+      setActiveTab("projects");
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save the project. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteProject = async (id: string) => {
+    try {
+      await deleteProject(id);
+      toast({
+        title: "Success",
+        description: "Project deleted successfully!",
+      });
+      loadProjects();
+      
+      if (editingProjectId === id) {
+        resetProjectForm();
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete the project. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const resetProjectForm = () => {
+    setEditingProjectId(null);
+    setProjectTitle("");
+    setProjectDescription("");
+    setProjectImageUrl("");
+    setProjectTags("");
+    setProjectLiveUrl("");
+    setProjectGithubUrl("");
   };
 
   return (
@@ -175,16 +327,22 @@ const Admin = () => {
           <Button variant="outline" onClick={handleLogout}>Logout</Button>
         </div>
 
-        <Tabs defaultValue="posts">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-8">
             <TabsTrigger value="posts">Blog Posts</TabsTrigger>
             <TabsTrigger value="editor">{editingId ? "Edit Post" : "New Post"}</TabsTrigger>
+            <TabsTrigger value="projects">Projects</TabsTrigger>
+            <TabsTrigger value="project-editor">{editingProjectId ? "Edit Project" : "New Project"}</TabsTrigger>
           </TabsList>
 
+          {/* Blog Posts Tab */}
           <TabsContent value="posts">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-semibold">All Posts</h2>
-              <Button onClick={resetForm}>
+              <Button onClick={() => {
+                resetPostForm();
+                setActiveTab("editor");
+              }}>
                 <Plus className="mr-2 h-4 w-4" />
                 New Post
               </Button>
@@ -206,6 +364,7 @@ const Admin = () => {
             )}
           </TabsContent>
 
+          {/* Blog Editor Tab */}
           <TabsContent value="editor">
             <Card>
               <CardContent className="pt-6">
@@ -261,13 +420,142 @@ const Admin = () => {
 
                   <div className="flex gap-4 justify-end pt-4">
                     {editingId && (
-                      <Button variant="outline" onClick={resetForm}>
+                      <Button variant="outline" onClick={() => {
+                        resetPostForm();
+                        setActiveTab("posts");
+                      }}>
                         Cancel
                       </Button>
                     )}
                     <Button onClick={handleSavePost}>
                       <Save className="mr-2 h-4 w-4" />
                       {editingId ? "Update" : "Publish"} Post
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Projects Tab */}
+          <TabsContent value="projects">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-semibold">All Projects</h2>
+              <Button onClick={() => {
+                resetProjectForm();
+                setActiveTab("project-editor");
+              }}>
+                <Plus className="mr-2 h-4 w-4" />
+                New Project
+              </Button>
+            </div>
+
+            {projects.length === 0 ? (
+              <p className="text-muted-foreground text-center py-8">No projects found. Create your first project!</p>
+            ) : (
+              <div className="grid gap-6">
+                {projects.map((project) => (
+                  <AdminProjectCard
+                    key={project.id}
+                    project={project}
+                    onEdit={() => handleEditProject(project)}
+                    onDelete={() => handleDeleteProject(project.id)}
+                  />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Project Editor Tab */}
+          <TabsContent value="project-editor">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="space-y-4">
+                  <div>
+                    <label htmlFor="projectTitle" className="block text-sm font-medium mb-1">
+                      Project Title *
+                    </label>
+                    <Input
+                      id="projectTitle"
+                      value={projectTitle}
+                      onChange={(e) => setProjectTitle(e.target.value)}
+                      placeholder="Enter project title"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="projectDescription" className="block text-sm font-medium mb-1">
+                      Description *
+                    </label>
+                    <Textarea
+                      id="projectDescription"
+                      value={projectDescription}
+                      onChange={(e) => setProjectDescription(e.target.value)}
+                      placeholder="Write your project description"
+                      className="min-h-[150px]"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="projectImageUrl" className="block text-sm font-medium mb-1">
+                      Image URL (optional)
+                    </label>
+                    <Input
+                      id="projectImageUrl"
+                      value={projectImageUrl}
+                      onChange={(e) => setProjectImageUrl(e.target.value)}
+                      placeholder="Enter image URL"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="projectTags" className="block text-sm font-medium mb-1">
+                      Tags (comma separated)
+                    </label>
+                    <Input
+                      id="projectTags"
+                      value={projectTags}
+                      onChange={(e) => setProjectTags(e.target.value)}
+                      placeholder="e.g. React, TypeScript, UI/UX"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="projectLiveUrl" className="block text-sm font-medium mb-1">
+                      Live Demo URL (optional)
+                    </label>
+                    <Input
+                      id="projectLiveUrl"
+                      value={projectLiveUrl}
+                      onChange={(e) => setProjectLiveUrl(e.target.value)}
+                      placeholder="https://example.com"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="projectGithubUrl" className="block text-sm font-medium mb-1">
+                      GitHub URL (optional)
+                    </label>
+                    <Input
+                      id="projectGithubUrl"
+                      value={projectGithubUrl}
+                      onChange={(e) => setProjectGithubUrl(e.target.value)}
+                      placeholder="https://github.com/username/repo"
+                    />
+                  </div>
+
+                  <div className="flex gap-4 justify-end pt-4">
+                    {editingProjectId && (
+                      <Button variant="outline" onClick={() => {
+                        resetProjectForm();
+                        setActiveTab("projects");
+                      }}>
+                        Cancel
+                      </Button>
+                    )}
+                    <Button onClick={handleSaveProject}>
+                      <Save className="mr-2 h-4 w-4" />
+                      {editingProjectId ? "Update" : "Create"} Project
                     </Button>
                   </div>
                 </div>
