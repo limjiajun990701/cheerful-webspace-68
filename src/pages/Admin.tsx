@@ -177,6 +177,7 @@ const Admin = () => {
       loadPosts();
       setActiveTab("posts");
     } catch (error) {
+      console.error("Error saving post:", error);
       toast({
         title: "Error",
         description: "Failed to save the blog post. Please try again.",

@@ -155,7 +155,7 @@ export const addBlogPost = (post: Omit<BlogPost, 'id'>): Promise<BlogPost> => {
   const blogPosts = storedBlogs ? JSON.parse(storedBlogs) : initialBlogPosts;
   
   // Generate a new ID
-  const newId = (Math.max(...blogPosts.map((p: BlogPost) => parseInt(p.id)), 0) + 1).toString();
+  const newId = (Math.max(...blogPosts.map((p: BlogPost) => parseInt(p.id) || 0), 0) + 1).toString();
   
   const newPost = {
     ...post,
