@@ -7,6 +7,7 @@ import { requireAuth, logout } from "../utils/authUtils";
 import { useToast } from "../hooks/use-toast";
 import BlogPostManager from "../components/admin/BlogPostManager";
 import ProjectManager from "../components/admin/ProjectManager";
+import CertificationManager from "../components/admin/CertificationManager";
 
 const Admin = () => {
   const [searchParams] = useSearchParams();
@@ -24,6 +25,8 @@ const Admin = () => {
         setActiveTab("posts");
       } else if (editId && editType === "project") {
         setActiveTab("projects");
+      } else if (editId && editType === "certification") {
+        setActiveTab("certifications");
       }
     });
   }, [searchParams]);
@@ -45,6 +48,7 @@ const Admin = () => {
           <TabsList className="mb-8">
             <TabsTrigger value="posts">Blog Posts</TabsTrigger>
             <TabsTrigger value="projects">Projects</TabsTrigger>
+            <TabsTrigger value="certifications">Certifications</TabsTrigger>
           </TabsList>
 
           {/* Blog Posts Tab */}
@@ -55,6 +59,11 @@ const Admin = () => {
           {/* Projects Tab */}
           <TabsContent value="projects">
             <ProjectManager />
+          </TabsContent>
+          
+          {/* Certifications Tab */}
+          <TabsContent value="certifications">
+            <CertificationManager />
           </TabsContent>
         </Tabs>
       </div>
