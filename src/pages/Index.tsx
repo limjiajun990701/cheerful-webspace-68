@@ -2,6 +2,7 @@
 import Hero from "../components/Hero";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
+import CertificationsSection from "../components/CertificationsSection";
 
 const Index = () => {
   return (
@@ -58,6 +59,9 @@ const Index = () => {
           </div>
         </div>
       </section>
+      
+      {/* Add the new Certifications Section here */}
+      <CertificationsSection />
       
       <section className="py-24">
         <div className="container mx-auto px-4">
