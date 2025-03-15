@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Plus, Save } from "lucide-react";
-import { BlogPost } from "../../utils/blogData";
+import { BlogPost, getBlogPostById } from "../../utils/blogData";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
@@ -19,7 +19,38 @@ const BlogPostEditor = ({ editingId, onSave, onCancel }: BlogPostEditorProps) =>
   const [content, setContent] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [tags, setTags] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+
+  // Load post data when editing an existing post
+  useEffect(() => {
+    const loadPostData = async () => {
+      if (editingId) {
+        setIsLoading(true);
+        try {
+          const post = await getBlogPostById(editingId);
+          
+          if (post) {
+            setTitle(post.title);
+            setContent(post.content);
+            setImageUrl(post.imageUrl || "");
+            setTags(post.tags.join(", "));
+          }
+        } catch (error) {
+          console.error("Error loading post data:", error);
+          toast({
+            title: "Error",
+            description: "Failed to load post data. Please try again.",
+            variant: "destructive",
+          });
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadPostData();
+  }, [editingId, toast]);
 
   const handleSave = () => {
     if (!title || !content) {
@@ -57,6 +88,7 @@ const BlogPostEditor = ({ editingId, onSave, onCancel }: BlogPostEditorProps) =>
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Enter post title"
+              disabled={isLoading}
             />
           </div>
 
@@ -70,6 +102,7 @@ const BlogPostEditor = ({ editingId, onSave, onCancel }: BlogPostEditorProps) =>
               onChange={(e) => setContent(e.target.value)}
               placeholder="Write your post content here (Markdown supported)"
               className="min-h-[300px]"
+              disabled={isLoading}
             />
           </div>
 
@@ -82,6 +115,7 @@ const BlogPostEditor = ({ editingId, onSave, onCancel }: BlogPostEditorProps) =>
               value={imageUrl}
               onChange={(e) => setImageUrl(e.target.value)}
               placeholder="Enter image URL"
+              disabled={isLoading}
             />
           </div>
 
@@ -94,16 +128,17 @@ const BlogPostEditor = ({ editingId, onSave, onCancel }: BlogPostEditorProps) =>
               value={tags}
               onChange={(e) => setTags(e.target.value)}
               placeholder="e.g. technology, design, react"
+              disabled={isLoading}
             />
           </div>
 
           <div className="flex gap-4 justify-end pt-4">
             {editingId && (
-              <Button variant="outline" onClick={onCancel}>
+              <Button variant="outline" onClick={onCancel} disabled={isLoading}>
                 Cancel
               </Button>
             )}
-            <Button onClick={handleSave}>
+            <Button onClick={handleSave} disabled={isLoading}>
               <Save className="mr-2 h-4 w-4" />
               {editingId ? "Update" : "Publish"} Post
             </Button>
