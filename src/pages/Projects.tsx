@@ -5,6 +5,7 @@ import { PlusCircle } from "lucide-react";
 import ProjectCard from "../components/ProjectCard";
 import { getAllProjects, Project } from "../utils/projectData";
 import { isAuthenticated } from "../utils/authUtils";
+import { Button } from "@/components/ui/button";
 
 const Projects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -41,13 +42,12 @@ const Projects = () => {
               </div>
               
               {isAdmin && (
-                <Link 
-                  to="/admin"
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
-                >
-                  <PlusCircle size={16} />
-                  Manage Projects
-                </Link>
+                <Button asChild size="sm">
+                  <Link to="/admin">
+                    <PlusCircle className="mr-1.5" size={16} />
+                    Manage Projects
+                  </Link>
+                </Button>
               )}
             </div>
           </div>
@@ -65,13 +65,12 @@ const Projects = () => {
               
               {isAdmin && (
                 <div className="mt-8">
-                  <Link 
-                    to="/admin"
-                    className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
-                  >
-                    <PlusCircle size={18} />
-                    Add Your First Project
-                  </Link>
+                  <Button asChild>
+                    <Link to="/admin">
+                      <PlusCircle className="mr-1.5" size={18} />
+                      Add Your First Project
+                    </Link>
+                  </Button>
                 </div>
               )}
             </div>
