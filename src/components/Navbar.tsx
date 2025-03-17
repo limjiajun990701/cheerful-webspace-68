@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { Menu, X, Book, Search, Rss, Award } from "lucide-react";
+import { Menu, X, Book, Search, Rss } from "lucide-react";
 import { 
   NavigationMenu,
   NavigationMenuContent,
@@ -79,7 +78,6 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close mobile menu when changing routes
   useEffect(() => {
     closeMenu();
     setShowSearch(false);
@@ -106,9 +104,7 @@ const Navbar = () => {
             </NavLink>
           </div>
           
-          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-4">
-            {/* Regular Navigation Links */}
             {!isBlogPage ? (
               <ul className="flex space-x-8">
                 {navItems.map((item) => (
@@ -116,79 +112,74 @@ const Navbar = () => {
                     <NavLink
                       to={item.path}
                       className={({ isActive }) => 
-                        `underline-animation py-1 smooth-transition flex items-center gap-1 ${
+                        `underline-animation py-1 smooth-transition ${
                           isActive 
                             ? "text-primary font-medium" 
                             : "text-foreground hover:text-primary"
                         }`
                       }
                     >
-                      {item.name === "Certifications & Badges" && <Award className="h-4 w-4" />}
                       {item.name}
                     </NavLink>
                   </li>
                 ))}
               </ul>
             ) : (
-              <>
-                {/* Blog specific enhanced navigation */}
-                <NavigationMenu>
-                  <NavigationMenuList>
-                    <NavigationMenuItem>
-                      <NavigationMenuTrigger className="bg-transparent hover:bg-secondary">Categories</NavigationMenuTrigger>
-                      <NavigationMenuContent>
-                        <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-                          {blogCategories.map((category) => (
-                            <ListItem
-                              key={category.name}
-                              title={category.name}
-                              href={`/blog?category=${category.name.toLowerCase()}`}
-                            >
-                              {category.description}
-                            </ListItem>
-                          ))}
-                        </ul>
-                      </NavigationMenuContent>
-                    </NavigationMenuItem>
-                    <NavigationMenuItem>
-                      <NavLink 
-                        to="/blog" 
-                        className={({ isActive }) => 
-                          `underline-animation py-1 mx-4 smooth-transition ${
-                            isActive 
-                              ? "text-primary font-medium" 
-                              : "text-foreground hover:text-primary"
-                          }`
-                        }
-                      >
-                        All Posts
-                      </NavLink>
-                    </NavigationMenuItem>
-                    <NavigationMenuItem>
-                      <button
-                        onClick={() => setShowSearch(!showSearch)}
-                        className="p-2 rounded-full text-foreground hover:bg-accent smooth-transition"
-                        aria-label="Search blog"
-                      >
-                        <Search size={18} />
-                      </button>
-                    </NavigationMenuItem>
-                    <NavigationMenuItem>
-                      <button
-                        onClick={() => {}}
-                        className="p-2 rounded-full text-foreground hover:bg-accent smooth-transition"
-                        aria-label="RSS Feed"
-                      >
-                        <Rss size={18} />
-                      </button>
-                    </NavigationMenuItem>
-                  </NavigationMenuList>
-                </NavigationMenu>
-              </>
+              <NavigationMenu>
+                <NavigationMenuList>
+                  <NavigationMenuItem>
+                    <NavigationMenuTrigger className="bg-transparent hover:bg-secondary">Categories</NavigationMenuTrigger>
+                    <NavigationMenuContent>
+                      <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                        {blogCategories.map((category) => (
+                          <ListItem
+                            key={category.name}
+                            title={category.name}
+                            href={`/blog?category=${category.name.toLowerCase()}`}
+                          >
+                            {category.description}
+                          </ListItem>
+                        ))}
+                      </ul>
+                    </NavigationMenuContent>
+                  </NavigationMenuItem>
+                  <NavigationMenuItem>
+                    <NavLink 
+                      to="/blog" 
+                      className={({ isActive }) => 
+                        `underline-animation py-1 mx-4 smooth-transition ${
+                          isActive 
+                            ? "text-primary font-medium" 
+                            : "text-foreground hover:text-primary"
+                        }`
+                      }
+                    >
+                      All Posts
+                    </NavLink>
+                  </NavigationMenuItem>
+                  <NavigationMenuItem>
+                    <button
+                      onClick={() => setShowSearch(!showSearch)}
+                      className="p-2 rounded-full text-foreground hover:bg-accent smooth-transition"
+                      aria-label="Search blog"
+                    >
+                      <Search size={18} />
+                    </button>
+                  </NavigationMenuItem>
+                  <NavigationMenuItem>
+                    <button
+                      onClick={() => {}}
+                      className="p-2 rounded-full text-foreground hover:bg-accent smooth-transition"
+                      aria-label="RSS Feed"
+                    >
+                      <Rss size={18} />
+                    </button>
+                  </NavigationMenuItem>
+                </NavigationMenuList>
+              </NavigationMenu>
             )}
           </nav>
           
-          {/* Mobile Navigation Toggle */}
           <div className="md:hidden flex items-center">
             {isBlogPage && (
               <>
@@ -212,7 +203,6 @@ const Navbar = () => {
         </div>
       </div>
       
-      {/* Search Bar - Conditional Rendering */}
       {showSearch && (
         <div className="border-t border-border bg-white/80 backdrop-blur-md py-3 px-4 animate-slide-down">
           <div className="container mx-auto">
@@ -228,7 +218,6 @@ const Navbar = () => {
         </div>
       )}
       
-      {/* Mobile Navigation Menu */}
       <div
         className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
           isOpen ? "max-h-[80vh] opacity-100" : "max-h-0 opacity-0"
@@ -241,7 +230,7 @@ const Navbar = () => {
                 <NavLink
                   to={item.path}
                   className={({ isActive }) => 
-                    `block py-2 px-3 rounded-lg smooth-transition flex items-center gap-2 ${
+                    `block py-2 px-3 rounded-lg smooth-transition ${
                       isActive 
                         ? "bg-primary/10 text-primary font-medium" 
                         : "text-foreground hover:bg-accent"
@@ -249,7 +238,6 @@ const Navbar = () => {
                   }
                   onClick={closeMenu}
                 >
-                  {item.name === "Certifications & Badges" && <Award className="h-4 w-4" />}
                   {item.name}
                 </NavLink>
               </li>

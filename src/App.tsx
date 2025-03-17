@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import About from "./pages/About";
 import Experience from "./pages/Experience";
 import Projects from "./pages/Projects";
+import Certifications from "./pages/Certifications";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import Admin from "./pages/Admin";
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="/experience" element={<Experience />} />
             <Route path="/projects" element={<Projects />} />
+            <Route path="/certifications" element={<Certifications />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:id" element={<BlogPost />} />
             <Route path="/admin/login" element={<AdminLogin />} />
