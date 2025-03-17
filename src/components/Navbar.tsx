@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { Menu, X, Book, Search, Rss } from "lucide-react";
+import { Menu, X, Book, Search, Rss, Award } from "lucide-react";
 import { 
   NavigationMenu,
   NavigationMenuContent,
@@ -18,6 +18,7 @@ const navItems = [
   { name: "About", path: "/about" },
   { name: "Experience", path: "/experience" },
   { name: "Projects", path: "/projects" },
+  { name: "Certifications & Badges", path: "/certifications" },
   { name: "Blog", path: "/blog" },
 ];
 
@@ -115,13 +116,14 @@ const Navbar = () => {
                     <NavLink
                       to={item.path}
                       className={({ isActive }) => 
-                        `underline-animation py-1 smooth-transition ${
+                        `underline-animation py-1 smooth-transition flex items-center gap-1 ${
                           isActive 
                             ? "text-primary font-medium" 
                             : "text-foreground hover:text-primary"
                         }`
                       }
                     >
+                      {item.name === "Certifications & Badges" && <Award className="h-4 w-4" />}
                       {item.name}
                     </NavLink>
                   </li>
@@ -239,7 +241,7 @@ const Navbar = () => {
                 <NavLink
                   to={item.path}
                   className={({ isActive }) => 
-                    `block py-2 px-3 rounded-lg smooth-transition ${
+                    `block py-2 px-3 rounded-lg smooth-transition flex items-center gap-2 ${
                       isActive 
                         ? "bg-primary/10 text-primary font-medium" 
                         : "text-foreground hover:bg-accent"
@@ -247,6 +249,7 @@ const Navbar = () => {
                   }
                   onClick={closeMenu}
                 >
+                  {item.name === "Certifications & Badges" && <Award className="h-4 w-4" />}
                   {item.name}
                 </NavLink>
               </li>
