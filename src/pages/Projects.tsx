@@ -41,14 +41,7 @@ const Projects = () => {
                 </p>
               </div>
               
-              {isAdmin && (
-                <Button asChild size="sm">
-                  <Link to="/admin">
-                    <PlusCircle className="mr-1.5" size={16} />
-                    Manage Projects
-                  </Link>
-                </Button>
-              )}
+              {/* Removed the "Manage Projects" button that was here */}
             </div>
           </div>
           
