@@ -3,10 +3,11 @@ import { Github, Mail, Linkedin, Phone, ExternalLink } from "lucide-react";
 
 const About = () => {
   const skills = [
-    { category: "Languages", items: ["JavaScript", "TypeScript", "HTML", "CSS", "Python"] },
-    { category: "Frontend", items: ["React", "Next.js", "Tailwind CSS", "Redux", "GraphQL"] },
-    { category: "Backend", items: ["Node.js", "Express", "MongoDB", "PostgreSQL", "Firebase"] },
-    { category: "Tools", items: ["Git", "Docker", "AWS", "Figma", "Jest"] },
+    { category: "Programming Languages", items: ["Dart", "JavaScript", "TypeScript", "PHP", "Java", "HTML", "CSS"] },
+    { category: "Frontend", items: ["Flutter", "Vue.js", "React"] },
+    { category: "Backend", items: ["PHP", "Java", "Quarkus"] },
+    { category: "Databases", items: ["MySQL", "SQLite", "MariaDB", "PostgreSQL"] },
+    { category: "Tools & Platforms", items: ["Git", "GitLab", "GitHub", "AWS", "Azure", "Oracle Cloud"] },
   ];
 
   return (
@@ -17,7 +18,7 @@ const About = () => {
             <div className="flex flex-col gap-6 animate-fade-in">
               <span className="text-sm font-medium text-primary">About Me</span>
               <h1 className="text-4xl md:text-5xl font-bold">
-                Hey, I'm <span className="text-primary">John Doe</span>
+                Hey, I'm <span className="text-primary">Lim Jia Jun</span>
               </h1>
               
               <div className="flex flex-col md:flex-row gap-12 mt-8">
@@ -32,23 +33,18 @@ const About = () => {
                 
                 <div className="md:w-2/3">
                   <p className="text-lg mb-6">
-                    I'm a passionate full-stack developer with over 5 years of experience building
-                    web applications. My journey in software development started with a curiosity
-                    about how websites work, which evolved into a career creating digital
-                    experiences that are both functional and beautiful.
+                    I am a fresh graduate of Universiti Utara Malaysia (UUM) with a Bachelor's Degree in Science with Honours in 
+                    Information Technology specializing in Software Engineering.
                   </p>
                   
                   <p className="text-lg mb-6">
-                    I specialize in JavaScript and TypeScript ecosystems, with expertise in React
-                    for frontend development and Node.js for backend services. My approach combines
-                    technical knowledge with an eye for design, ensuring that the applications I
-                    build are not only robust but also intuitive for users.
+                    I'm seeking a challenging position related to Software Engineering and Development, including roles such as 
+                    Software Engineer, Software Developer, Frontend Developer, Backend Developer, or Full Stack Developer. 
                   </p>
                   
                   <p className="text-lg">
-                    When I'm not coding, you'll find me exploring new technologies, contributing to
-                    open-source projects, or enjoying outdoor activities like hiking and
-                    photography.
+                    I'm eager to apply my programming skills and knowledge of software engineering principles to contribute to the 
+                    design and development of innovative software products.
                   </p>
                 </div>
               </div>
@@ -97,7 +93,7 @@ const About = () => {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <a 
-                href="mailto:hello@example.com" 
+                href="mailto:jiajunlim0701@gmail.com" 
                 className="flex items-center gap-4 p-6 rounded-xl border border-border hover:bg-accent transition-colors"
               >
                 <div className="rounded-full bg-primary/10 p-3">
@@ -105,13 +101,13 @@ const About = () => {
                 </div>
                 <div>
                   <h3 className="text-lg font-medium">Email</h3>
-                  <p className="text-muted-foreground">hello@example.com</p>
+                  <p className="text-muted-foreground">jiajunlim0701@gmail.com</p>
                 </div>
                 <ExternalLink className="w-5 h-5 text-muted-foreground ml-auto" />
               </a>
               
               <a 
-                href="tel:+1234567890" 
+                href="tel:+60 1128797556" 
                 className="flex items-center gap-4 p-6 rounded-xl border border-border hover:bg-accent transition-colors"
               >
                 <div className="rounded-full bg-primary/10 p-3">
@@ -119,13 +115,13 @@ const About = () => {
                 </div>
                 <div>
                   <h3 className="text-lg font-medium">Phone</h3>
-                  <p className="text-muted-foreground">+1 (234) 567-890</p>
+                  <p className="text-muted-foreground">+60 1128797556</p>
                 </div>
                 <ExternalLink className="w-5 h-5 text-muted-foreground ml-auto" />
               </a>
               
               <a 
-                href="https://github.com" 
+                href="https://github.com/LIMJIAJUN" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="flex items-center gap-4 p-6 rounded-xl border border-border hover:bg-accent transition-colors"
@@ -135,13 +131,13 @@ const About = () => {
                 </div>
                 <div>
                   <h3 className="text-lg font-medium">GitHub</h3>
-                  <p className="text-muted-foreground">github.com/johndoe</p>
+                  <p className="text-muted-foreground">github.com/LIMJIAJUN</p>
                 </div>
                 <ExternalLink className="w-5 h-5 text-muted-foreground ml-auto" />
               </a>
               
               <a 
-                href="https://linkedin.com" 
+                href="https://linkedin.com/in/LIMJIAJUN" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="flex items-center gap-4 p-6 rounded-xl border border-border hover:bg-accent transition-colors"
@@ -151,7 +147,7 @@ const About = () => {
                 </div>
                 <div>
                   <h3 className="text-lg font-medium">LinkedIn</h3>
-                  <p className="text-muted-foreground">linkedin.com/in/johndoe</p>
+                  <p className="text-muted-foreground">linkedin.com/in/LIMJIAJUN</p>
                 </div>
                 <ExternalLink className="w-5 h-5 text-muted-foreground ml-auto" />
               </a>

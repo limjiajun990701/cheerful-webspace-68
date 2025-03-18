@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, GitHub, Linkedin, Mail, Phone } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Hero = () => {
@@ -28,7 +28,7 @@ const Hero = () => {
               isLoaded ? "opacity-100" : "opacity-0 translate-y-4"
             } transition-all duration-700 delay-100`}
           >
-            Welcome to my portfolio
+            Software Engineer
           </span>
           
           <h1 
@@ -36,8 +36,8 @@ const Hero = () => {
               isLoaded ? "opacity-100" : "opacity-0 translate-y-4"
             } transition-all duration-700 delay-200`}
           >
-            Crafting Digital<br />
-            <span className="text-primary">Experiences</span> with Passion
+            LIM JIA<br />
+            <span className="text-primary">JUN</span>
           </h1>
           
           <p 
@@ -45,8 +45,9 @@ const Hero = () => {
               isLoaded ? "opacity-100" : "opacity-0 translate-y-4"
             } transition-all duration-700 delay-300`}
           >
-            I'm a developer and designer focused on creating intuitive, 
-            user-centered digital solutions that combine aesthetics with functionality.
+            Fresh graduate with a Bachelor's Degree in Information Technology specializing in 
+            Software Engineering. Focused on full-stack development with expertise in Flutter, 
+            Vue.js, and Java.
           </p>
           
           <div 
@@ -68,6 +69,45 @@ const Hero = () => {
             >
               About Me
             </Link>
+          </div>
+          
+          <div 
+            className={`flex mt-10 gap-4 transform ${
+              isLoaded ? "opacity-100" : "opacity-0 translate-y-4"
+            } transition-all duration-700 delay-500`}
+          >
+            <a 
+              href="https://github.com/LIMJIAJUN" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="p-2 rounded-full bg-accent hover:bg-primary/10 transition-colors"
+              aria-label="GitHub"
+            >
+              <GitHub size={20} />
+            </a>
+            <a 
+              href="https://linkedin.com/in/LIMJIAJUN" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="p-2 rounded-full bg-accent hover:bg-primary/10 transition-colors"
+              aria-label="LinkedIn"
+            >
+              <Linkedin size={20} />
+            </a>
+            <a 
+              href="mailto:jiajunlim0701@gmail.com" 
+              className="p-2 rounded-full bg-accent hover:bg-primary/10 transition-colors"
+              aria-label="Email"
+            >
+              <Mail size={20} />
+            </a>
+            <a 
+              href="tel:+60 1128797556" 
+              className="p-2 rounded-full bg-accent hover:bg-primary/10 transition-colors"
+              aria-label="Phone"
+            >
+              <Phone size={20} />
+            </a>
           </div>
         </div>
       </div>

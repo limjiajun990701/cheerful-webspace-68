@@ -3,16 +3,22 @@ import React, { useState, useEffect } from "react";
 import { getAllCertifications, Certification } from "../utils/certificationData";
 import CertificationCard from "../components/CertificationCard";
 import { Badge } from "../components/ui/badge";
+import { Input } from "../components/ui/input";
+import { Search } from "lucide-react";
 
 const Certifications = () => {
   const [certifications, setCertifications] = useState<Certification[]>([]);
+  const [filteredCertifications, setFilteredCertifications] = useState<Certification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedIssuer, setSelectedIssuer] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchCertifications = async () => {
       try {
         const data = await getAllCertifications();
         setCertifications(data);
+        setFilteredCertifications(data);
       } catch (error) {
         console.error("Error fetching certifications:", error);
       } finally {
@@ -22,6 +28,25 @@ const Certifications = () => {
 
     fetchCertifications();
   }, []);
+
+  useEffect(() => {
+    let filtered = certifications;
+    
+    if (searchTerm) {
+      filtered = filtered.filter(cert => 
+        cert.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        cert.description.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    if (selectedIssuer) {
+      filtered = filtered.filter(cert => cert.issuer === selectedIssuer);
+    }
+    
+    setFilteredCertifications(filtered);
+  }, [searchTerm, selectedIssuer, certifications]);
+
+  const issuers = Array.from(new Set(certifications.map(cert => cert.issuer)));
 
   if (isLoading) {
     return (
@@ -54,25 +79,47 @@ const Certifications = () => {
           </p>
         </div>
 
-        {certifications.length === 0 ? (
+        <div className="mb-8">
+          <div className="relative max-w-md mx-auto mb-6">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
+            <Input 
+              className="pl-10" 
+              placeholder="Search certifications..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          
+          <div className="flex flex-wrap justify-center gap-2 mb-6">
+            <Badge 
+              variant={selectedIssuer === null ? "default" : "outline"} 
+              className="cursor-pointer text-sm"
+              onClick={() => setSelectedIssuer(null)}
+            >
+              All
+            </Badge>
+            {issuers.map(issuer => (
+              <Badge 
+                key={issuer} 
+                variant={selectedIssuer === issuer ? "default" : "outline"} 
+                className="cursor-pointer text-sm"
+                onClick={() => setSelectedIssuer(issuer === selectedIssuer ? null : issuer)}
+              >
+                {issuer}
+              </Badge>
+            ))}
+          </div>
+        </div>
+
+        {filteredCertifications.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">No certifications found.</p>
+            <p className="text-muted-foreground">No certifications found matching your search.</p>
           </div>
         ) : (
-          <div>
-            <div className="flex flex-wrap justify-center gap-2 mb-8">
-              {Array.from(new Set(certifications.map(cert => cert.issuer))).map(issuer => (
-                <Badge key={issuer} variant="outline" className="text-sm">
-                  {issuer}
-                </Badge>
-              ))}
-            </div>
-            
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {certifications.map(certification => (
-                <CertificationCard key={certification.id} certification={certification} />
-              ))}
-            </div>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {filteredCertifications.map(certification => (
+              <CertificationCard key={certification.id} certification={certification} />
+            ))}
           </div>
         )}
       </div>

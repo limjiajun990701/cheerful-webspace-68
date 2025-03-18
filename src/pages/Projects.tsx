@@ -37,7 +37,7 @@ const Projects = () => {
                 <span className="text-sm font-medium text-primary">My Portfolio</span>
                 <h1 className="text-4xl md:text-5xl font-bold mt-2">Projects</h1>
                 <p className="text-muted-foreground text-lg max-w-2xl mt-4">
-                  A showcase of my work and personal projects.
+                  A showcase of my work, featuring mobile applications, web development, and software engineering projects.
                 </p>
               </div>
               
