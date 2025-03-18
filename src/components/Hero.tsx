@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { ArrowRight, GitHub, Linkedin, Mail, Phone } from "lucide-react";
+import { ArrowRight, Github, Linkedin, Mail, Phone } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Hero = () => {
@@ -83,7 +82,7 @@ const Hero = () => {
               className="p-2 rounded-full bg-accent hover:bg-primary/10 transition-colors"
               aria-label="GitHub"
             >
-              <GitHub size={20} />
+              <Github size={20} />
             </a>
             <a 
               href="https://linkedin.com/in/LIMJIAJUN" 
