@@ -1,5 +1,5 @@
 
-import { Award, ExternalLink, Edit, Trash2 } from "lucide-react";
+import { Award, ExternalLink, Edit, Trash2, FileText } from "lucide-react";
 import { Certification } from "../utils/certificationData";
 
 interface AdminCertificationCardProps {
@@ -15,15 +15,19 @@ const AdminCertificationCard = ({ certification, onEdit, onDelete }: AdminCertif
         <div className="flex justify-between items-start">
           <div className="flex-1">
             <div className="flex items-center gap-4 mb-4">
-              {certification.imageUrl && (
-                <div className="h-16 w-16 flex-shrink-0 rounded-md overflow-hidden border border-border">
+              <div className="h-16 w-16 flex-shrink-0 rounded-md overflow-hidden border border-border">
+                {certification.fileType === "image" ? (
                   <img 
-                    src={certification.imageUrl} 
+                    src={certification.fileUrl} 
                     alt={certification.name}
                     className="h-full w-full object-cover"
                   />
-                </div>
-              )}
+                ) : (
+                  <div className="h-full w-full flex items-center justify-center bg-muted/30">
+                    <FileText size={24} className="text-muted-foreground" />
+                  </div>
+                )}
+              </div>
               
               <div>
                 <h3 className="text-xl font-semibold mb-1">{certification.name}</h3>
