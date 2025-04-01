@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "../ui/button";
@@ -53,7 +54,8 @@ const BlogPostManager = () => {
           content: postData.content,
           tags: postData.tags,
           date,
-          excerpt
+          excerpt,
+          imageUrl: postData.imageUrl
         });
         
         toast({
@@ -67,7 +69,8 @@ const BlogPostManager = () => {
           content: postData.content,
           tags: postData.tags,
           date,
-          excerpt
+          excerpt,
+          imageUrl: postData.imageUrl
         });
         
         toast({

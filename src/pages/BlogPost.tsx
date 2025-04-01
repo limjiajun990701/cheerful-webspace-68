@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { CalendarIcon, Edit, ArrowLeft } from "lucide-react";
@@ -127,6 +128,16 @@ const BlogPost = () => {
             </div>
             
             <h1 className="text-3xl md:text-4xl font-bold mb-6">{post.title}</h1>
+            
+            {post.imageUrl && (
+              <div className="mb-8 rounded-xl overflow-hidden">
+                <img 
+                  src={post.imageUrl} 
+                  alt={post.title} 
+                  className="w-full h-auto object-cover max-h-[500px]"
+                />
+              </div>
+            )}
           </div>
           
           <article className="prose prose-lg max-w-none">

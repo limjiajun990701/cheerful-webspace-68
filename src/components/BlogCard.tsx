@@ -11,6 +11,16 @@ interface BlogCardProps {
 const BlogCard = ({ post, featured = false }: BlogCardProps) => {
   return featured ? (
     <div className="bg-background rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-border">
+      {post.imageUrl && (
+        <div className="aspect-video w-full overflow-hidden">
+          <img 
+            src={post.imageUrl} 
+            alt={post.title} 
+            className="w-full h-full object-cover transition-transform hover:scale-105"
+          />
+        </div>
+      )}
+      
       <div className="p-6 flex flex-col">
         <div className="flex items-center text-sm text-muted-foreground mb-3">
           <CalendarIcon size={16} className="mr-1" />
@@ -44,6 +54,16 @@ const BlogCard = ({ post, featured = false }: BlogCardProps) => {
     </div>
   ) : (
     <div className="bg-background rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-border h-full flex flex-col">
+      {post.imageUrl && (
+        <div className="aspect-video w-full overflow-hidden">
+          <img 
+            src={post.imageUrl} 
+            alt={post.title} 
+            className="w-full h-full object-cover transition-transform hover:scale-105"
+          />
+        </div>
+      )}
+      
       <div className="p-6 flex flex-col flex-grow">
         <div className="flex items-center text-sm text-muted-foreground mb-3">
           <CalendarIcon size={16} className="mr-1" />
