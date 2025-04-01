@@ -1,11 +1,13 @@
 
-import { ExternalLink, Github } from "lucide-react";
+import { ExternalLink, Github, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface ProjectCardProps {
   title: string;
   description: string;
-  imageUrl: string;
+  imageUrl?: string;
+  fileUrl?: string;
+  fileType?: "image" | "pdf";
   tags: string[];
   liveUrl?: string;
   githubUrl?: string;
@@ -15,19 +17,36 @@ const ProjectCard = ({
   title, 
   description, 
   imageUrl, 
+  fileUrl,
+  fileType,
   tags, 
   liveUrl, 
   githubUrl 
 }: ProjectCardProps) => {
+  // Determine what to display in the media section
+  const displayImage = fileUrl && fileType === "image" ? fileUrl : imageUrl;
+  const isPdf = fileUrl && fileType === "pdf";
+  
   return (
     <div className="bg-background rounded-xl overflow-hidden shadow-sm border border-border hover:shadow-md transition-all">
       <div className="aspect-video relative overflow-hidden bg-muted">
-        <div 
-          className="absolute inset-0 bg-muted flex items-center justify-center"
-          style={{ backgroundImage: imageUrl ? `url(${imageUrl})` : 'none', backgroundSize: 'cover', backgroundPosition: 'center' }}
-        >
-          {!imageUrl && <span className="text-muted-foreground">Project Image</span>}
-        </div>
+        {displayImage ? (
+          <div 
+            className="absolute inset-0 bg-muted flex items-center justify-center"
+            style={{ backgroundImage: `url(${displayImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+          />
+        ) : isPdf ? (
+          <div className="absolute inset-0 bg-muted flex items-center justify-center">
+            <div className="flex flex-col items-center justify-center">
+              <FileText size={48} className="text-muted-foreground mb-2" />
+              <span className="text-sm text-muted-foreground">PDF Document</span>
+            </div>
+          </div>
+        ) : (
+          <div className="absolute inset-0 bg-muted flex items-center justify-center">
+            <span className="text-muted-foreground">Project Image</span>
+          </div>
+        )}
       </div>
       
       <div className="p-6">
@@ -69,6 +88,19 @@ const ProjectCard = ({
               >
                 <Github size={16} className="mr-1.5" />
                 View Code
+              </a>
+            </Button>
+          )}
+          
+          {isPdf && fileUrl && (
+            <Button asChild variant="outline" size="sm">
+              <a 
+                href={fileUrl} 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                <FileText size={16} className="mr-1.5" />
+                View PDF
               </a>
             </Button>
           )}

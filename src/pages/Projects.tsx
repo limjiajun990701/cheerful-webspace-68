@@ -40,8 +40,6 @@ const Projects = () => {
                   A showcase of my work, featuring mobile applications, web development, and software engineering projects.
                 </p>
               </div>
-              
-              {/* Removed the "Manage Projects" button that was here */}
             </div>
           </div>
           
@@ -74,7 +72,9 @@ const Projects = () => {
                   <ProjectCard
                     title={project.title}
                     description={project.description}
-                    imageUrl={project.imageUrl || ""}
+                    imageUrl={project.imageUrl}
+                    fileUrl={project.fileUrl}
+                    fileType={project.fileType}
                     tags={project.tags}
                     liveUrl={project.liveUrl}
                     githubUrl={project.githubUrl}

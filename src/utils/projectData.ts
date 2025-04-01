@@ -3,6 +3,8 @@ export interface Project {
   title: string;
   description: string;
   imageUrl?: string;
+  fileUrl?: string;
+  fileType?: "image" | "pdf";
   tags: string[];
   liveUrl?: string;
   githubUrl?: string;
