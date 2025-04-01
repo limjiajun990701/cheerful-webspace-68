@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "../ui/button";
@@ -52,7 +51,6 @@ const BlogPostManager = () => {
           id: editingId,
           title: postData.title,
           content: postData.content,
-          imageUrl: postData.imageUrl,
           tags: postData.tags,
           date,
           excerpt
@@ -67,7 +65,6 @@ const BlogPostManager = () => {
         await addBlogPost({
           title: postData.title,
           content: postData.content,
-          imageUrl: postData.imageUrl,
           tags: postData.tags,
           date,
           excerpt

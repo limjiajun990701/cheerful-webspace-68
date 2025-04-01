@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { CalendarIcon, Edit, ArrowLeft } from "lucide-react";
@@ -6,7 +5,6 @@ import { getBlogPostById } from "../utils/blogData";
 import { isAuthenticated } from "../utils/authUtils";
 import type { BlogPost as BlogPostType } from "../utils/blogData";
 
-// Simple markdown renderer - in a real app, use a library like react-markdown
 const renderMarkdown = (markdown: string) => {
   return { __html: markdown
     .replace(/^# (.*$)/gm, '<h1 class="text-3xl font-bold my-6">$1</h1>')
@@ -108,16 +106,6 @@ const BlogPost = () => {
               </Link>
             )}
           </div>
-          
-          {post.imageUrl && (
-            <div className="w-full aspect-video rounded-xl overflow-hidden mb-8 bg-muted">
-              <img
-                src={post.imageUrl}
-                alt={post.title}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          )}
           
           <div className="mb-6">
             <div className="flex items-center text-sm text-muted-foreground mb-4">

@@ -5,7 +5,7 @@ export interface BlogPost {
   content: string;
   date: string;
   tags: string[];
-  imageUrl?: string;
+  imageUrl?: string; // already optional
   excerpt: string;
 }
 
