@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { Menu, X, Book, Search, Rss } from "lucide-react";
@@ -19,13 +20,6 @@ const navItems = [
   { name: "Projects", path: "/projects" },
   { name: "Certifications & Badges", path: "/certifications" },
   { name: "Blog", path: "/blog" },
-];
-
-const blogCategories = [
-  { name: "Technology", description: "Articles about the latest tech trends and innovations" },
-  { name: "Design", description: "Insights into UI/UX design principles and practices" },
-  { name: "Development", description: "Tutorials and tips for web and app development" },
-  { name: "Career", description: "Advice and stories about professional growth in tech" },
 ];
 
 const ListItem = React.forwardRef<
@@ -125,58 +119,34 @@ const Navbar = () => {
                 ))}
               </ul>
             ) : (
-              <NavigationMenu>
-                <NavigationMenuList>
-                  <NavigationMenuItem>
-                    <NavigationMenuTrigger className="bg-transparent hover:bg-secondary">Categories</NavigationMenuTrigger>
-                    <NavigationMenuContent>
-                      <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-                        {blogCategories.map((category) => (
-                          <ListItem
-                            key={category.name}
-                            title={category.name}
-                            href={`/blog?category=${category.name.toLowerCase()}`}
-                          >
-                            {category.description}
-                          </ListItem>
-                        ))}
-                      </ul>
-                    </NavigationMenuContent>
-                  </NavigationMenuItem>
-                  <NavigationMenuItem>
-                    <NavLink 
-                      to="/blog" 
-                      className={({ isActive }) => 
-                        `underline-animation py-1 mx-4 smooth-transition ${
-                          isActive 
-                            ? "text-primary font-medium" 
-                            : "text-foreground hover:text-primary"
-                        }`
-                      }
-                    >
-                      All Posts
-                    </NavLink>
-                  </NavigationMenuItem>
-                  <NavigationMenuItem>
-                    <button
-                      onClick={() => setShowSearch(!showSearch)}
-                      className="p-2 rounded-full text-foreground hover:bg-accent smooth-transition"
-                      aria-label="Search blog"
-                    >
-                      <Search size={18} />
-                    </button>
-                  </NavigationMenuItem>
-                  <NavigationMenuItem>
-                    <button
-                      onClick={() => {}}
-                      className="p-2 rounded-full text-foreground hover:bg-accent smooth-transition"
-                      aria-label="RSS Feed"
-                    >
-                      <Rss size={18} />
-                    </button>
-                  </NavigationMenuItem>
-                </NavigationMenuList>
-              </NavigationMenu>
+              <div className="flex items-center space-x-4">
+                <NavLink 
+                  to="/blog" 
+                  className={({ isActive }) => 
+                    `underline-animation py-1 smooth-transition ${
+                      isActive 
+                        ? "text-primary font-medium" 
+                        : "text-foreground hover:text-primary"
+                    }`
+                  }
+                >
+                  All Posts
+                </NavLink>
+                <button
+                  onClick={() => setShowSearch(!showSearch)}
+                  className="p-2 rounded-full text-foreground hover:bg-accent smooth-transition"
+                  aria-label="Search blog"
+                >
+                  <Search size={18} />
+                </button>
+                <button
+                  onClick={() => {}}
+                  className="p-2 rounded-full text-foreground hover:bg-accent smooth-transition"
+                  aria-label="RSS Feed"
+                >
+                  <Rss size={18} />
+                </button>
+              </div>
             )}
           </nav>
           
@@ -242,24 +212,6 @@ const Navbar = () => {
                 </NavLink>
               </li>
             ))}
-            {isBlogPage && (
-              <>
-                <li className="pt-2 border-t border-border">
-                  <p className="px-3 py-1 text-sm font-medium text-muted-foreground">Blog Categories</p>
-                </li>
-                {blogCategories.map((category) => (
-                  <li key={category.name}>
-                    <a
-                      href={`/blog?category=${category.name.toLowerCase()}`}
-                      className="block py-2 px-3 rounded-lg text-foreground hover:bg-accent smooth-transition"
-                      onClick={closeMenu}
-                    >
-                      {category.name}
-                    </a>
-                  </li>
-                ))}
-              </>
-            )}
           </ul>
         </div>
       </div>
