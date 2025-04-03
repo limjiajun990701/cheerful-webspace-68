@@ -1,7 +1,47 @@
 
-import { Github, Mail, Linkedin, Phone, ExternalLink, Code, Globe, Server, Database, Wrench } from "lucide-react";
+import { 
+  Github, Mail, Linkedin, Phone, ExternalLink, Code, Globe, Server, 
+  Database, Wrench, Zap, Cpu, FileJson, Languages, FileType, BarChart, 
+  Coffee, Bookmark, FolderGit, Cloud, Box, Database as DBIcon
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const About = () => {
+  // Define icon mappings for skills
+  const skillIcons = {
+    // Programming Languages
+    "Dart": <Zap className="w-4 h-4" />,
+    "JavaScript": <FileJson className="w-4 h-4" />,
+    "TypeScript": <FileType className="w-4 h-4" />,
+    "PHP": <Code className="w-4 h-4" />,
+    "Java": <Coffee className="w-4 h-4" />,
+    "HTML": <Languages className="w-4 h-4" />,
+    "CSS": <BarChart className="w-4 h-4" />,
+    
+    // Frontend
+    "Flutter": <Box className="w-4 h-4" />,
+    "Vue.js": <Bookmark className="w-4 h-4" />,
+    "React": <Cpu className="w-4 h-4" />,
+    
+    // Backend
+    // PHP and Java already defined above
+    "Quarkus": <Server className="w-4 h-4" />,
+    
+    // Databases
+    "MySQL": <DBIcon className="w-4 h-4" />,
+    "SQLite": <DBIcon className="w-4 h-4" />,
+    "MariaDB": <DBIcon className="w-4 h-4" />,
+    "PostgreSQL": <DBIcon className="w-4 h-4" />,
+    
+    // Tools & Platforms
+    "Git": <FolderGit className="w-4 h-4" />,
+    "GitLab": <FolderGit className="w-4 h-4" />,
+    "GitHub": <Github className="w-4 h-4" />,
+    "AWS": <Cloud className="w-4 h-4" />,
+    "Azure": <Cloud className="w-4 h-4" />,
+    "Oracle Cloud": <Cloud className="w-4 h-4" />
+  };
+
   const skills = [
     { 
       category: "Programming Languages", 
@@ -92,8 +132,9 @@ const About = () => {
                     {skillGroup.items.map((skill) => (
                       <span 
                         key={skill} 
-                        className="px-3 py-1.5 bg-secondary text-foreground rounded-full text-sm"
+                        className="px-3 py-1.5 bg-secondary text-foreground rounded-full text-sm flex items-center gap-1.5"
                       >
+                        {skillIcons[skill]}
                         {skill}
                       </span>
                     ))}
