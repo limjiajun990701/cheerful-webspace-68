@@ -1,116 +1,30 @@
 
 import React from 'react';
 import { 
-  Github, Mail, Linkedin, Phone, ExternalLink, Code, Globe, Server, 
-  Database, Wrench, Zap, Cpu, FileJson, Languages, FileType, BarChart, 
-  Coffee, Bookmark, FolderGit, Cloud, Box, Database as DBIcon
+  Github, Mail, Linkedin, Phone, ExternalLink
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const About = () => {
-  // Define skill icons with proper SVG icons where possible
-  const skillIcons = {
-    // Programming Languages
-    "Dart": <img src="https://favicon.is/dart" alt="Dart" className="w-4 h-4" />,
-    "JavaScript": <img src="https://favicon.is/javascript" alt="JavaScript" className="w-4 h-4" />,
-    "TypeScript": <img src="https://favicon.is/typescript" alt="TypeScript" className="w-4 h-4" />,
-    "PHP": <img src="https://favicon.is/php" alt="PHP" className="w-4 h-4" />,
-    "Java": <img src="https://favicon.is/java" alt="Java" className="w-4 h-4" />,
-    "HTML": <img src="https://favicon.is/html" alt="HTML" className="w-4 h-4" />,
-    "CSS": <img src="https://favicon.is/css" alt="CSS" className="w-4 h-4" />,
-    
-    // Frontend
-    "Flutter": <img src="https://favicon.is/flutter" alt="Flutter" className="w-4 h-4" />,
-    "Vue.js": <img src="https://favicon.is/vue" alt="Vue.js" className="w-4 h-4" />,
-    "React": <img src="https://favicon.is/react" alt="React" className="w-4 h-4" />,
-    
-    // Backend
-    "Quarkus": <img src="https://favicon.is/quarkus" alt="Quarkus" className="w-4 h-4" />,
-    
-    // Databases
-    "MySQL": <img src="https://favicon.is/mysql" alt="MySQL" className="w-4 h-4" />,
-    "SQLite": <img src="https://favicon.is/sqlite" alt="SQLite" className="w-4 h-4" />,
-    "MariaDB": <img src="https://favicon.is/mariadb" alt="MariaDB" className="w-4 h-4" />,
-    "PostgreSQL": <img src="https://favicon.is/postgresql" alt="PostgreSQL" className="w-4 h-4" />,
-    
-    // Tools & Platforms
-    "Git": <img src="https://favicon.is/git" alt="Git" className="w-4 h-4" />,
-    "GitLab": <img src="https://favicon.is/gitlab" alt="GitLab" className="w-4 h-4" />,
-    "GitHub": <img src="https://favicon.is/github" alt="GitHub" className="w-4 h-4" />,
-    "AWS": <img src="https://favicon.is/aws" alt="AWS" className="w-4 h-4" />,
-    "Azure": <img src="https://favicon.is/azure" alt="Azure" className="w-4 h-4" />,
-    "Oracle Cloud": <img src="https://favicon.is/oracle" alt="Oracle Cloud" className="w-4 h-4" />
-  };
-
-  // Add fallback handling for when icons don't load
-  const handleImageError = (e, skill) => {
-    e.target.onerror = null;
-    
-    // Use the existing Lucide icons as fallbacks
-    const fallbackIcons = {
-      // Programming Languages
-      "Dart": <Zap className="w-4 h-4" />,
-      "JavaScript": <FileJson className="w-4 h-4" />,
-      "TypeScript": <FileType className="w-4 h-4" />,
-      "PHP": <Code className="w-4 h-4" />,
-      "Java": <Coffee className="w-4 h-4" />,
-      "HTML": <Languages className="w-4 h-4" />,
-      "CSS": <BarChart className="w-4 h-4" />,
-      
-      // Frontend
-      "Flutter": <Box className="w-4 h-4" />,
-      "Vue.js": <Bookmark className="w-4 h-4" />,
-      "React": <Cpu className="w-4 h-4" />,
-      
-      // Backend
-      "Quarkus": <Server className="w-4 h-4" />,
-      
-      // Databases
-      "MySQL": <DBIcon className="w-4 h-4" />,
-      "SQLite": <DBIcon className="w-4 h-4" />,
-      "MariaDB": <DBIcon className="w-4 h-4" />,
-      "PostgreSQL": <DBIcon className="w-4 h-4" />,
-      
-      // Tools & Platforms
-      "Git": <FolderGit className="w-4 h-4" />,
-      "GitLab": <FolderGit className="w-4 h-4" />,
-      "GitHub": <Github className="w-4 h-4" />,
-      "AWS": <Cloud className="w-4 h-4" />,
-      "Azure": <Cloud className="w-4 h-4" />,
-      "Oracle Cloud": <Cloud className="w-4 h-4" />
-    };
-    
-    // Replace the img element with the fallback icon
-    e.target.parentNode.replaceChild(
-      fallbackIcons[skill] || <Code className="w-4 h-4" />, 
-      e.target
-    );
-  };
-
   const skills = [
     { 
       category: "Programming Languages", 
-      icon: <Code className="w-5 h-5 text-primary" />,
       items: ["Dart", "JavaScript", "TypeScript", "PHP", "Java", "HTML", "CSS"] 
     },
     { 
       category: "Frontend", 
-      icon: <Globe className="w-5 h-5 text-primary" />,
       items: ["Flutter", "Vue.js", "React"] 
     },
     { 
       category: "Backend", 
-      icon: <Server className="w-5 h-5 text-primary" />,
       items: ["PHP", "Java", "Quarkus"] 
     },
     { 
       category: "Databases", 
-      icon: <Database className="w-5 h-5 text-primary" />,
       items: ["MySQL", "SQLite", "MariaDB", "PostgreSQL"] 
     },
     { 
       category: "Tools & Platforms", 
-      icon: <Wrench className="w-5 h-5 text-primary" />,
       items: ["Git", "GitLab", "GitHub", "AWS", "Azure", "Oracle Cloud"] 
     },
   ];
@@ -169,22 +83,13 @@ const About = () => {
                   key={skillGroup.category} 
                   className="bg-background rounded-xl p-6 shadow-sm"
                 >
-                  <div className="flex items-center gap-3 mb-4">
-                    {skillGroup.icon}
-                    <h3 className="text-xl font-semibold">{skillGroup.category}</h3>
-                  </div>
+                  <h3 className="text-xl font-semibold mb-4">{skillGroup.category}</h3>
                   <div className="flex flex-wrap gap-2">
                     {skillGroup.items.map((skill) => (
                       <span 
                         key={skill} 
-                        className="px-3 py-1.5 bg-secondary text-foreground rounded-full text-sm flex items-center gap-1.5"
+                        className="px-3 py-1.5 bg-secondary text-foreground rounded-full text-sm"
                       >
-                        {React.cloneElement(
-                          skillIcons[skill], 
-                          { 
-                            onError: (e) => handleImageError(e, skill)
-                          }
-                        )}
                         {skill}
                       </span>
                     ))}
