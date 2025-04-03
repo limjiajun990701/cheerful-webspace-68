@@ -1,13 +1,33 @@
 
-import { Github, Mail, Linkedin, Phone, ExternalLink } from "lucide-react";
+import { Github, Mail, Linkedin, Phone, ExternalLink, Code, Globe, Server, Database, Tool } from "lucide-react";
 
 const About = () => {
   const skills = [
-    { category: "Programming Languages", items: ["Dart", "JavaScript", "TypeScript", "PHP", "Java", "HTML", "CSS"] },
-    { category: "Frontend", items: ["Flutter", "Vue.js", "React"] },
-    { category: "Backend", items: ["PHP", "Java", "Quarkus"] },
-    { category: "Databases", items: ["MySQL", "SQLite", "MariaDB", "PostgreSQL"] },
-    { category: "Tools & Platforms", items: ["Git", "GitLab", "GitHub", "AWS", "Azure", "Oracle Cloud"] },
+    { 
+      category: "Programming Languages", 
+      icon: <Code className="w-5 h-5 text-primary" />,
+      items: ["Dart", "JavaScript", "TypeScript", "PHP", "Java", "HTML", "CSS"] 
+    },
+    { 
+      category: "Frontend", 
+      icon: <Globe className="w-5 h-5 text-primary" />,
+      items: ["Flutter", "Vue.js", "React"] 
+    },
+    { 
+      category: "Backend", 
+      icon: <Server className="w-5 h-5 text-primary" />,
+      items: ["PHP", "Java", "Quarkus"] 
+    },
+    { 
+      category: "Databases", 
+      icon: <Database className="w-5 h-5 text-primary" />,
+      items: ["MySQL", "SQLite", "MariaDB", "PostgreSQL"] 
+    },
+    { 
+      category: "Tools & Platforms", 
+      icon: <Tool className="w-5 h-5 text-primary" />,
+      items: ["Git", "GitLab", "GitHub", "AWS", "Azure", "Oracle Cloud"] 
+    },
   ];
 
   return (
@@ -64,7 +84,10 @@ const About = () => {
                   key={skillGroup.category} 
                   className="bg-background rounded-xl p-6 shadow-sm"
                 >
-                  <h3 className="text-xl font-semibold mb-4">{skillGroup.category}</h3>
+                  <div className="flex items-center gap-3 mb-4">
+                    {skillGroup.icon}
+                    <h3 className="text-xl font-semibold">{skillGroup.category}</h3>
+                  </div>
                   <div className="flex flex-wrap gap-2">
                     {skillGroup.items.map((skill) => (
                       <span 

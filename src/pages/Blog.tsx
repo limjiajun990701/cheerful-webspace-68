@@ -1,17 +1,14 @@
 
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { SearchIcon } from "lucide-react";
 import BlogCard from "../components/BlogCard";
 import { getAllBlogPosts, BlogPost } from "../utils/blogData";
-import { isAuthenticated } from "../utils/authUtils";
 
 const Blog = () => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  const isAdmin = isAuthenticated();
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -60,17 +57,6 @@ const Blog = () => {
             <p className="text-muted-foreground text-lg max-w-2xl">
               Articles, tutorials, and insights about development, design, and technology.
             </p>
-            
-            {isAdmin && (
-              <div className="mt-4">
-                <Link 
-                  to="/admin" 
-                  className="px-5 py-2.5 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors inline-flex items-center"
-                >
-                  Admin Dashboard
-                </Link>
-              </div>
-            )}
           </div>
           
           <div className="mb-12">
