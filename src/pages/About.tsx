@@ -1,4 +1,5 @@
 
+import React from 'react';
 import { 
   Github, Mail, Linkedin, Phone, ExternalLink, Code, Globe, Server, 
   Database, Wrench, Zap, Cpu, FileJson, Languages, FileType, BarChart, 
