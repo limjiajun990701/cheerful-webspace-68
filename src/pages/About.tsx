@@ -1,5 +1,5 @@
 
-import { Github, Mail, Linkedin, Phone, ExternalLink, Code, Globe, Server, Database, Tool } from "lucide-react";
+import { Github, Mail, Linkedin, Phone, ExternalLink, Code, Globe, Server, Database, Wrench } from "lucide-react";
 
 const About = () => {
   const skills = [
@@ -25,7 +25,7 @@ const About = () => {
     },
     { 
       category: "Tools & Platforms", 
-      icon: <Tool className="w-5 h-5 text-primary" />,
+      icon: <Wrench className="w-5 h-5 text-primary" />,
       items: ["Git", "GitLab", "GitHub", "AWS", "Azure", "Oracle Cloud"] 
     },
   ];
