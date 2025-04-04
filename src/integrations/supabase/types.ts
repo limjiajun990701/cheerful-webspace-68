@@ -9,6 +9,135 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      admin_users: {
+        Row: {
+          created_at: string | null
+          id: string
+          password_hash: string
+          username: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          password_hash: string
+          username: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          password_hash?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      blog_posts: {
+        Row: {
+          content: string
+          date: string | null
+          excerpt: string | null
+          id: string
+          imageurl: string | null
+          tags: string[] | null
+          title: string
+        }
+        Insert: {
+          content: string
+          date?: string | null
+          excerpt?: string | null
+          id?: string
+          imageurl?: string | null
+          tags?: string[] | null
+          title: string
+        }
+        Update: {
+          content?: string
+          date?: string | null
+          excerpt?: string | null
+          id?: string
+          imageurl?: string | null
+          tags?: string[] | null
+          title?: string
+        }
+        Relationships: []
+      }
+      certifications: {
+        Row: {
+          credentialurl: string | null
+          date: string
+          description: string
+          filetype: string
+          fileurl: string
+          id: string
+          issuer: string
+          name: string
+        }
+        Insert: {
+          credentialurl?: string | null
+          date?: string
+          description: string
+          filetype: string
+          fileurl: string
+          id?: string
+          issuer: string
+          name: string
+        }
+        Update: {
+          credentialurl?: string | null
+          date?: string
+          description?: string
+          filetype?: string
+          fileurl?: string
+          id?: string
+          issuer?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      projects: {
+        Row: {
+          content: string | null
+          date: string | null
+          description: string
+          filetype: string | null
+          fileurl: string | null
+          githuburl: string | null
+          id: string
+          imageurl: string | null
+          liveurl: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string
+        }
+        Insert: {
+          content?: string | null
+          date?: string | null
+          description: string
+          filetype?: string | null
+          fileurl?: string | null
+          githuburl?: string | null
+          id?: string
+          imageurl?: string | null
+          liveurl?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title: string
+        }
+        Update: {
+          content?: string | null
+          date?: string | null
+          description?: string
+          filetype?: string | null
+          fileurl?: string | null
+          githuburl?: string | null
+          id?: string
+          imageurl?: string | null
+          liveurl?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string
+        }
+        Relationships: []
+      }
       resumes: {
         Row: {
           file_name: string
