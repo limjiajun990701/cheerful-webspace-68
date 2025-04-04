@@ -8,6 +8,7 @@ import { useToast } from "../hooks/use-toast";
 import BlogPostManager from "../components/admin/BlogPostManager";
 import ProjectManager from "../components/admin/ProjectManager";
 import CertificationManager from "../components/admin/CertificationManager";
+import ResumeManager from "../components/admin/ResumeManager";
 
 const Admin = () => {
   const [searchParams] = useSearchParams();
@@ -49,6 +50,7 @@ const Admin = () => {
             <TabsTrigger value="posts">Blog Posts</TabsTrigger>
             <TabsTrigger value="projects">Projects</TabsTrigger>
             <TabsTrigger value="certifications">Certifications</TabsTrigger>
+            <TabsTrigger value="resume">Resume</TabsTrigger>
           </TabsList>
 
           {/* Blog Posts Tab */}
@@ -64,6 +66,11 @@ const Admin = () => {
           {/* Certifications Tab */}
           <TabsContent value="certifications">
             <CertificationManager />
+          </TabsContent>
+
+          {/* Resume Tab */}
+          <TabsContent value="resume">
+            <ResumeManager />
           </TabsContent>
         </Tabs>
       </div>

@@ -7,6 +7,7 @@ import NavLinks from "./navbar/NavLinks";
 import MobileMenu from "./navbar/MobileMenu";
 import BlogNavOptions from "./navbar/BlogNavOptions";
 import SearchBar from "./navbar/SearchBar";
+import ResumeButton from "./navbar/ResumeButton";
 
 const navItems = [
   { name: "Home", path: "/" },
@@ -69,10 +70,14 @@ const Navbar = () => {
           
           <nav className="hidden md:flex items-center space-x-4">
             {!isBlogPage ? (
-              <NavLinks navItems={navItems} />
+              <>
+                <NavLinks navItems={navItems} />
+                <ResumeButton />
+              </>
             ) : (
               <div className="flex items-center space-x-4">
                 <NavLinks navItems={[]} isBlogPage={true} />
+                <ResumeButton />
                 <BlogNavOptions 
                   setShowSearch={setShowSearch} 
                   showSearch={showSearch}
@@ -83,6 +88,7 @@ const Navbar = () => {
           </nav>
           
           <div className="md:hidden flex items-center">
+            <ResumeButton />
             {isBlogPage && (
               <BlogNavOptions 
                 setShowSearch={setShowSearch} 
