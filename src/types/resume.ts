@@ -1,7 +1,11 @@
 
 export interface Resume {
   id: string;
-  fileUrl: string;
-  fileName: string;
-  uploadDate: string;
+  user_id: string;
+  file_name: string;
+  file_path: string;
+  file_size: number;
+  upload_date: string;
+  fileUrl?: string; // For compatibility with frontend components
+  fileName?: string; // For compatibility with frontend components
 }

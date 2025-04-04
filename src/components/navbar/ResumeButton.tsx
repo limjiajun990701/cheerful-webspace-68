@@ -13,12 +13,25 @@ import { Resume } from '@/types/resume';
 
 const ResumeButton = () => {
   const [resume, setResume] = useState<Resume | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    setResume(getCurrentResume());
+    const fetchResume = async () => {
+      try {
+        setLoading(true);
+        const data = await getCurrentResume();
+        setResume(data);
+      } catch (error) {
+        console.error("Error fetching resume:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchResume();
   }, []);
 
-  if (!resume) {
+  if (loading || !resume) {
     return null;
   }
 
@@ -45,7 +58,7 @@ const ResumeButton = () => {
         <DropdownMenuItem asChild>
           <a 
             href={resume.fileUrl} 
-            download={resume.fileName}
+            download={resume.fileName || resume.file_name}
             className="flex w-full cursor-pointer items-center"
           >
             <Download className="mr-2 h-4 w-4" />

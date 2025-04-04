@@ -30,14 +30,14 @@ const ResumeUploader = ({ onUploadSuccess }: { onUploadSuccess: () => void }) =>
       await uploadResume(file);
       toast({
         title: "Resume updated",
-        description: "Your resume has been successfully uploaded.",
+        description: "Your resume has been successfully uploaded to Supabase.",
       });
       onUploadSuccess();
     } catch (error) {
       console.error("Upload error:", error);
       toast({
         title: "Upload failed",
-        description: "Failed to upload resume. Please try again.",
+        description: "Failed to upload resume. Please sign in and try again.",
         variant: "destructive",
       });
     } finally {

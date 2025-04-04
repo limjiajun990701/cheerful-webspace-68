@@ -15,25 +15,67 @@ interface ResumeViewerProps {
 
 const ResumeViewer = ({ onDelete, showActions = true }: ResumeViewerProps) => {
   const [resume, setResume] = useState<Resume | null>(null);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
-    setResume(getCurrentResume());
+    const fetchResume = async () => {
+      try {
+        setLoading(true);
+        const data = await getCurrentResume();
+        setResume(data);
+      } catch (error) {
+        console.error("Error fetching resume:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchResume();
   }, []);
 
-  if (!resume) {
-    return <div>No resume available</div>;
+  const handleDelete = async () => {
+    try {
+      await deleteResume();
+      setResume(null);
+      toast({
+        title: "Resume deleted",
+        description: "Your resume has been deleted from Supabase.",
+      });
+      if (onDelete) onDelete();
+    } catch (error) {
+      console.error("Error deleting resume:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete resume. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  if (loading) {
+    return (
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex items-center justify-center p-4">
+            <p>Loading resume...</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
-  const handleDelete = () => {
-    deleteResume();
-    setResume(getCurrentResume());
-    toast({
-      title: "Resume deleted",
-      description: "Your resume has been deleted.",
-    });
-    if (onDelete) onDelete();
-  };
+  if (!resume) {
+    return (
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex items-center justify-center p-4">
+            <p>No resume available. Please upload one.</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
@@ -42,9 +84,9 @@ const ResumeViewer = ({ onDelete, showActions = true }: ResumeViewerProps) => {
           <div className="flex items-center space-x-3">
             <FileText className="h-8 w-8 text-primary" />
             <div>
-              <p className="font-medium">{resume.fileName}</p>
+              <p className="font-medium">{resume.fileName || resume.file_name}</p>
               <p className="text-sm text-muted-foreground">
-                Last updated: {format(new Date(resume.uploadDate), "MMM d, yyyy")}
+                Last updated: {format(new Date(resume.upload_date), "MMM d, yyyy")}
               </p>
             </div>
           </div>
@@ -70,7 +112,7 @@ const ResumeViewer = ({ onDelete, showActions = true }: ResumeViewerProps) => {
             >
               <a 
                 href={resume.fileUrl} 
-                download={resume.fileName}
+                download={resume.fileName || resume.file_name}
               >
                 <Download className="h-4 w-4 mr-1" />
                 Download
