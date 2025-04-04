@@ -1,15 +1,9 @@
 
 import { v4 as uuidv4 } from 'uuid';
-
-interface Resume {
-  id: string;
-  fileUrl: string;
-  fileName: string;
-  uploadDate: string;
-}
+import { Resume } from '@/types/resume';
 
 const STORAGE_KEY = 'portfolio_resume';
-const DEFAULT_RESUME = {
+const DEFAULT_RESUME: Resume = {
   id: 'default',
   fileUrl: '/resume-sample.pdf', // Default placeholder
   fileName: 'resume.pdf',

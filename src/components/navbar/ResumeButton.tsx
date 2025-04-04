@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FileText, Download, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -9,9 +9,18 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { getCurrentResume } from '@/utils/resumeData';
+import { Resume } from '@/types/resume';
 
 const ResumeButton = () => {
-  const [resume] = useState(getCurrentResume);
+  const [resume, setResume] = useState<Resume | null>(null);
+
+  useEffect(() => {
+    setResume(getCurrentResume());
+  }, []);
+
+  if (!resume) {
+    return null;
+  }
 
   return (
     <DropdownMenu>
