@@ -99,7 +99,8 @@ export const uploadResume = async (file: File): Promise<Resume> => {
       .eq('user_id', userId)
       .single();
 
-    const newResume: Partial<Resume> = {
+    // Define the resume data for database insertion/update
+    const resumeData = {
       user_id: userId,
       file_name: file.name,
       file_path: filePath,
@@ -113,7 +114,7 @@ export const uploadResume = async (file: File): Promise<Resume> => {
       // Update existing resume
       const { data, error } = await supabase
         .from('resumes')
-        .update(newResume)
+        .update(resumeData)
         .eq('id', existingResume.id)
         .select()
         .single();
@@ -124,7 +125,7 @@ export const uploadResume = async (file: File): Promise<Resume> => {
       // Insert new resume
       const { data, error } = await supabase
         .from('resumes')
-        .insert(newResume)
+        .insert(resumeData)
         .select()
         .single();
         

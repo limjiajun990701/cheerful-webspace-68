@@ -2,6 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
 
+// Interface matching our front-end naming conventions (camelCase)
 export interface Certification {
   id: string;
   name: string;
@@ -12,6 +13,30 @@ export interface Certification {
   date: string;
   credentialUrl?: string;
 }
+
+// Type representing the database column names (snake_case)
+interface CertificationDB {
+  id: string;
+  name: string;
+  issuer: string;
+  fileurl: string;
+  filetype: string;
+  description: string;
+  date: string;
+  credentialurl: string | null;
+}
+
+// Convert from DB format to our interface format
+const mapDbToCertification = (dbCert: CertificationDB): Certification => ({
+  id: dbCert.id,
+  name: dbCert.name,
+  issuer: dbCert.issuer,
+  fileUrl: dbCert.fileurl,
+  fileType: dbCert.filetype as 'image' | 'pdf',
+  description: dbCert.description,
+  date: dbCert.date,
+  credentialUrl: dbCert.credentialurl || undefined
+});
 
 // Upload certification file to storage
 export const uploadCertificationFile = async (file: File): Promise<{ url: string, fileType: 'image' | 'pdf' }> => {
@@ -49,7 +74,8 @@ export const getAllCertifications = async (): Promise<Certification[]> => {
       throw error;
     }
 
-    return data || [];
+    // Map the data from DB format to our interface format
+    return (data as CertificationDB[]).map(mapDbToCertification) || [];
   } catch (error) {
     console.error("Error fetching certifications:", error);
     return [];
@@ -69,7 +95,7 @@ export const getCertificationById = async (id: string): Promise<Certification | 
       throw error;
     }
 
-    return data;
+    return data ? mapDbToCertification(data as CertificationDB) : null;
   } catch (error) {
     console.error(`Error fetching certification with ID ${id}:`, error);
     return null;
@@ -81,7 +107,15 @@ export const addCertification = async (certification: Omit<Certification, 'id'>)
   try {
     const { data, error } = await supabase
       .from('certifications')
-      .insert([certification])
+      .insert([{
+        name: certification.name,
+        issuer: certification.issuer,
+        fileurl: certification.fileUrl,
+        filetype: certification.fileType,
+        description: certification.description,
+        date: certification.date,
+        credentialurl: certification.credentialUrl || null
+      }])
       .select()
       .single();
 
@@ -89,7 +123,7 @@ export const addCertification = async (certification: Omit<Certification, 'id'>)
       throw error;
     }
 
-    return data;
+    return mapDbToCertification(data as CertificationDB);
   } catch (error) {
     console.error("Error adding certification:", error);
     throw error;
@@ -101,7 +135,15 @@ export const updateCertification = async (certification: Certification): Promise
   try {
     const { data, error } = await supabase
       .from('certifications')
-      .update(certification)
+      .update({
+        name: certification.name,
+        issuer: certification.issuer,
+        fileurl: certification.fileUrl,
+        filetype: certification.fileType,
+        description: certification.description,
+        date: certification.date,
+        credentialurl: certification.credentialUrl || null
+      })
       .eq('id', certification.id)
       .select()
       .single();
@@ -110,7 +152,7 @@ export const updateCertification = async (certification: Certification): Promise
       throw error;
     }
 
-    return data;
+    return mapDbToCertification(data as CertificationDB);
   } catch (error) {
     console.error(`Error updating certification with ID ${certification.id}:`, error);
     throw error;
