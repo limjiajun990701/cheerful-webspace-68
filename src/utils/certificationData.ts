@@ -13,6 +13,30 @@ export interface Certification {
   credentialUrl?: string;
 }
 
+// Upload certification file to storage
+export const uploadCertificationFile = async (file: File): Promise<{ url: string, fileType: 'image' | 'pdf' }> => {
+  const fileExt = file.name.split('.').pop()?.toLowerCase();
+  const filePath = `certifications/${uuidv4()}.${fileExt}`;
+  const fileType = file.type.startsWith('image/') ? 'image' : 'pdf';
+  
+  try {
+    // For now, simulate file upload and return a URL
+    // In a real app, this would upload to Supabase storage
+    
+    // Create a blob URL for local preview
+    const blobUrl = URL.createObjectURL(file);
+    
+    // Return the URL and file type
+    return {
+      url: blobUrl,
+      fileType
+    };
+  } catch (error) {
+    console.error("Error uploading file:", error);
+    throw error;
+  }
+};
+
 // Get all certifications
 export const getAllCertifications = async (): Promise<Certification[]> => {
   try {

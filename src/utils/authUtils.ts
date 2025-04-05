@@ -1,6 +1,5 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { createClient } from '@supabase/supabase-js';
 
 // Check if admin is logged in
 export const isAuthenticated = async (): Promise<boolean> => {

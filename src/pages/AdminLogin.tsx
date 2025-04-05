@@ -13,18 +13,23 @@ const AdminLogin = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // If already authenticated, redirect to admin page
-    if (isAuthenticated()) {
-      navigate("/admin");
-    }
+    // Check if already authenticated
+    const checkAuth = async () => {
+      const authenticated = await isAuthenticated();
+      if (authenticated) {
+        navigate("/admin");
+      }
+    };
+    
+    checkAuth();
   }, [navigate]);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
-    setTimeout(() => {
-      const success = login(username, password);
+    try {
+      const success = await login(username, password);
       
       if (success) {
         toast({
@@ -40,9 +45,16 @@ const AdminLogin = () => {
           variant: "destructive",
         });
       }
-      
+    } catch (error) {
+      console.error("Login error:", error);
+      toast({
+        title: "Login error",
+        description: "An error occurred during login",
+        variant: "destructive",
+      });
+    } finally {
       setIsLoading(false);
-    }, 1000); // Simulate API request
+    }
   };
 
   return (
