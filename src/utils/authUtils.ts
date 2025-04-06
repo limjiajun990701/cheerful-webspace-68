@@ -25,22 +25,26 @@ export const login = async (username: string, password: string): Promise<boolean
     }
 
     console.log("Admin user found:", adminUser.username);
+    
+    // Check if the password matches directly (simple comparison since we're using plain text)
+    if (adminUser.password_hash !== password) {
+      console.error("Password doesn't match");
+      return false;
+    }
 
     // Construct the email using a consistent format
     const adminEmail = `${username}@admin.portfolio`;
     
-    // Try to sign in with Supabase auth
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: adminEmail,
-      password,
-    });
+    // Try to sign in with Supabase auth or create the account if it doesn't exist
+    try {
+      // Try to sign in first
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: adminEmail,
+        password,
+      });
 
-    if (error) {
-      console.error("Login error:", error);
-      
-      // If the user doesn't exist in auth yet or credentials are invalid, try to create the account
-      if (error.message.includes("Invalid login credentials")) {
-        console.log("Attempting to create admin auth account");
+      if (error) {
+        console.log("Auth error, attempting to create account:", error.message);
         
         // Create the user in Supabase Auth
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
@@ -65,15 +69,14 @@ export const login = async (username: string, password: string): Promise<boolean
           console.error("Second login attempt failed:", secondLoginError);
           return false;
         }
-        
-        console.log("Login successful after account creation");
-        return true;
       }
+      
+      console.log("Login successful");
+      return true;
+    } catch (authError) {
+      console.error("Auth operation failed:", authError);
       return false;
     }
-
-    console.log("Login successful on first attempt");
-    return true;
   } catch (error) {
     console.error("Error in login:", error);
     return false;

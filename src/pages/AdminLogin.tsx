@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 
 const AdminLogin = () => {
   const [username, setUsername] = useState("admin");
-  const [password, setPassword] = useState("password123");
+  const [password, setPassword] = useState("admin");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPasswordReset, setShowPasswordReset] = useState(false);
@@ -120,12 +120,12 @@ const AdminLogin = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="pl-10"
-                placeholder="password123"
+                placeholder="admin"
                 required
               />
             </div>
             <p className="text-xs text-muted-foreground mt-2">
-              Default credentials: admin / password123
+              Default credentials: admin / admin
             </p>
           </div>
           
