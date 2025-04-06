@@ -10,6 +10,8 @@ export const isAuthenticated = async (): Promise<boolean> => {
 // Login function
 export const login = async (username: string, password: string): Promise<boolean> => {
   try {
+    console.log("Attempting login for user:", username);
+    
     // First check if the admin user exists in the admin_users table
     const { data: adminUser, error: adminError } = await supabase
       .from('admin_users')
@@ -30,7 +32,7 @@ export const login = async (username: string, password: string): Promise<boolean
     // Try to sign in with Supabase auth
     const { data, error } = await supabase.auth.signInWithPassword({
       email: adminEmail,
-      password: password,
+      password,
     });
 
     if (error) {
@@ -43,7 +45,7 @@ export const login = async (username: string, password: string): Promise<boolean
         // Create the user in Supabase Auth
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email: adminEmail,
-          password: password,
+          password,
         });
         
         if (signUpError) {
@@ -56,7 +58,7 @@ export const login = async (username: string, password: string): Promise<boolean
         // Try to sign in again now that the account exists
         const { data: secondLoginData, error: secondLoginError } = await supabase.auth.signInWithPassword({
           email: adminEmail,
-          password: password,
+          password,
         });
         
         if (secondLoginError) {

@@ -35,6 +35,7 @@ const AdminLogin = () => {
     setError(null);
     
     try {
+      console.log("Starting login process...");
       const success = await login(username, password);
       
       if (success) {

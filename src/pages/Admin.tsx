@@ -15,27 +15,42 @@ const Admin = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("posts");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    requireAuth(() => {
-      // Check URL params for editing
-      const editId = searchParams.get("edit");
-      const editType = searchParams.get("type");
-      
-      if (editId && editType === "post") {
-        setActiveTab("posts");
-      } else if (editId && editType === "project") {
-        setActiveTab("projects");
-      } else if (editId && editType === "certification") {
-        setActiveTab("certifications");
-      }
-    });
+    const checkAuth = async () => {
+      requireAuth(() => {
+        setIsAuthenticated(true);
+        // Check URL params for editing
+        const editId = searchParams.get("edit");
+        const editType = searchParams.get("type");
+        
+        if (editId && editType === "post") {
+          setActiveTab("posts");
+        } else if (editId && editType === "project") {
+          setActiveTab("projects");
+        } else if (editId && editType === "certification") {
+          setActiveTab("certifications");
+        }
+      });
+    };
+    
+    checkAuth();
   }, [searchParams]);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
+    toast({
+      title: "Logged out",
+      description: "You have been successfully logged out",
+      variant: "default",
+    });
     navigate("/admin/login");
   };
+
+  if (!isAuthenticated) {
+    return null; // Don't render anything until authentication check is complete
+  }
 
   return (
     <div className="min-h-screen py-16 lg:py-24">
