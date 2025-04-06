@@ -22,21 +22,27 @@ export const login = async (username: string, password: string): Promise<boolean
       return false;
     }
 
-    // Then authenticate with Supabase
-    // For admin users, we'll use a special email format
-    const { error } = await supabase.auth.signInWithPassword({
-      email: `${username}@admin.portfolio`, // Using a consistent email format for admin authentication
+    console.log("Admin user found:", adminUser.username);
+
+    // Construct the email using a consistent format
+    const adminEmail = `${username}@admin.portfolio`;
+    
+    // Try to sign in with Supabase auth
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: adminEmail,
       password: password,
     });
 
     if (error) {
       console.error("Login error:", error);
-      // If the user doesn't exist in auth yet, create it
-      if (error.message.includes("Email not confirmed") || 
-          error.message.includes("Invalid login credentials")) {
-        // Try to sign up the admin user if they don't exist yet in auth
-        const { error: signUpError } = await supabase.auth.signUp({
-          email: `${username}@admin.portfolio`,
+      
+      // If the user doesn't exist in auth yet or credentials are invalid, try to create the account
+      if (error.message.includes("Invalid login credentials")) {
+        console.log("Attempting to create admin auth account");
+        
+        // Create the user in Supabase Auth
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+          email: adminEmail,
           password: password,
         });
         
@@ -45,9 +51,11 @@ export const login = async (username: string, password: string): Promise<boolean
           return false;
         }
         
-        // Try logging in again
-        const { error: secondLoginError } = await supabase.auth.signInWithPassword({
-          email: `${username}@admin.portfolio`,
+        console.log("Admin account created successfully");
+        
+        // Try to sign in again now that the account exists
+        const { data: secondLoginData, error: secondLoginError } = await supabase.auth.signInWithPassword({
+          email: adminEmail,
           password: password,
         });
         
@@ -56,11 +64,13 @@ export const login = async (username: string, password: string): Promise<boolean
           return false;
         }
         
+        console.log("Login successful after account creation");
         return true;
       }
       return false;
     }
 
+    console.log("Login successful on first attempt");
     return true;
   } catch (error) {
     console.error("Error in login:", error);
