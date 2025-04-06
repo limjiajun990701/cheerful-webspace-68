@@ -26,7 +26,7 @@ export const login = async (username: string, password: string): Promise<boolean
 
     console.log("Admin user found:", adminUser.username);
     
-    // Check if the password matches directly (simple comparison since we're using plain text)
+    // Check if the password matches directly
     if (adminUser.password_hash !== password) {
       console.error("Password doesn't match");
       return false;
@@ -35,32 +35,33 @@ export const login = async (username: string, password: string): Promise<boolean
     // Construct the email using a consistent format
     const adminEmail = `${username}@admin.portfolio`;
     
-    // Try to sign in with Supabase auth or create the account if it doesn't exist
+    // Try to sign in or create account if needed
     try {
       // Try to sign in first
+      console.log("Attempting to sign in with Supabase auth");
       const { data, error } = await supabase.auth.signInWithPassword({
         email: adminEmail,
         password,
       });
 
       if (error) {
-        console.log("Auth error, attempting to create account:", error.message);
+        console.log("Sign in failed, creating new account:", error.message);
         
         // Create the user in Supabase Auth
-        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        const { error: signUpError } = await supabase.auth.signUp({
           email: adminEmail,
           password,
         });
         
         if (signUpError) {
-          console.error("Sign up error:", signUpError);
+          console.error("Sign up failed:", signUpError);
           return false;
         }
         
-        console.log("Admin account created successfully");
+        console.log("Admin account created, signing in");
         
-        // Try to sign in again now that the account exists
-        const { data: secondLoginData, error: secondLoginError } = await supabase.auth.signInWithPassword({
+        // Sign in with the newly created account
+        const { error: secondLoginError } = await supabase.auth.signInWithPassword({
           email: adminEmail,
           password,
         });
