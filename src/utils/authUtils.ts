@@ -13,7 +13,7 @@ export const login = async (username: string, password: string): Promise<boolean
     // First check if the admin user exists in the admin_users table
     const { data: adminUser, error: adminError } = await supabase
       .from('admin_users')
-      .select('username')
+      .select('username, password_hash')
       .eq('username', username)
       .single();
     
@@ -23,13 +23,41 @@ export const login = async (username: string, password: string): Promise<boolean
     }
 
     // Then authenticate with Supabase
+    // For admin users, we'll use a special email format
     const { error } = await supabase.auth.signInWithPassword({
-      email: `${username}@example.com`, // Using username as email for Supabase auth
+      email: `${username}@admin.portfolio`, // Using a consistent email format for admin authentication
       password: password,
     });
 
     if (error) {
       console.error("Login error:", error);
+      // If the user doesn't exist in auth yet, create it
+      if (error.message.includes("Email not confirmed") || 
+          error.message.includes("Invalid login credentials")) {
+        // Try to sign up the admin user if they don't exist yet in auth
+        const { error: signUpError } = await supabase.auth.signUp({
+          email: `${username}@admin.portfolio`,
+          password: password,
+        });
+        
+        if (signUpError) {
+          console.error("Sign up error:", signUpError);
+          return false;
+        }
+        
+        // Try logging in again
+        const { error: secondLoginError } = await supabase.auth.signInWithPassword({
+          email: `${username}@admin.portfolio`,
+          password: password,
+        });
+        
+        if (secondLoginError) {
+          console.error("Second login attempt failed:", secondLoginError);
+          return false;
+        }
+        
+        return true;
+      }
       return false;
     }
 
