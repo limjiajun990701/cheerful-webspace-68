@@ -35,9 +35,13 @@ const AdminLogin = () => {
   useEffect(() => {
     // Check if already authenticated
     const checkAuth = async () => {
-      const authenticated = await isAuthenticated();
-      if (authenticated) {
-        navigate("/admin");
+      try {
+        const authenticated = await isAuthenticated();
+        if (authenticated) {
+          navigate("/admin");
+        }
+      } catch (err) {
+        console.error("Auth check error:", err);
       }
     };
     
@@ -49,7 +53,7 @@ const AdminLogin = () => {
     setError(null);
     
     try {
-      console.log("Starting login process...");
+      console.log("Starting login process with:", values.username);
       const success = await login(values.username, values.password);
       
       if (success) {
@@ -66,10 +70,11 @@ const AdminLogin = () => {
           description: "Invalid username or password",
           variant: "destructive",
         });
+        console.log("Login failed for user:", values.username);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login error:", error);
-      setError("An unexpected error occurred. Please try again.");
+      setError(`An error occurred: ${error.message || "Unknown error"}`);
       toast({
         title: "Login error",
         description: "An error occurred during login",

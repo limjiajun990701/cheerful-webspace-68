@@ -17,48 +17,22 @@ export const login = async (username: string, password: string): Promise<boolean
       .from('admin_users')
       .select('username, password_hash')
       .eq('username', username)
-      .limit(1);
+      .single();
     
     if (adminError) {
       console.error("Error fetching admin user:", adminError);
       return false;
     }
     
-    if (!adminUsers || adminUsers.length === 0) {
-      // If no admin user exists, create one
-      console.log("Admin user not found. Creating default admin user.");
-      
-      const { error: insertError } = await supabase
-        .from('admin_users')
-        .insert([
-          { username: 'admin', password_hash: 'admin' }
-        ]);
-      
-      if (insertError) {
-        console.error("Failed to create admin user:", insertError);
-        return false;
-      }
-      
-      console.log("Default admin user created successfully");
-    }
-    
-    // Fetch the admin user again to ensure it exists
-    const { data: verifiedAdminUsers, error: verifyError } = await supabase
-      .from('admin_users')
-      .select('username, password_hash')
-      .eq('username', username)
-      .limit(1);
-    
-    if (verifyError || !verifiedAdminUsers || verifiedAdminUsers.length === 0) {
-      console.error("Admin verification failed:", verifyError);
+    if (!adminUsers) {
+      console.error("Admin user not found.");
       return false;
     }
 
-    const adminUser = verifiedAdminUsers[0];
-    console.log("Admin user found:", adminUser.username);
+    console.log("Admin user found:", adminUsers.username);
     
     // Check if the password matches directly
-    if (adminUser.password_hash !== password) {
+    if (adminUsers.password_hash !== password) {
       console.error("Password doesn't match");
       return false;
     }
@@ -66,7 +40,6 @@ export const login = async (username: string, password: string): Promise<boolean
     // Construct the email using a consistent format
     const adminEmail = `${username}@admin.portfolio`;
     
-    // Try to sign in or create account if needed
     try {
       // Try to sign in first
       console.log("Attempting to sign in with Supabase auth");
