@@ -53,7 +53,7 @@ export const getCurrentResume = async (): Promise<Resume | null> => {
       ...resumeData,
       fileUrl: publicUrlData.publicUrl,
       fileName: resumeData.file_name
-    };
+    } as Resume;
   } catch (error) {
     console.error("Error in getCurrentResume:", error);
     return null;
@@ -137,7 +137,7 @@ export const uploadResume = async (file: File): Promise<Resume> => {
       ...resumeResult,
       fileUrl: publicUrlData.publicUrl,
       fileName: file.name
-    };
+    } as Resume;
   } catch (error) {
     console.error("Error uploading resume:", error);
     throw error;

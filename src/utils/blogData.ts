@@ -24,7 +24,16 @@ export const getAllBlogPosts = async (): Promise<BlogPost[]> => {
       throw error;
     }
 
-    return data || [];
+    // Map database column names to our interface properties
+    return (data || []).map(post => ({
+      id: post.id,
+      title: post.title,
+      content: post.content,
+      date: post.date,
+      tags: post.tags,
+      excerpt: post.excerpt || '',
+      imageUrl: post.imageurl
+    }));
   } catch (error) {
     console.error("Error fetching blog posts:", error);
     return [];
@@ -44,7 +53,17 @@ export const getBlogPostById = async (id: string): Promise<BlogPost | null> => {
       throw error;
     }
 
-    return data;
+    if (!data) return null;
+
+    return {
+      id: data.id,
+      title: data.title,
+      content: data.content,
+      date: data.date,
+      tags: data.tags,
+      excerpt: data.excerpt || '',
+      imageUrl: data.imageurl
+    };
   } catch (error) {
     console.error(`Error fetching blog post with ID ${id}:`, error);
     return null;
@@ -56,7 +75,14 @@ export const addBlogPost = async (post: Omit<BlogPost, 'id'>): Promise<BlogPost>
   try {
     const { data, error } = await supabase
       .from('blog_posts')
-      .insert([post])
+      .insert([{
+        title: post.title,
+        content: post.content,
+        date: post.date,
+        tags: post.tags,
+        excerpt: post.excerpt,
+        imageurl: post.imageUrl
+      }])
       .select()
       .single();
 
@@ -64,7 +90,15 @@ export const addBlogPost = async (post: Omit<BlogPost, 'id'>): Promise<BlogPost>
       throw error;
     }
 
-    return data;
+    return {
+      id: data.id,
+      title: data.title,
+      content: data.content,
+      date: data.date,
+      tags: data.tags,
+      excerpt: data.excerpt || '',
+      imageUrl: data.imageurl
+    };
   } catch (error) {
     console.error("Error adding blog post:", error);
     throw error;
@@ -76,7 +110,14 @@ export const updateBlogPost = async (post: BlogPost): Promise<BlogPost> => {
   try {
     const { data, error } = await supabase
       .from('blog_posts')
-      .update(post)
+      .update({
+        title: post.title,
+        content: post.content,
+        date: post.date,
+        tags: post.tags,
+        excerpt: post.excerpt,
+        imageurl: post.imageUrl
+      })
       .eq('id', post.id)
       .select()
       .single();
@@ -85,7 +126,15 @@ export const updateBlogPost = async (post: BlogPost): Promise<BlogPost> => {
       throw error;
     }
 
-    return data;
+    return {
+      id: data.id,
+      title: data.title,
+      content: data.content,
+      date: data.date,
+      tags: data.tags,
+      excerpt: data.excerpt || '',
+      imageUrl: data.imageurl
+    };
   } catch (error) {
     console.error(`Error updating blog post with ID ${post.id}:`, error);
     throw error;

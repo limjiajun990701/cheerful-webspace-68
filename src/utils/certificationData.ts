@@ -14,30 +14,6 @@ export interface Certification {
   credentialUrl?: string;
 }
 
-// Type representing the database column names (snake_case)
-interface CertificationDB {
-  id: string;
-  name: string;
-  issuer: string;
-  fileurl: string;
-  filetype: string;
-  description: string;
-  date: string;
-  credentialurl: string | null;
-}
-
-// Convert from DB format to our interface format
-const mapDbToCertification = (dbCert: CertificationDB): Certification => ({
-  id: dbCert.id,
-  name: dbCert.name,
-  issuer: dbCert.issuer,
-  fileUrl: dbCert.fileurl,
-  fileType: dbCert.filetype as 'image' | 'pdf',
-  description: dbCert.description,
-  date: dbCert.date,
-  credentialUrl: dbCert.credentialurl || undefined
-});
-
 // Upload certification file to storage
 export const uploadCertificationFile = async (file: File): Promise<{ url: string, fileType: 'image' | 'pdf' }> => {
   const fileExt = file.name.split('.').pop()?.toLowerCase();
@@ -75,7 +51,16 @@ export const getAllCertifications = async (): Promise<Certification[]> => {
     }
 
     // Map the data from DB format to our interface format
-    return (data as CertificationDB[]).map(mapDbToCertification) || [];
+    return (data || []).map(cert => ({
+      id: cert.id,
+      name: cert.name,
+      issuer: cert.issuer,
+      fileUrl: cert.fileurl,
+      fileType: cert.filetype as 'image' | 'pdf',
+      description: cert.description || '',
+      date: cert.date,
+      credentialUrl: cert.credentialurl
+    }));
   } catch (error) {
     console.error("Error fetching certifications:", error);
     return [];
@@ -95,7 +80,18 @@ export const getCertificationById = async (id: string): Promise<Certification | 
       throw error;
     }
 
-    return data ? mapDbToCertification(data as CertificationDB) : null;
+    if (!data) return null;
+
+    return {
+      id: data.id,
+      name: data.name,
+      issuer: data.issuer,
+      fileUrl: data.fileurl,
+      fileType: data.filetype as 'image' | 'pdf',
+      description: data.description || '',
+      date: data.date,
+      credentialUrl: data.credentialurl
+    };
   } catch (error) {
     console.error(`Error fetching certification with ID ${id}:`, error);
     return null;
@@ -123,7 +119,16 @@ export const addCertification = async (certification: Omit<Certification, 'id'>)
       throw error;
     }
 
-    return mapDbToCertification(data as CertificationDB);
+    return {
+      id: data.id,
+      name: data.name,
+      issuer: data.issuer,
+      fileUrl: data.fileurl,
+      fileType: data.filetype as 'image' | 'pdf',
+      description: data.description || '',
+      date: data.date,
+      credentialUrl: data.credentialurl
+    };
   } catch (error) {
     console.error("Error adding certification:", error);
     throw error;
@@ -152,7 +157,16 @@ export const updateCertification = async (certification: Certification): Promise
       throw error;
     }
 
-    return mapDbToCertification(data as CertificationDB);
+    return {
+      id: data.id,
+      name: data.name,
+      issuer: data.issuer,
+      fileUrl: data.fileurl,
+      fileType: data.filetype as 'image' | 'pdf',
+      description: data.description || '',
+      date: data.date,
+      credentialUrl: data.credentialurl
+    };
   } catch (error) {
     console.error(`Error updating certification with ID ${certification.id}:`, error);
     throw error;

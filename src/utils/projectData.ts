@@ -26,7 +26,17 @@ export const getAllProjects = async (): Promise<Project[]> => {
       throw error;
     }
 
-    return data || [];
+    return (data || []).map(project => ({
+      id: project.id,
+      title: project.title,
+      description: project.description,
+      imageUrl: project.imageurl,
+      fileUrl: project.fileurl,
+      fileType: project.filetype as 'image' | 'pdf' | undefined,
+      tags: project.tags,
+      liveUrl: project.liveurl,
+      githubUrl: project.githuburl
+    }));
   } catch (error) {
     console.error("Error fetching projects:", error);
     return [];
@@ -46,7 +56,19 @@ export const getProjectById = async (id: string): Promise<Project | null> => {
       throw error;
     }
 
-    return data;
+    if (!data) return null;
+
+    return {
+      id: data.id,
+      title: data.title,
+      description: data.description,
+      imageUrl: data.imageurl,
+      fileUrl: data.fileurl,
+      fileType: data.filetype as 'image' | 'pdf' | undefined,
+      tags: data.tags,
+      liveUrl: data.liveurl,
+      githubUrl: data.githuburl
+    };
   } catch (error) {
     console.error(`Error fetching project with ID ${id}:`, error);
     return null;
@@ -58,7 +80,16 @@ export const addProject = async (project: Omit<Project, 'id'>): Promise<Project>
   try {
     const { data, error } = await supabase
       .from('projects')
-      .insert([project])
+      .insert([{
+        title: project.title,
+        description: project.description,
+        imageurl: project.imageUrl,
+        fileurl: project.fileUrl,
+        filetype: project.fileType,
+        tags: project.tags,
+        liveurl: project.liveUrl,
+        githuburl: project.githubUrl
+      }])
       .select()
       .single();
 
@@ -66,7 +97,17 @@ export const addProject = async (project: Omit<Project, 'id'>): Promise<Project>
       throw error;
     }
 
-    return data;
+    return {
+      id: data.id,
+      title: data.title,
+      description: data.description,
+      imageUrl: data.imageurl,
+      fileUrl: data.fileurl,
+      fileType: data.filetype as 'image' | 'pdf' | undefined,
+      tags: data.tags,
+      liveUrl: data.liveurl,
+      githubUrl: data.githuburl
+    };
   } catch (error) {
     console.error("Error adding project:", error);
     throw error;
@@ -78,7 +119,16 @@ export const updateProject = async (project: Project): Promise<Project> => {
   try {
     const { data, error } = await supabase
       .from('projects')
-      .update(project)
+      .update({
+        title: project.title,
+        description: project.description,
+        imageurl: project.imageUrl,
+        fileurl: project.fileUrl,
+        filetype: project.fileType,
+        tags: project.tags,
+        liveurl: project.liveUrl,
+        githuburl: project.githubUrl
+      })
       .eq('id', project.id)
       .select()
       .single();
@@ -87,7 +137,17 @@ export const updateProject = async (project: Project): Promise<Project> => {
       throw error;
     }
 
-    return data;
+    return {
+      id: data.id,
+      title: data.title,
+      description: data.description,
+      imageUrl: data.imageurl,
+      fileUrl: data.fileurl,
+      fileType: data.filetype as 'image' | 'pdf' | undefined,
+      tags: data.tags,
+      liveUrl: data.liveurl,
+      githubUrl: data.githuburl
+    };
   } catch (error) {
     console.error(`Error updating project with ID ${project.id}:`, error);
     throw error;
