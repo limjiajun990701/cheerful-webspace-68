@@ -10,26 +10,51 @@ export const isAuthenticated = async (): Promise<boolean> => {
 // Login function
 export const login = async (username: string, password: string): Promise<boolean> => {
   try {
-    console.log("Attempting login for user:", username);
+    console.log("Attempting login with username:", username);
     
     // First check if the admin user exists in the admin_users table
     const { data: adminUsers, error: adminError } = await supabase
       .from('admin_users')
       .select('username, password_hash')
-      .eq('username', username);
+      .eq('username', username)
+      .limit(1);
     
     if (adminError) {
       console.error("Error fetching admin user:", adminError);
       return false;
     }
     
-    // Change from single() to checking if any users were returned
     if (!adminUsers || adminUsers.length === 0) {
-      console.error("Admin user not found. No matching records in admin_users table.");
+      // If no admin user exists, create one
+      console.log("Admin user not found. Creating default admin user.");
+      
+      const { error: insertError } = await supabase
+        .from('admin_users')
+        .insert([
+          { username: 'admin', password_hash: 'admin' }
+        ]);
+      
+      if (insertError) {
+        console.error("Failed to create admin user:", insertError);
+        return false;
+      }
+      
+      console.log("Default admin user created successfully");
+    }
+    
+    // Fetch the admin user again to ensure it exists
+    const { data: verifiedAdminUsers, error: verifyError } = await supabase
+      .from('admin_users')
+      .select('username, password_hash')
+      .eq('username', username)
+      .limit(1);
+    
+    if (verifyError || !verifiedAdminUsers || verifiedAdminUsers.length === 0) {
+      console.error("Admin verification failed:", verifyError);
       return false;
     }
 
-    const adminUser = adminUsers[0];
+    const adminUser = verifiedAdminUsers[0];
     console.log("Admin user found:", adminUser.username);
     
     // Check if the password matches directly
@@ -54,9 +79,12 @@ export const login = async (username: string, password: string): Promise<boolean
         console.log("Sign in failed, creating new account:", error.message);
         
         // Create the user in Supabase Auth
-        const { error: signUpError } = await supabase.auth.signUp({
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email: adminEmail,
           password,
+          options: {
+            emailRedirectTo: window.location.origin + '/admin'
+          }
         });
         
         if (signUpError) {

@@ -7,15 +7,30 @@ import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const formSchema = z.object({
+  username: z.string().min(1, "Username is required"),
+  password: z.string().min(1, "Password is required"),
+});
 
 const AdminLogin = () => {
-  const [username, setUsername] = useState("admin");
-  const [password, setPassword] = useState("admin");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPasswordReset, setShowPasswordReset] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      username: "admin",
+      password: "admin",
+    },
+  });
 
   useEffect(() => {
     // Check if already authenticated
@@ -29,14 +44,13 @@ const AdminLogin = () => {
     checkAuth();
   }, [navigate]);
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     setError(null);
     
     try {
       console.log("Starting login process...");
-      const success = await login(username, password);
+      const success = await login(values.username, values.password);
       
       if (success) {
         toast({
@@ -79,64 +93,73 @@ const AdminLogin = () => {
           </p>
         </div>
         
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {error && (
-            <div className="bg-destructive/10 text-destructive p-3 rounded-md text-sm">
-              {error}
-            </div>
-          )}
-          
-          <div className="space-y-2">
-            <label htmlFor="username" className="text-sm font-medium block">
-              Username
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <User className="h-5 w-5 text-muted-foreground" />
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {error && (
+              <div className="bg-destructive/10 text-destructive p-3 rounded-md text-sm">
+                {error}
               </div>
-              <Input
-                id="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="pl-10"
-                placeholder="admin"
-                required
-              />
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <label htmlFor="password" className="text-sm font-medium block">
-              Password
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Lock className="h-5 w-5 text-muted-foreground" />
-              </div>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="pl-10"
-                placeholder="admin"
-                required
-              />
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              Default credentials: admin / admin
-            </p>
-          </div>
-          
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="w-full"
-          >
-            {isLoading ? "Signing in..." : "Sign In"}
-          </Button>
-        </form>
+            )}
+            
+            <FormField
+              control={form.control}
+              name="username"
+              render={({ field }) => (
+                <FormItem className="space-y-2">
+                  <FormLabel>Username</FormLabel>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <User className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        className="pl-10"
+                        placeholder="admin"
+                      />
+                    </FormControl>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem className="space-y-2">
+                  <FormLabel>Password</FormLabel>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Lock className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="password"
+                        className="pl-10"
+                        placeholder="admin"
+                      />
+                    </FormControl>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Default credentials: admin / admin
+                  </p>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="w-full"
+            >
+              {isLoading ? "Signing in..." : "Sign In"}
+            </Button>
+          </form>
+        </Form>
       </div>
 
       <Dialog open={showPasswordReset} onOpenChange={setShowPasswordReset}>
