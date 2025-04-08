@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
-import { isAuthenticated, logout } from "../utils/authUtils";
+import { isAuthenticated as checkAuthentication, logout } from "../utils/authUtils";
 import { useToast } from "../hooks/use-toast";
 import BlogPostManager from "../components/admin/BlogPostManager";
 import ProjectManager from "../components/admin/ProjectManager";
@@ -21,7 +21,7 @@ const Admin = () => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const authenticated = await isAuthenticated();
+        const authenticated = await checkAuthentication();
         if (!authenticated) {
           navigate("/admin/login");
           return;
