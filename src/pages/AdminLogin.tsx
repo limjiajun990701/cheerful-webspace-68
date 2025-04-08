@@ -163,7 +163,7 @@ const AdminLogin = () => {
                     </FormControl>
                   </div>
                   <p className="text-xs text-muted-foreground mt-2">
-                    Default credentials: admin / Admin123!
+                    Default credentials: admin@admin.portfolio / Admin123!
                   </p>
                   <FormMessage />
                 </FormItem>

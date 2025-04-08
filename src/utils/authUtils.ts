@@ -42,7 +42,7 @@ export const login = async (username: string, password: string): Promise<boolean
       return false;
     }
 
-    // Use the new email format and password
+    // Use the specified email and password for Supabase auth
     const adminEmail = "admin@admin.portfolio";
     const adminPassword = "Admin123!";
     
