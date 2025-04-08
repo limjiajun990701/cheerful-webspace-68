@@ -4,7 +4,8 @@ import { Plus } from "lucide-react";
 import { Button } from "../ui/button";
 import { useToast } from "../../hooks/use-toast";
 import AdminBlogCard from "../AdminBlogCard";
-import { BlogPost, getAllBlogPosts, addBlogPost, updateBlogPost, deleteBlogPost } from "../../utils/blogData";
+import { getAllBlogPosts, addBlogPost, updateBlogPost, deleteBlogPost } from "../../utils/blogData";
+import { BlogPost } from "../../types/database";
 import BlogPostEditor from "./BlogPostEditor";
 
 const BlogPostManager = () => {

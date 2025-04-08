@@ -4,7 +4,8 @@ import { Plus } from "lucide-react";
 import { Button } from "../ui/button";
 import { useToast } from "../../hooks/use-toast";
 import AdminCertificationCard from "../AdminCertificationCard";
-import { Certification, getAllCertifications, addCertification, updateCertification, deleteCertification } from "../../utils/certificationData";
+import { getAllCertifications, addCertification, updateCertification, deleteCertification } from "../../utils/certificationData";
+import { Certification } from "../../types/database";
 import CertificationEditor from "./CertificationEditor";
 
 const CertificationManager = () => {

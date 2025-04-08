@@ -1,7 +1,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Award, Save, Upload, File, FileText, X } from "lucide-react";
-import { Certification, getCertificationById, uploadCertificationFile } from "../../utils/certificationData";
+import { getCertificationById, uploadCertificationFile } from "../../utils/certificationData";
+import { Certification } from "../../types/database";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";

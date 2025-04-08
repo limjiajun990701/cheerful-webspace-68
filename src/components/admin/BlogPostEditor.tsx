@@ -1,7 +1,8 @@
 
 import { useState, useEffect, ChangeEvent } from "react";
 import { Save, Upload, X } from "lucide-react";
-import { BlogPost, getBlogPostById } from "../../utils/blogData";
+import { getBlogPostById } from "../../utils/blogData";
+import { BlogPost } from "../../types/database";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";

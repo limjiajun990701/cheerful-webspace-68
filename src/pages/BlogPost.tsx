@@ -1,9 +1,10 @@
+
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { CalendarIcon, Edit, ArrowLeft } from "lucide-react";
 import { getBlogPostById } from "../utils/blogData";
 import { isAuthenticated } from "../utils/authUtils";
-import type { BlogPost as BlogPostType } from "../types/database";
+import { BlogPost as BlogPostType } from "../types/database";
 
 const renderMarkdown = (markdown: string) => {
   return { __html: markdown
@@ -128,10 +129,10 @@ const BlogPost = () => {
             
             <h1 className="text-3xl md:text-4xl font-bold mb-6">{post.title}</h1>
             
-            {post.imageUrl && (
+            {post.imageurl && (
               <div className="mb-8 rounded-xl overflow-hidden">
                 <img 
-                  src={post.imageUrl} 
+                  src={post.imageurl} 
                   alt={post.title} 
                   className="w-full h-auto object-cover max-h-[500px]"
                 />

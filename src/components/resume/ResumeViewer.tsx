@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { getCurrentResume, deleteResume } from "@/utils/resumeData";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
-import { Resume } from "@/types/resume";
+import { Resume } from "@/types/database";
 
 interface ResumeViewerProps {
   onDelete?: () => void;
@@ -23,7 +23,10 @@ const ResumeViewer = ({ onDelete, showActions = true }: ResumeViewerProps) => {
       try {
         setLoading(true);
         const data = await getCurrentResume();
-        setResume(data);
+        if (data) {
+          // Using type assertion to ensure compatibility
+          setResume(data as Resume);
+        }
       } catch (error) {
         console.error("Error fetching resume:", error);
       } finally {
