@@ -1,5 +1,9 @@
 
-export interface Project {
+import type { Database } from "@/integrations/supabase/types";
+
+type TablesWithRows<T extends keyof Database["public"]["Tables"]> = Database["public"]["Tables"][T]["Row"];
+
+export interface Project extends TablesWithRows<"projects"> {
   id: string;
   title: string;
   description: string;
@@ -12,8 +16,7 @@ export interface Project {
   date?: string;
 }
 
-// Export other existing interfaces...
-export interface BlogPost {
+export interface BlogPost extends TablesWithRows<"blog_posts"> {
   id: string;
   title: string;
   content: string;
@@ -23,7 +26,7 @@ export interface BlogPost {
   imageurl?: string;
 }
 
-export interface Certification {
+export interface Certification extends TablesWithRows<"certifications"> {
   id: string;
   name: string;
   issuer: string;
@@ -34,7 +37,7 @@ export interface Certification {
   credentialurl?: string;
 }
 
-export interface Resume {
+export interface Resume extends TablesWithRows<"resumes"> {
   id: string;
   user_id: string;
   file_name: string;

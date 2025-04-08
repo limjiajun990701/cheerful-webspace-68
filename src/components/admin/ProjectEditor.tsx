@@ -1,6 +1,7 @@
 import { useState, useEffect, ChangeEvent } from "react";
 import { Save, Upload, FileText } from "lucide-react";
-import { Project, getProjectById } from "../../utils/projectData";
+import { Project } from "../../types/database";
+import { getProjectById } from "../../utils/projectData";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";

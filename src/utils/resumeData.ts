@@ -1,10 +1,10 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { Resume } from '@/types/resume';
+import { Resume } from '@/types/database';
 import { v4 as uuidv4 } from 'uuid';
 
 const STORAGE_BUCKET = 'resumes';
-const DEFAULT_RESUME: Resume = {
+const DEFAULT_RESUME: Resume & { fileUrl: string; fileName: string } = {
   id: 'default',
   user_id: '',
   file_name: 'resume.pdf',
@@ -16,7 +16,7 @@ const DEFAULT_RESUME: Resume = {
 };
 
 // Get the current user's resume
-export const getCurrentResume = async (): Promise<Resume | null> => {
+export const getCurrentResume = async (): Promise<(Resume & { fileUrl: string; fileName: string }) | null> => {
   try {
     // First check if user is authenticated
     const { data: { session } } = await supabase.auth.getSession();
@@ -50,12 +50,7 @@ export const getCurrentResume = async (): Promise<Resume | null> => {
 
     // Return the resume with fileUrl for compatibility
     return {
-      id: data.id,
-      user_id: data.user_id,
-      file_name: data.file_name,
-      file_path: data.file_path,
-      file_size: data.file_size,
-      upload_date: data.upload_date,
+      ...data,
       fileUrl: publicUrlData.publicUrl,
       fileName: data.file_name
     };
@@ -66,7 +61,7 @@ export const getCurrentResume = async (): Promise<Resume | null> => {
 };
 
 // Upload a new resume
-export const uploadResume = async (file: File): Promise<Resume> => {
+export const uploadResume = async (file: File): Promise<Resume & { fileUrl: string; fileName: string }> => {
   try {
     // Check if user is authenticated
     const { data: { session } } = await supabase.auth.getSession();
@@ -146,12 +141,7 @@ export const uploadResume = async (file: File): Promise<Resume> => {
     }
     
     return {
-      id: resumeResult.id,
-      user_id: resumeResult.user_id,
-      file_name: resumeResult.file_name,
-      file_path: resumeResult.file_path,
-      file_size: resumeResult.file_size,
-      upload_date: resumeResult.upload_date,
+      ...resumeResult,
       fileUrl: publicUrlData.publicUrl,
       fileName: file.name
     };

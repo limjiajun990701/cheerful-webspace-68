@@ -1,18 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
-
-// Interface matching our front-end naming conventions (camelCase)
-export interface Certification {
-  id: string;
-  name: string;
-  issuer: string;
-  fileUrl: string;
-  fileType: 'image' | 'pdf';
-  description: string;
-  date: string;
-  credentialUrl?: string;
-}
+import { Certification } from '@/types/database';
 
 // Upload certification file to storage
 export const uploadCertificationFile = async (file: File): Promise<{ url: string, fileType: 'image' | 'pdf' }> => {
@@ -50,17 +39,7 @@ export const getAllCertifications = async (): Promise<Certification[]> => {
       throw error;
     }
 
-    // Map the data from DB format to our interface format
-    return (data || []).map(cert => ({
-      id: cert.id,
-      name: cert.name,
-      issuer: cert.issuer,
-      fileUrl: cert.fileurl,
-      fileType: cert.filetype as 'image' | 'pdf',
-      description: cert.description || '',
-      date: cert.date,
-      credentialUrl: cert.credentialurl
-    }));
+    return data || [];
   } catch (error) {
     console.error("Error fetching certifications:", error);
     return [];
@@ -80,18 +59,7 @@ export const getCertificationById = async (id: string): Promise<Certification | 
       throw error;
     }
 
-    if (!data) return null;
-
-    return {
-      id: data.id,
-      name: data.name,
-      issuer: data.issuer,
-      fileUrl: data.fileurl,
-      fileType: data.filetype as 'image' | 'pdf',
-      description: data.description || '',
-      date: data.date,
-      credentialUrl: data.credentialurl
-    };
+    return data;
   } catch (error) {
     console.error(`Error fetching certification with ID ${id}:`, error);
     return null;
@@ -106,11 +74,11 @@ export const addCertification = async (certification: Omit<Certification, 'id'>)
       .insert([{
         name: certification.name,
         issuer: certification.issuer,
-        fileurl: certification.fileUrl,
-        filetype: certification.fileType,
+        fileurl: certification.fileurl,
+        filetype: certification.filetype,
         description: certification.description,
         date: certification.date,
-        credentialurl: certification.credentialUrl || null
+        credentialurl: certification.credentialurl || null
       }])
       .select()
       .single();
@@ -123,16 +91,7 @@ export const addCertification = async (certification: Omit<Certification, 'id'>)
       throw new Error("No data returned from insert");
     }
 
-    return {
-      id: data.id,
-      name: data.name,
-      issuer: data.issuer,
-      fileUrl: data.fileurl,
-      fileType: data.filetype as 'image' | 'pdf',
-      description: data.description || '',
-      date: data.date,
-      credentialUrl: data.credentialurl
-    };
+    return data;
   } catch (error) {
     console.error("Error adding certification:", error);
     throw error;
@@ -147,11 +106,11 @@ export const updateCertification = async (certification: Certification): Promise
       .update({
         name: certification.name,
         issuer: certification.issuer,
-        fileurl: certification.fileUrl,
-        filetype: certification.fileType,
+        fileurl: certification.fileurl,
+        filetype: certification.filetype,
         description: certification.description,
         date: certification.date,
-        credentialurl: certification.credentialUrl || null
+        credentialurl: certification.credentialurl || null
       })
       .eq('id', certification.id)
       .select()
@@ -165,16 +124,7 @@ export const updateCertification = async (certification: Certification): Promise
       throw new Error("No data returned from update");
     }
 
-    return {
-      id: data.id,
-      name: data.name,
-      issuer: data.issuer,
-      fileUrl: data.fileurl,
-      fileType: data.filetype as 'image' | 'pdf',
-      description: data.description || '',
-      date: data.date,
-      credentialUrl: data.credentialurl
-    };
+    return data;
   } catch (error) {
     console.error(`Error updating certification with ID ${certification.id}:`, error);
     throw error;
