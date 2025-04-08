@@ -29,7 +29,7 @@ const AdminLogin = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       username: "admin",
-      password: "admin",
+      password: "Admin123!",
     },
   });
 
@@ -158,12 +158,12 @@ const AdminLogin = () => {
                         {...field}
                         type="password"
                         className="pl-10"
-                        placeholder="admin"
+                        placeholder="Admin123!"
                       />
                     </FormControl>
                   </div>
                   <p className="text-xs text-muted-foreground mt-2">
-                    Default credentials: admin / admin
+                    Default credentials: admin / Admin123!
                   </p>
                   <FormMessage />
                 </FormItem>

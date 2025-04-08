@@ -42,13 +42,14 @@ export const login = async (username: string, password: string): Promise<boolean
       return false;
     }
 
-    // Construct the email using a consistent format
-    const adminEmail = `${username}@admin.portfolio`;
+    // Use the new email format and password
+    const adminEmail = "admin@admin.portfolio";
+    const adminPassword = "Admin123!";
     
     // Try to sign in with Supabase auth
     const { data, error } = await supabase.auth.signInWithPassword({
       email: adminEmail,
-      password,
+      password: adminPassword,
     });
 
     if (error) {
@@ -57,7 +58,7 @@ export const login = async (username: string, password: string): Promise<boolean
       // Create the user in Supabase Auth
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: adminEmail,
-        password,
+        password: adminPassword,
       });
       
       if (signUpError) {
@@ -70,7 +71,7 @@ export const login = async (username: string, password: string): Promise<boolean
       // Sign in with the newly created account
       const { error: secondLoginError } = await supabase.auth.signInWithPassword({
         email: adminEmail,
-        password,
+        password: adminPassword,
       });
       
       if (secondLoginError) {
