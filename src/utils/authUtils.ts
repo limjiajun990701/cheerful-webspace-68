@@ -21,19 +21,23 @@ export const login = async (username: string, password: string): Promise<boolean
     const { data: adminUsers, error: adminError } = await supabase
       .from('admin_users')
       .select('username, password_hash')
-      .eq('username', username);
+      .eq('username', username)
+      .single();
     
-    if (adminError || !adminUsers || adminUsers.length === 0) {
-      console.error("Error fetching admin user:", adminError || "User not found");
+    if (adminError) {
+      console.error("Error fetching admin user:", adminError);
       return false;
     }
 
-    const adminUser = adminUsers[0];
+    if (!adminUsers) {
+      console.error("User not found");
+      return false;
+    }
     
-    console.log("Admin user found:", adminUser.username);
+    console.log("Admin user found:", adminUsers.username);
     
     // Check if the password matches directly
-    if (adminUser.password_hash !== password) {
+    if (adminUsers.password_hash !== password) {
       console.error("Password doesn't match");
       return false;
     }
@@ -42,50 +46,41 @@ export const login = async (username: string, password: string): Promise<boolean
     const adminEmail = `${username}@admin.portfolio`;
     
     // Try to sign in with Supabase auth
-    try {
-      console.log("Attempting to sign in with Supabase auth");
-      const { data, error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: adminEmail,
+      password,
+    });
+
+    if (error) {
+      console.log("Sign in failed, creating new account:", error.message);
+      
+      // Create the user in Supabase Auth
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: adminEmail,
         password,
       });
-
-      if (error) {
-        console.log("Sign in failed, creating new account:", error.message);
-        
-        // Create the user in Supabase Auth
-        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-          email: adminEmail,
-          password,
-          options: {
-            emailRedirectTo: window.location.origin + '/admin'
-          }
-        });
-        
-        if (signUpError) {
-          console.error("Sign up failed:", signUpError);
-          return false;
-        }
-        
-        console.log("Admin account created, signing in");
-        
-        // Sign in with the newly created account
-        const { error: secondLoginError } = await supabase.auth.signInWithPassword({
-          email: adminEmail,
-          password,
-        });
-        
-        if (secondLoginError) {
-          console.error("Second login attempt failed:", secondLoginError);
-          return false;
-        }
+      
+      if (signUpError) {
+        console.error("Sign up failed:", signUpError);
+        return false;
       }
       
-      console.log("Login successful");
-      return true;
-    } catch (authError) {
-      console.error("Auth operation failed:", authError);
-      return false;
+      console.log("Admin account created, signing in again");
+      
+      // Sign in with the newly created account
+      const { error: secondLoginError } = await supabase.auth.signInWithPassword({
+        email: adminEmail,
+        password,
+      });
+      
+      if (secondLoginError) {
+        console.error("Second login attempt failed:", secondLoginError);
+        return false;
+      }
     }
+    
+    console.log("Login successful");
+    return true;
   } catch (error) {
     console.error("Error in login:", error);
     return false;

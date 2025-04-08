@@ -3,12 +3,13 @@ import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
-import { requireAuth, logout } from "../utils/authUtils";
+import { isAuthenticated, logout } from "../utils/authUtils";
 import { useToast } from "../hooks/use-toast";
 import BlogPostManager from "../components/admin/BlogPostManager";
 import ProjectManager from "../components/admin/ProjectManager";
 import CertificationManager from "../components/admin/CertificationManager";
 import ResumeManager from "../components/admin/ResumeManager";
+import { supabase } from "@/integrations/supabase/client";
 
 const Admin = () => {
   const [searchParams] = useSearchParams();
@@ -19,8 +20,14 @@ const Admin = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      requireAuth(() => {
+      try {
+        const authenticated = await isAuthenticated();
+        if (!authenticated) {
+          navigate("/admin/login");
+          return;
+        }
         setIsAuthenticated(true);
+        
         // Check URL params for editing
         const editId = searchParams.get("edit");
         const editType = searchParams.get("type");
@@ -32,11 +39,27 @@ const Admin = () => {
         } else if (editId && editType === "certification") {
           setActiveTab("certifications");
         }
-      });
+      } catch (err) {
+        console.error("Auth check error:", err);
+        navigate("/admin/login");
+      }
     };
     
     checkAuth();
-  }, [searchParams]);
+    
+    // Set up auth state change listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (event === 'SIGNED_OUT') {
+          navigate("/admin/login");
+        }
+      }
+    );
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [searchParams, navigate]);
 
   const handleLogout = async () => {
     await logout();
