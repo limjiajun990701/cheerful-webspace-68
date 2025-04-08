@@ -3,7 +3,8 @@ import type { Database } from "@/integrations/supabase/types";
 
 type TablesWithRows<T extends keyof Database["public"]["Tables"]> = Database["public"]["Tables"][T]["Row"];
 
-export interface Project extends TablesWithRows<"projects"> {
+// Export our database interfaces with proper property names
+export interface Project {
   id: string;
   title: string;
   description: string;
@@ -16,17 +17,17 @@ export interface Project extends TablesWithRows<"projects"> {
   date?: string;
 }
 
-export interface BlogPost extends TablesWithRows<"blog_posts"> {
+export interface BlogPost {
   id: string;
   title: string;
   content: string;
   date: string;
   tags: string[];
-  excerpt: string;
+  excerpt?: string;
   imageurl?: string;
 }
 
-export interface Certification extends TablesWithRows<"certifications"> {
+export interface Certification {
   id: string;
   name: string;
   issuer: string;
@@ -37,13 +38,15 @@ export interface Certification extends TablesWithRows<"certifications"> {
   credentialurl?: string;
 }
 
-export interface Resume extends TablesWithRows<"resumes"> {
+export interface Resume {
   id: string;
   user_id: string;
   file_name: string;
   file_path: string;
   file_size?: number;
   upload_date?: string;
+  fileUrl?: string;
+  fileName?: string;
 }
 
 export interface Profile {

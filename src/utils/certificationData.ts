@@ -7,7 +7,7 @@ import { Certification } from '@/types/database';
 export const uploadCertificationFile = async (file: File): Promise<{ url: string, fileType: 'image' | 'pdf' }> => {
   const fileExt = file.name.split('.').pop()?.toLowerCase();
   const filePath = `certifications/${uuidv4()}.${fileExt}`;
-  const fileType = file.type.startsWith('image/') ? 'image' : 'pdf';
+  const fileType = file.type.startsWith('image/') ? 'image' as const : 'pdf' as const;
   
   try {
     // For now, simulate file upload and return a URL
@@ -39,7 +39,7 @@ export const getAllCertifications = async (): Promise<Certification[]> => {
       throw error;
     }
 
-    return data || [];
+    return data as Certification[] || [];
   } catch (error) {
     console.error("Error fetching certifications:", error);
     return [];
@@ -59,7 +59,7 @@ export const getCertificationById = async (id: string): Promise<Certification | 
       throw error;
     }
 
-    return data;
+    return data as Certification;
   } catch (error) {
     console.error(`Error fetching certification with ID ${id}:`, error);
     return null;
@@ -91,7 +91,7 @@ export const addCertification = async (certification: Omit<Certification, 'id'>)
       throw new Error("No data returned from insert");
     }
 
-    return data;
+    return data as Certification;
   } catch (error) {
     console.error("Error adding certification:", error);
     throw error;
@@ -124,7 +124,7 @@ export const updateCertification = async (certification: Certification): Promise
       throw new Error("No data returned from update");
     }
 
-    return data;
+    return data as Certification;
   } catch (error) {
     console.error(`Error updating certification with ID ${certification.id}:`, error);
     throw error;

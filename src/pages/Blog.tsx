@@ -2,7 +2,8 @@
 import { useEffect, useState } from "react";
 import { SearchIcon } from "lucide-react";
 import BlogCard from "../components/BlogCard";
-import { getAllBlogPosts, BlogPost } from "../utils/blogData";
+import { getAllBlogPosts } from "../utils/blogData";
+import { BlogPost } from "../types/database";
 
 const Blog = () => {
   const [posts, setPosts] = useState<BlogPost[]>([]);

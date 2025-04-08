@@ -1,10 +1,9 @@
-
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { CalendarIcon, Edit, ArrowLeft } from "lucide-react";
 import { getBlogPostById } from "../utils/blogData";
 import { isAuthenticated } from "../utils/authUtils";
-import type { BlogPost as BlogPostType } from "../utils/blogData";
+import type { BlogPost as BlogPostType } from "../types/database";
 
 const renderMarkdown = (markdown: string) => {
   return { __html: markdown

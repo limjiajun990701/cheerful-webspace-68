@@ -1,7 +1,6 @@
-
 import { CalendarIcon } from "lucide-react";
 import { Link } from "react-router-dom";
-import { BlogPost } from "../utils/blogData";
+import { BlogPost } from "../types/database";
 
 interface BlogCardProps {
   post: BlogPost;
@@ -11,10 +10,10 @@ interface BlogCardProps {
 const BlogCard = ({ post, featured = false }: BlogCardProps) => {
   return featured ? (
     <div className="bg-background rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-border">
-      {post.imageUrl && (
+      {post.imageurl && (
         <div className="aspect-video w-full overflow-hidden">
           <img 
-            src={post.imageUrl} 
+            src={post.imageurl} 
             alt={post.title} 
             className="w-full h-full object-cover transition-transform hover:scale-105"
           />
@@ -54,10 +53,10 @@ const BlogCard = ({ post, featured = false }: BlogCardProps) => {
     </div>
   ) : (
     <div className="bg-background rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-border h-full flex flex-col">
-      {post.imageUrl && (
+      {post.imageurl && (
         <div className="aspect-video w-full overflow-hidden">
           <img 
-            src={post.imageUrl} 
+            src={post.imageurl} 
             alt={post.title} 
             className="w-full h-full object-cover transition-transform hover:scale-105"
           />

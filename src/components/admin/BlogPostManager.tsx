@@ -55,7 +55,7 @@ const BlogPostManager = () => {
           tags: postData.tags,
           date,
           excerpt,
-          imageUrl: postData.imageUrl
+          imageurl: postData.imageurl
         });
         
         toast({
@@ -70,7 +70,7 @@ const BlogPostManager = () => {
           tags: postData.tags,
           date,
           excerpt,
-          imageUrl: postData.imageUrl
+          imageurl: postData.imageurl
         });
         
         toast({

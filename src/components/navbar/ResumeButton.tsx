@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { getCurrentResume } from '@/utils/resumeData';
-import { Resume } from '@/types/resume';
+import { Resume } from '@/types/database';
 
 const ResumeButton = () => {
   const [resume, setResume] = useState<Resume | null>(null);
@@ -20,7 +20,9 @@ const ResumeButton = () => {
       try {
         setLoading(true);
         const data = await getCurrentResume();
-        setResume(data);
+        if (data) {
+          setResume(data);
+        }
       } catch (error) {
         console.error("Error fetching resume:", error);
       } finally {
@@ -46,7 +48,7 @@ const ResumeButton = () => {
       <DropdownMenuContent align="end" className="w-48">
         <DropdownMenuItem asChild>
           <a 
-            href={resume.fileUrl} 
+            href={resume.fileUrl || resume.file_path} 
             target="_blank" 
             rel="noopener noreferrer"
             className="flex w-full cursor-pointer items-center"
@@ -57,7 +59,7 @@ const ResumeButton = () => {
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <a 
-            href={resume.fileUrl} 
+            href={resume.fileUrl || resume.file_path} 
             download={resume.fileName || resume.file_name}
             className="flex w-full cursor-pointer items-center"
           >

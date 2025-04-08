@@ -1,6 +1,6 @@
 
 import { CalendarIcon, Edit, Trash2 } from "lucide-react";
-import { BlogPost } from "../utils/blogData";
+import { BlogPost } from "../types/database";
 
 interface AdminBlogCardProps {
   post: BlogPost;

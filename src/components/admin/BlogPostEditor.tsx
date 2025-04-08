@@ -36,9 +36,9 @@ const BlogPostEditor = ({ editingId, onSave, onCancel }: BlogPostEditorProps) =>
             setTitle(post.title);
             setContent(post.content);
             setTags(post.tags.join(", "));
-            setImageUrl(post.imageUrl || "");
-            if (post.imageUrl) {
-              setImagePreview(post.imageUrl);
+            setImageUrl(post.imageurl || "");
+            if (post.imageurl) {
+              setImagePreview(post.imageurl);
             }
           }
         } catch (error) {
@@ -135,7 +135,7 @@ const BlogPostEditor = ({ editingId, onSave, onCancel }: BlogPostEditorProps) =>
       title,
       content,
       tags: tagArray,
-      imageUrl: finalImageUrl
+      imageurl: finalImageUrl
     });
   };
 

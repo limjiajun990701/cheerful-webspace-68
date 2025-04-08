@@ -41,11 +41,11 @@ const CertificationEditor = ({ editingId, onSave, onCancel }: CertificationEdito
           if (certification) {
             setName(certification.name);
             setIssuer(certification.issuer);
-            setFileUrl(certification.fileUrl || "");
-            setFileType(certification.fileType || "image");
-            setDescription(certification.description);
+            setFileUrl(certification.fileurl || "");
+            setFileType(certification.filetype || "image");
+            setDescription(certification.description || "");
             setDate(certification.date);
-            setCredentialUrl(certification.credentialUrl || "");
+            setCredentialUrl(certification.credentialurl || "");
           }
         } catch (error) {
           console.error("Error loading certification data:", error);
@@ -130,11 +130,11 @@ const CertificationEditor = ({ editingId, onSave, onCancel }: CertificationEdito
     onSave({
       name,
       issuer,
-      fileUrl,
-      fileType,
+      fileurl: fileUrl,
+      filetype: fileType,
       description,
       date,
-      credentialUrl: credentialUrl || undefined,
+      credentialurl: credentialUrl || undefined,
     });
   };
 

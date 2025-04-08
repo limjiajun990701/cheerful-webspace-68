@@ -1,7 +1,8 @@
 
 import React, { useState, useEffect } from "react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "./ui/carousel";
-import { getAllCertifications, Certification } from "../utils/certificationData";
+import { getAllCertifications } from "../utils/certificationData";
+import { Certification } from "../types/database";
 import CertificationCard from "./CertificationCard";
 import { useMediaQuery } from "../hooks/use-media-query";
 

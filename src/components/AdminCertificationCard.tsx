@@ -1,6 +1,6 @@
 
 import { Award, ExternalLink, Edit, Trash2, FileText } from "lucide-react";
-import { Certification } from "../utils/certificationData";
+import { Certification } from "../types/database";
 
 interface AdminCertificationCardProps {
   certification: Certification;
@@ -16,9 +16,9 @@ const AdminCertificationCard = ({ certification, onEdit, onDelete }: AdminCertif
           <div className="flex-1">
             <div className="flex items-center gap-4 mb-4">
               <div className="h-16 w-16 flex-shrink-0 rounded-md overflow-hidden border border-border">
-                {certification.fileType === "image" ? (
+                {certification.filetype === "image" ? (
                   <img 
-                    src={certification.fileUrl} 
+                    src={certification.fileurl} 
                     alt={certification.name}
                     className="h-full w-full object-cover"
                   />
@@ -47,9 +47,9 @@ const AdminCertificationCard = ({ certification, onEdit, onDelete }: AdminCertif
                 Issued: {new Date(certification.date).toLocaleDateString()}
               </p>
               
-              {certification.credentialUrl && (
+              {certification.credentialurl && (
                 <a 
-                  href={certification.credentialUrl} 
+                  href={certification.credentialurl} 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"

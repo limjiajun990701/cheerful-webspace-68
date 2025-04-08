@@ -15,7 +15,7 @@ export const getAllProjects = async (): Promise<Project[]> => {
       throw error;
     }
 
-    return data || [];
+    return data as Project[] || [];
   } catch (error) {
     console.error("Error fetching projects:", error);
     return [];
@@ -36,7 +36,7 @@ export const getProjectById = async (id: string): Promise<Project | null> => {
       throw error;
     }
 
-    return data;
+    return data as Project;
   } catch (error) {
     console.error(`Error fetching project with ID ${id}:`, error);
     return null;
@@ -61,7 +61,7 @@ export const addProject = async (project: Omit<Project, 'id'>): Promise<Project>
       throw new Error("No data returned from insert");
     }
 
-    return data;
+    return data as Project;
   } catch (error) {
     console.error("Error adding project:", error);
     throw error;
@@ -87,7 +87,7 @@ export const updateProject = async (project: Project): Promise<Project> => {
       throw new Error("No data returned from update");
     }
 
-    return data;
+    return data as Project;
   } catch (error) {
     console.error(`Error updating project with ID ${project.id}:`, error);
     throw error;

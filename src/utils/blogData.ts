@@ -14,8 +14,7 @@ export const getAllBlogPosts = async (): Promise<BlogPost[]> => {
       throw error;
     }
 
-    // Map database column names to our interface properties
-    return data || [];
+    return data as BlogPost[] || [];
   } catch (error) {
     console.error("Error fetching blog posts:", error);
     return [];
@@ -35,7 +34,7 @@ export const getBlogPostById = async (id: string): Promise<BlogPost | null> => {
       throw error;
     }
 
-    return data;
+    return data as BlogPost;
   } catch (error) {
     console.error(`Error fetching blog post with ID ${id}:`, error);
     return null;
@@ -66,7 +65,7 @@ export const addBlogPost = async (post: Omit<BlogPost, 'id'>): Promise<BlogPost>
       throw new Error("No data returned from insert");
     }
 
-    return data;
+    return data as BlogPost;
   } catch (error) {
     console.error("Error adding blog post:", error);
     throw error;
@@ -98,7 +97,7 @@ export const updateBlogPost = async (post: BlogPost): Promise<BlogPost> => {
       throw new Error("No data returned from update");
     }
 
-    return data;
+    return data as BlogPost;
   } catch (error) {
     console.error(`Error updating blog post with ID ${post.id}:`, error);
     throw error;

@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from "react";
-import { getAllCertifications, Certification } from "../utils/certificationData";
+import { getAllCertifications } from "../utils/certificationData";
+import { Certification } from "../types/database";
 import CertificationCard from "../components/CertificationCard";
 import { Badge } from "../components/ui/badge";
 import { Input } from "../components/ui/input";
