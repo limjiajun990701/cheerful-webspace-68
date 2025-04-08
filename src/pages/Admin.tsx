@@ -10,6 +10,7 @@ import ProjectManager from "../components/admin/ProjectManager";
 import CertificationManager from "../components/admin/CertificationManager";
 import ResumeManager from "../components/admin/ResumeManager";
 import { supabase } from "@/integrations/supabase/client";
+import { LogOut, LayoutDashboard, Settings, FileText, Award, Briefcase } from "lucide-react";
 
 const Admin = () => {
   const [searchParams] = useSearchParams();
@@ -17,10 +18,12 @@ const Admin = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("posts");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        setIsLoading(true);
         const authenticated = await checkAuthentication();
         if (!authenticated) {
           navigate("/admin/login");
@@ -42,6 +45,8 @@ const Admin = () => {
       } catch (err) {
         console.error("Auth check error:", err);
         navigate("/admin/login");
+      } finally {
+        setIsLoading(false);
       }
     };
     
@@ -71,46 +76,79 @@ const Admin = () => {
     navigate("/admin/login");
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
-    return null; // Don't render anything until authentication check is complete
+    return null;
   }
 
   return (
-    <div className="min-h-screen py-16 lg:py-24">
-      <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center mb-10">
-          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-          <Button variant="outline" onClick={handleLogout}>Logout</Button>
+    <div className="min-h-screen bg-background">
+      <header className="bg-card border-b border-border shadow-sm py-4">
+        <div className="container mx-auto px-4 flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <LayoutDashboard className="h-6 w-6 text-primary" />
+            <h1 className="text-2xl font-bold">Portfolio Admin</h1>
+          </div>
+          <Button variant="outline" onClick={handleLogout} className="gap-2">
+            <LogOut className="h-4 w-4" />
+            Logout
+          </Button>
         </div>
+      </header>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="mb-8">
-            <TabsTrigger value="posts">Blog Posts</TabsTrigger>
-            <TabsTrigger value="projects">Projects</TabsTrigger>
-            <TabsTrigger value="certifications">Certifications</TabsTrigger>
-            <TabsTrigger value="resume">Resume</TabsTrigger>
-          </TabsList>
+      <div className="container mx-auto px-4 py-8">
+        <div className="bg-card rounded-xl border border-border shadow-sm p-6">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <TabsList className="grid grid-cols-4 gap-2 bg-muted/50 p-1">
+              <TabsTrigger value="posts" className="flex items-center gap-2 data-[state=active]:bg-background">
+                <FileText className="h-4 w-4" />
+                <span className="hidden sm:inline">Blog Posts</span>
+                <span className="sm:hidden">Blog</span>
+              </TabsTrigger>
+              <TabsTrigger value="projects" className="flex items-center gap-2 data-[state=active]:bg-background">
+                <Briefcase className="h-4 w-4" />
+                <span className="hidden sm:inline">Projects</span>
+                <span className="sm:hidden">Projects</span>
+              </TabsTrigger>
+              <TabsTrigger value="certifications" className="flex items-center gap-2 data-[state=active]:bg-background">
+                <Award className="h-4 w-4" />
+                <span className="hidden sm:inline">Certifications</span>
+                <span className="sm:hidden">Certs</span>
+              </TabsTrigger>
+              <TabsTrigger value="resume" className="flex items-center gap-2 data-[state=active]:bg-background">
+                <Settings className="h-4 w-4" />
+                <span className="hidden sm:inline">Resume</span>
+                <span className="sm:hidden">Resume</span>
+              </TabsTrigger>
+            </TabsList>
 
-          {/* Blog Posts Tab */}
-          <TabsContent value="posts">
-            <BlogPostManager />
-          </TabsContent>
+            {/* Content panels */}
+            <div className="p-1">
+              <TabsContent value="posts" className="mt-0 focus:outline-none">
+                <BlogPostManager />
+              </TabsContent>
 
-          {/* Projects Tab */}
-          <TabsContent value="projects">
-            <ProjectManager />
-          </TabsContent>
-          
-          {/* Certifications Tab */}
-          <TabsContent value="certifications">
-            <CertificationManager />
-          </TabsContent>
+              <TabsContent value="projects" className="mt-0 focus:outline-none">
+                <ProjectManager />
+              </TabsContent>
+              
+              <TabsContent value="certifications" className="mt-0 focus:outline-none">
+                <CertificationManager />
+              </TabsContent>
 
-          {/* Resume Tab */}
-          <TabsContent value="resume">
-            <ResumeManager />
-          </TabsContent>
-        </Tabs>
+              <TabsContent value="resume" className="mt-0 focus:outline-none">
+                <ResumeManager />
+              </TabsContent>
+            </div>
+          </Tabs>
+        </div>
       </div>
     </div>
   );

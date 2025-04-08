@@ -13,26 +13,26 @@ export const isAuthenticated = async (): Promise<boolean> => {
   }
 };
 
-// Login function
+// Login function with simplified logic
 export const login = async (username: string, password: string): Promise<boolean> => {
   try {
     console.log("Attempting login with username:", username);
     
-    // Use a valid email format with domain
+    // Always use admin@portfolio.com as the email
     const adminEmail = `admin@portfolio.com`;
     
-    // Sign in with Supabase auth
+    // First try to sign in
     const { data, error } = await supabase.auth.signInWithPassword({
       email: adminEmail,
       password: password,
     });
 
     if (error) {
-      console.error("Login failed:", error.message);
+      console.log("Login failed, attempting to create admin account");
       
-      // If the admin hasn't been created yet and the username is "admin", create it
+      // If the admin doesn't exist yet, create it (only for specific credentials)
       if (username === "admin" && password === "Admin123!") {
-        console.log("Admin not found, creating new admin account");
+        console.log("Creating new admin account");
         
         // Create the admin user in Supabase Auth
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
@@ -45,29 +45,32 @@ export const login = async (username: string, password: string): Promise<boolean
           return false;
         }
         
-        console.log("Admin account created, signing in again");
+        console.log("Admin account created, signing in");
         
         // Sign in with the newly created account
-        const { error: secondLoginError } = await supabase.auth.signInWithPassword({
+        const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
           email: adminEmail,
           password: password,
         });
         
-        if (secondLoginError) {
-          console.error("Second login attempt failed:", secondLoginError);
+        if (loginError) {
+          console.error("Login after signup failed:", loginError);
           return false;
         }
         
+        console.log("Login successful after signup");
         return true;
-      } else {
-        return false;
       }
+      
+      // If not using the default credentials, login fails
+      console.error("Invalid credentials:", error.message);
+      return false;
     }
     
     console.log("Login successful");
     return true;
   } catch (error) {
-    console.error("Error in login:", error);
+    console.error("Error in login process:", error);
     return false;
   }
 };
