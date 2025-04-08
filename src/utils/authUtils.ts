@@ -22,7 +22,7 @@ export const login = async (username: string, password: string): Promise<boolean
       .from('admin_users')
       .select('username, password_hash')
       .eq('username', username)
-      .single();
+      .maybeSingle();
     
     if (adminError) {
       console.error("Error fetching admin user:", adminError);
