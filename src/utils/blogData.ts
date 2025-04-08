@@ -90,6 +90,10 @@ export const addBlogPost = async (post: Omit<BlogPost, 'id'>): Promise<BlogPost>
       throw error;
     }
 
+    if (!data) {
+      throw new Error("No data returned from insert");
+    }
+
     return {
       id: data.id,
       title: data.title,
@@ -124,6 +128,10 @@ export const updateBlogPost = async (post: BlogPost): Promise<BlogPost> => {
 
     if (error) {
       throw error;
+    }
+
+    if (!data) {
+      throw new Error("No data returned from update");
     }
 
     return {

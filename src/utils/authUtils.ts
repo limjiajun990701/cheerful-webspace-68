@@ -18,16 +18,17 @@ export const login = async (username: string, password: string): Promise<boolean
     console.log("Attempting login with username:", username);
     
     // First check if the admin user exists in the admin_users table
-    const { data: adminUser, error: adminError } = await supabase
+    const { data: adminUsers, error: adminError } = await supabase
       .from('admin_users')
       .select('username, password_hash')
-      .eq('username', username)
-      .single();
+      .eq('username', username);
     
-    if (adminError || !adminUser) {
+    if (adminError || !adminUsers || adminUsers.length === 0) {
       console.error("Error fetching admin user:", adminError || "User not found");
       return false;
     }
+
+    const adminUser = adminUsers[0];
     
     console.log("Admin user found:", adminUser.username);
     

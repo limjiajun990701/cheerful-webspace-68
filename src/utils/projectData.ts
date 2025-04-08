@@ -97,6 +97,10 @@ export const addProject = async (project: Omit<Project, 'id'>): Promise<Project>
       throw error;
     }
 
+    if (!data) {
+      throw new Error("No data returned from insert");
+    }
+
     return {
       id: data.id,
       title: data.title,
@@ -135,6 +139,10 @@ export const updateProject = async (project: Project): Promise<Project> => {
 
     if (error) {
       throw error;
+    }
+
+    if (!data) {
+      throw new Error("No data returned from update");
     }
 
     return {

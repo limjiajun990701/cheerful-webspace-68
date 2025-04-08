@@ -119,6 +119,10 @@ export const addCertification = async (certification: Omit<Certification, 'id'>)
       throw error;
     }
 
+    if (!data) {
+      throw new Error("No data returned from insert");
+    }
+
     return {
       id: data.id,
       name: data.name,
@@ -155,6 +159,10 @@ export const updateCertification = async (certification: Certification): Promise
 
     if (error) {
       throw error;
+    }
+
+    if (!data) {
+      throw new Error("No data returned from update");
     }
 
     return {

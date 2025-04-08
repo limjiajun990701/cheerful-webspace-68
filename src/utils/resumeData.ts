@@ -26,18 +26,18 @@ export const getCurrentResume = async (): Promise<Resume | null> => {
     }
 
     // Query the resumes table for the current user
-    const { data: resumeData, error: resumeError } = await supabase
+    const { data, error } = await supabase
       .from('resumes')
       .select('*')
       .eq('user_id', session.user.id)
       .single();
 
-    if (resumeError) {
-      console.error("Error fetching resume:", resumeError);
+    if (error) {
+      console.error("Error fetching resume:", error);
       return null;
     }
 
-    if (!resumeData) {
+    if (!data) {
       console.log("No resume found for user");
       return null;
     }
@@ -46,14 +46,19 @@ export const getCurrentResume = async (): Promise<Resume | null> => {
     const { data: publicUrlData } = supabase
       .storage
       .from(STORAGE_BUCKET)
-      .getPublicUrl(resumeData.file_path);
+      .getPublicUrl(data.file_path);
 
     // Return the resume with fileUrl for compatibility
     return {
-      ...resumeData,
+      id: data.id,
+      user_id: data.user_id,
+      file_name: data.file_name,
+      file_path: data.file_path,
+      file_size: data.file_size,
+      upload_date: data.upload_date,
       fileUrl: publicUrlData.publicUrl,
-      fileName: resumeData.file_name
-    } as Resume;
+      fileName: data.file_name
+    };
   } catch (error) {
     console.error("Error in getCurrentResume:", error);
     return null;
@@ -93,11 +98,14 @@ export const uploadResume = async (file: File): Promise<Resume> => {
       .getPublicUrl(filePath);
 
     // Check if user already has a resume
-    const { data: existingResume } = await supabase
+    const { data: existingResumes, error: existingError } = await supabase
       .from('resumes')
       .select('id')
-      .eq('user_id', userId)
-      .single();
+      .eq('user_id', userId);
+
+    if (existingError) {
+      throw existingError;
+    }
 
     // Define the resume data for database insertion/update
     const resumeData = {
@@ -110,12 +118,12 @@ export const uploadResume = async (file: File): Promise<Resume> => {
     
     let resumeResult;
 
-    if (existingResume) {
+    if (existingResumes && existingResumes.length > 0) {
       // Update existing resume
       const { data, error } = await supabase
         .from('resumes')
         .update(resumeData)
-        .eq('id', existingResume.id)
+        .eq('id', existingResumes[0].id)
         .select()
         .single();
         
@@ -133,11 +141,20 @@ export const uploadResume = async (file: File): Promise<Resume> => {
       resumeResult = data;
     }
     
+    if (!resumeResult) {
+      throw new Error("No data returned from insert/update");
+    }
+    
     return {
-      ...resumeResult,
+      id: resumeResult.id,
+      user_id: resumeResult.user_id,
+      file_name: resumeResult.file_name,
+      file_path: resumeResult.file_path,
+      file_size: resumeResult.file_size,
+      upload_date: resumeResult.upload_date,
       fileUrl: publicUrlData.publicUrl,
       fileName: file.name
-    } as Resume;
+    };
   } catch (error) {
     console.error("Error uploading resume:", error);
     throw error;
@@ -156,7 +173,7 @@ export const deleteResume = async (): Promise<void> => {
     const userId = session.user.id;
 
     // Get the resume record first
-    const { data: resumeData, error: fetchError } = await supabase
+    const { data, error: fetchError } = await supabase
       .from('resumes')
       .select('file_path')
       .eq('user_id', userId)
@@ -166,12 +183,12 @@ export const deleteResume = async (): Promise<void> => {
       throw fetchError;
     }
 
-    if (resumeData) {
+    if (data) {
       // Delete the file from storage
       const { error: storageError } = await supabase
         .storage
         .from(STORAGE_BUCKET)
-        .remove([resumeData.file_path]);
+        .remove([data.file_path]);
 
       if (storageError) {
         console.error("Error deleting file from storage:", storageError);
