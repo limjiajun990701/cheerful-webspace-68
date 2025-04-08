@@ -18,8 +18,8 @@ export const login = async (username: string, password: string): Promise<boolean
   try {
     console.log("Attempting login with username:", username);
     
-    // Use a valid email format for the admin
-    const adminEmail = "admin@example.com";
+    // Use a valid email format with domain
+    const adminEmail = `admin@portfolio.com`;
     
     // Sign in with Supabase auth
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -57,6 +57,8 @@ export const login = async (username: string, password: string): Promise<boolean
           console.error("Second login attempt failed:", secondLoginError);
           return false;
         }
+        
+        return true;
       } else {
         return false;
       }
