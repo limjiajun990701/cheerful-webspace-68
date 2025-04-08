@@ -1,4 +1,3 @@
-
 import { useState, useEffect, ChangeEvent } from "react";
 import { Save, Upload, FileText } from "lucide-react";
 import { Project, getProjectById } from "../../utils/projectData";
@@ -17,13 +16,13 @@ interface ProjectEditorProps {
 const ProjectEditor = ({ editingId, onSave, onCancel }: ProjectEditorProps) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
+  const [imageurl, setImageUrl] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
-  const [fileType, setFileType] = useState<"image" | "pdf" | null>(null);
+  const [filetype, setFileType] = useState<"image" | "pdf" | null>(null);
   const [tags, setTags] = useState("");
-  const [liveUrl, setLiveUrl] = useState("");
-  const [githubUrl, setGithubUrl] = useState("");
+  const [liveurl, setLiveUrl] = useState("");
+  const [githuburl, setGithubUrl] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -40,15 +39,14 @@ const ProjectEditor = ({ editingId, onSave, onCancel }: ProjectEditorProps) => {
       if (project) {
         setTitle(project.title);
         setDescription(project.description);
-        setImageUrl(project.imageUrl || "");
+        setImageUrl(project.imageurl || "");
         setTags(project.tags.join(", "));
-        setLiveUrl(project.liveUrl || "");
-        setGithubUrl(project.githubUrl || "");
+        setLiveUrl(project.liveurl || "");
+        setGithubUrl(project.githuburl || "");
         
-        // Set file preview if fileUrl exists
-        if (project.fileUrl) {
-          setFilePreview(project.fileUrl);
-          setFileType(project.fileType || null);
+        if (project.fileurl) {
+          setFilePreview(project.fileurl);
+          setFileType(project.filetype || null);
         }
       }
     } catch (error) {
@@ -77,7 +75,6 @@ const ProjectEditor = ({ editingId, onSave, onCancel }: ProjectEditorProps) => {
     const selectedFile = e.target.files?.[0];
     if (!selectedFile) return;
 
-    // Check file type
     const isImage = selectedFile.type.startsWith('image/');
     const isPdf = selectedFile.type === 'application/pdf';
 
@@ -93,7 +90,6 @@ const ProjectEditor = ({ editingId, onSave, onCancel }: ProjectEditorProps) => {
     setFile(selectedFile);
     setFileType(isImage ? "image" : "pdf");
 
-    // Create a preview URL for images
     if (isImage) {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -101,7 +97,6 @@ const ProjectEditor = ({ editingId, onSave, onCancel }: ProjectEditorProps) => {
       };
       reader.readAsDataURL(selectedFile);
     } else {
-      // For PDFs, just show an icon
       setFilePreview(null);
     }
   };
@@ -121,35 +116,35 @@ const ProjectEditor = ({ editingId, onSave, onCancel }: ProjectEditorProps) => {
       .map(tag => tag.trim())
       .filter(tag => tag !== "");
 
-    // Convert file to base64 for storage
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        const fileUrl = reader.result as string;
+        const fileurl = reader.result as string;
         
         onSave({
           title,
           description,
-          imageUrl: imageUrl || undefined,
-          fileUrl,
-          fileType,
+          imageurl: imageurl || undefined,
+          fileurl,
+          filetype,
           tags: tagArray,
-          liveUrl: liveUrl || undefined,
-          githubUrl: githubUrl || undefined
+          liveurl: liveurl || undefined,
+          githuburl: githuburl || undefined,
+          date: new Date().toISOString()
         });
       };
       reader.readAsDataURL(file);
     } else {
-      // Save without file or with existing file from loaded project
       onSave({
         title,
         description,
-        imageUrl: imageUrl || undefined,
-        fileUrl: filePreview || undefined,
-        fileType: fileType || undefined,
+        imageurl: imageurl || undefined,
+        fileurl: filePreview || undefined,
+        filetype: filetype || undefined,
         tags: tagArray,
-        liveUrl: liveUrl || undefined,
-        githubUrl: githubUrl || undefined
+        liveurl: liveurl || undefined,
+        githuburl: githuburl || undefined,
+        date: new Date().toISOString()
       });
     }
   };
@@ -196,7 +191,7 @@ const ProjectEditor = ({ editingId, onSave, onCancel }: ProjectEditorProps) => {
                 className="file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
               />
               
-              {filePreview && fileType === "image" ? (
+              {filePreview && filetype === "image" ? (
                 <div className="mt-2 w-full max-w-xs h-32 border rounded-md overflow-hidden">
                   <img 
                     src={filePreview} 
@@ -204,7 +199,7 @@ const ProjectEditor = ({ editingId, onSave, onCancel }: ProjectEditorProps) => {
                     className="w-full h-full object-cover"
                   />
                 </div>
-              ) : fileType === "pdf" ? (
+              ) : filetype === "pdf" ? (
                 <div className="mt-2 flex items-center space-x-2 p-2 border rounded-md max-w-xs">
                   <FileText className="text-primary" size={20} />
                   <span className="text-sm">PDF Document</span>
@@ -223,7 +218,7 @@ const ProjectEditor = ({ editingId, onSave, onCancel }: ProjectEditorProps) => {
             </label>
             <Input
               id="projectImageUrl"
-              value={imageUrl}
+              value={imageurl}
               onChange={(e) => setImageUrl(e.target.value)}
               placeholder="Enter image URL"
             />
@@ -247,7 +242,7 @@ const ProjectEditor = ({ editingId, onSave, onCancel }: ProjectEditorProps) => {
             </label>
             <Input
               id="projectLiveUrl"
-              value={liveUrl}
+              value={liveurl}
               onChange={(e) => setLiveUrl(e.target.value)}
               placeholder="https://example.com"
             />
@@ -259,7 +254,7 @@ const ProjectEditor = ({ editingId, onSave, onCancel }: ProjectEditorProps) => {
             </label>
             <Input
               id="projectGithubUrl"
-              value={githubUrl}
+              value={githuburl}
               onChange={(e) => setGithubUrl(e.target.value)}
               placeholder="https://github.com/username/repo"
             />

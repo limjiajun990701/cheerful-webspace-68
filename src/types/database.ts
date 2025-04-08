@@ -5,13 +5,14 @@ export interface Project {
   description: string;
   imageurl?: string;
   fileurl?: string;
-  filetype?: 'image' | 'pdf';
+  filetype?: 'image' | 'pdf' | null;
   tags: string[];
   liveurl?: string;
   githuburl?: string;
   date?: string;
 }
 
+// Export other existing interfaces...
 export interface BlogPost {
   id: string;
   title: string;
@@ -19,25 +20,27 @@ export interface BlogPost {
   date: string;
   tags: string[];
   excerpt: string;
-  imageUrl?: string;
+  imageurl?: string;
 }
 
 export interface Certification {
   id: string;
   name: string;
   issuer: string;
-  issueDate: string;
-  expiryDate?: string;
-  credentialUrl?: string;
-  imageUrl?: string;
+  date: string;
+  fileurl: string;
+  filetype: 'image' | 'pdf';
+  description?: string;
+  credentialurl?: string;
 }
 
 export interface Resume {
   id: string;
+  user_id: string;
   file_name: string;
-  fileUrl: string;
-  upload_date: string;
-  fileName?: string;
+  file_path: string;
+  file_size?: number;
+  upload_date?: string;
 }
 
 export interface Profile {

@@ -9,7 +9,135 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      blog_posts: {
+        Row: {
+          content: string
+          date: string
+          excerpt: string | null
+          id: string
+          imageurl: string | null
+          tags: string[]
+          title: string
+        }
+        Insert: {
+          content: string
+          date: string
+          excerpt?: string | null
+          id?: string
+          imageurl?: string | null
+          tags?: string[]
+          title: string
+        }
+        Update: {
+          content?: string
+          date?: string
+          excerpt?: string | null
+          id?: string
+          imageurl?: string | null
+          tags?: string[]
+          title?: string
+        }
+        Relationships: []
+      }
+      certifications: {
+        Row: {
+          credentialurl: string | null
+          date: string
+          description: string | null
+          filetype: string
+          fileurl: string
+          id: string
+          issuer: string
+          name: string
+        }
+        Insert: {
+          credentialurl?: string | null
+          date: string
+          description?: string | null
+          filetype: string
+          fileurl: string
+          id?: string
+          issuer: string
+          name: string
+        }
+        Update: {
+          credentialurl?: string | null
+          date?: string
+          description?: string | null
+          filetype?: string
+          fileurl?: string
+          id?: string
+          issuer?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      projects: {
+        Row: {
+          date: string | null
+          description: string
+          filetype: string | null
+          fileurl: string | null
+          githuburl: string | null
+          id: string
+          imageurl: string | null
+          liveurl: string | null
+          tags: string[]
+          title: string
+        }
+        Insert: {
+          date?: string | null
+          description: string
+          filetype?: string | null
+          fileurl?: string | null
+          githuburl?: string | null
+          id?: string
+          imageurl?: string | null
+          liveurl?: string | null
+          tags?: string[]
+          title: string
+        }
+        Update: {
+          date?: string | null
+          description?: string
+          filetype?: string | null
+          fileurl?: string | null
+          githuburl?: string | null
+          id?: string
+          imageurl?: string | null
+          liveurl?: string | null
+          tags?: string[]
+          title?: string
+        }
+        Relationships: []
+      }
+      resumes: {
+        Row: {
+          file_name: string
+          file_path: string
+          file_size: number | null
+          id: string
+          upload_date: string | null
+          user_id: string
+        }
+        Insert: {
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          id?: string
+          upload_date?: string | null
+          user_id: string
+        }
+        Update: {
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          upload_date?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
