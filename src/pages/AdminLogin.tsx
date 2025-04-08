@@ -1,5 +1,5 @@
 
-import { useState, FormEvent, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Lock, User } from "lucide-react";
 import { login, isAuthenticated } from "../utils/authUtils";

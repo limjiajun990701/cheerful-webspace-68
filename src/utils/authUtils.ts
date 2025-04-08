@@ -1,5 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { Session, User } from '@supabase/supabase-js';
 
 // Check if admin is logged in
 export const isAuthenticated = async (): Promise<boolean> => {
@@ -17,65 +18,46 @@ export const login = async (username: string, password: string): Promise<boolean
   try {
     console.log("Attempting login with username:", username);
     
-    // First check if the admin user exists in the admin_users table
-    const { data: adminUsers, error: adminError } = await supabase
-      .from('admin_users')
-      .select('username, password_hash')
-      .eq('username', username)
-      .maybeSingle();
-    
-    if (adminError) {
-      console.error("Error fetching admin user:", adminError);
-      return false;
-    }
-
-    if (!adminUsers) {
-      console.error("User not found");
-      return false;
-    }
-    
-    console.log("Admin user found:", adminUsers.username);
-    
-    // Check if the password matches directly
-    if (adminUsers.password_hash !== password) {
-      console.error("Password doesn't match");
-      return false;
-    }
-
-    // Use the specified email and password for Supabase auth
+    // The admin email is always admin@admin.portfolio
     const adminEmail = "admin@admin.portfolio";
-    const adminPassword = "Admin123!";
     
-    // Try to sign in with Supabase auth
+    // Sign in with Supabase auth
     const { data, error } = await supabase.auth.signInWithPassword({
       email: adminEmail,
-      password: adminPassword,
+      password: password,
     });
 
     if (error) {
-      console.log("Sign in failed, creating new account:", error.message);
+      console.error("Login failed:", error.message);
       
-      // Create the user in Supabase Auth
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email: adminEmail,
-        password: adminPassword,
-      });
-      
-      if (signUpError) {
-        console.error("Sign up failed:", signUpError);
-        return false;
-      }
-      
-      console.log("Admin account created, signing in again");
-      
-      // Sign in with the newly created account
-      const { error: secondLoginError } = await supabase.auth.signInWithPassword({
-        email: adminEmail,
-        password: adminPassword,
-      });
-      
-      if (secondLoginError) {
-        console.error("Second login attempt failed:", secondLoginError);
+      // If the admin hasn't been created yet and the username is "admin", create it
+      if (username === "admin" && password === "Admin123!") {
+        console.log("Admin not found, creating new admin account");
+        
+        // Create the admin user in Supabase Auth
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+          email: adminEmail,
+          password: password,
+        });
+        
+        if (signUpError) {
+          console.error("Admin account creation failed:", signUpError);
+          return false;
+        }
+        
+        console.log("Admin account created, signing in again");
+        
+        // Sign in with the newly created account
+        const { error: secondLoginError } = await supabase.auth.signInWithPassword({
+          email: adminEmail,
+          password: password,
+        });
+        
+        if (secondLoginError) {
+          console.error("Second login attempt failed:", secondLoginError);
+          return false;
+        }
+      } else {
         return false;
       }
     }
@@ -107,4 +89,16 @@ export const requireAuth = async (callback: () => void): Promise<void> => {
     console.error("Authentication check failed:", error);
     window.location.href = '/admin/login';
   }
+};
+
+// Get current session
+export const getSession = async (): Promise<Session | null> => {
+  const { data: { session } } = await supabase.auth.getSession();
+  return session;
+};
+
+// Get current user
+export const getCurrentUser = async (): Promise<User | null> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  return user;
 };

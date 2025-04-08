@@ -49,7 +49,7 @@ const Admin = () => {
     
     // Set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      (event) => {
         if (event === 'SIGNED_OUT') {
           navigate("/admin/login");
         }
