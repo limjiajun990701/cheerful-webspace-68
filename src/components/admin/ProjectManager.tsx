@@ -4,17 +4,28 @@ import { Plus } from "lucide-react";
 import { Button } from "../ui/button";
 import { useToast } from "../../hooks/use-toast";
 import AdminProjectCard from "../AdminProjectCard";
-import { Project, getAllProjects, addProject, updateProject, deleteProject } from "../../utils/projectData";
+import { getAllProjects, addProject, updateProject, deleteProject } from "../../utils/projectData";
 import ProjectEditor from "./ProjectEditor";
+import { Project } from "@/types/database";
+import { createTablesIfNeeded } from "@/utils/databaseSetup";
 
 const ProjectManager = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [tablesExist, setTablesExist] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
-    loadProjects();
+    const checkTables = async () => {
+      const exists = await createTablesIfNeeded();
+      setTablesExist(exists);
+      if (exists) {
+        loadProjects();
+      }
+    };
+    
+    checkTables();
   }, []);
 
   const loadProjects = async () => {
@@ -22,6 +33,7 @@ const ProjectManager = () => {
       const allProjects = await getAllProjects();
       setProjects(allProjects);
     } catch (error) {
+      console.error("Error loading projects:", error);
       toast({
         title: "Error Loading Projects",
         description: "Failed to load projects. Please try again.",
@@ -96,6 +108,17 @@ const ProjectManager = () => {
     setEditingId(null);
     setIsEditing(false);
   };
+
+  if (!tablesExist) {
+    return (
+      <div className="p-6 bg-amber-50 border border-amber-200 rounded-lg mb-6">
+        <h2 className="font-semibold text-amber-800 mb-2">Database Setup Required</h2>
+        <p className="text-amber-700 mb-4">
+          The required database tables do not exist in your Supabase project. Please run the SQL migrations to create them.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div>

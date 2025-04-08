@@ -3,14 +3,24 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { PlusCircle } from "lucide-react";
 import ProjectCard from "../components/ProjectCard";
-import { getAllProjects, Project } from "../utils/projectData";
+import { getAllProjects } from "../utils/projectData";
+import { Project } from "@/types/database";
 import { isAuthenticated } from "../utils/authUtils";
 import { Button } from "@/components/ui/button";
 
 const Projects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
-  const isAdmin = isAuthenticated();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const authenticated = await isAuthenticated();
+      setIsAdmin(authenticated);
+    };
+    
+    checkAuth();
+  }, []);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -72,12 +82,12 @@ const Projects = () => {
                   <ProjectCard
                     title={project.title}
                     description={project.description}
-                    imageUrl={project.imageUrl}
-                    fileUrl={project.fileUrl}
-                    fileType={project.fileType}
+                    imageUrl={project.imageurl}
+                    fileUrl={project.fileurl}
+                    fileType={project.filetype}
                     tags={project.tags}
-                    liveUrl={project.liveUrl}
-                    githubUrl={project.githubUrl}
+                    liveUrl={project.liveurl}
+                    githubUrl={project.githuburl}
                   />
                 </div>
               ))}

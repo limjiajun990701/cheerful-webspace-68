@@ -1,18 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { v4 as uuidv4 } from 'uuid';
-
-export interface Project {
-  id: string;
-  title: string;
-  description: string;
-  imageUrl?: string;
-  fileUrl?: string;
-  fileType?: 'image' | 'pdf';
-  tags: string[];
-  liveUrl?: string;
-  githubUrl?: string;
-}
+import { Project } from '@/types/database';
 
 // Get all projects
 export const getAllProjects = async (): Promise<Project[]> => {
@@ -23,20 +11,11 @@ export const getAllProjects = async (): Promise<Project[]> => {
       .order('date', { ascending: false });
 
     if (error) {
+      console.error("Error fetching projects:", error);
       throw error;
     }
 
-    return (data || []).map(project => ({
-      id: project.id,
-      title: project.title,
-      description: project.description,
-      imageUrl: project.imageurl,
-      fileUrl: project.fileurl,
-      fileType: project.filetype as 'image' | 'pdf' | undefined,
-      tags: project.tags,
-      liveUrl: project.liveurl,
-      githubUrl: project.githuburl
-    }));
+    return data || [];
   } catch (error) {
     console.error("Error fetching projects:", error);
     return [];
@@ -53,22 +32,11 @@ export const getProjectById = async (id: string): Promise<Project | null> => {
       .single();
 
     if (error) {
+      console.error(`Error fetching project with ID ${id}:`, error);
       throw error;
     }
 
-    if (!data) return null;
-
-    return {
-      id: data.id,
-      title: data.title,
-      description: data.description,
-      imageUrl: data.imageurl,
-      fileUrl: data.fileurl,
-      fileType: data.filetype as 'image' | 'pdf' | undefined,
-      tags: data.tags,
-      liveUrl: data.liveurl,
-      githubUrl: data.githuburl
-    };
+    return data;
   } catch (error) {
     console.error(`Error fetching project with ID ${id}:`, error);
     return null;
@@ -80,20 +48,12 @@ export const addProject = async (project: Omit<Project, 'id'>): Promise<Project>
   try {
     const { data, error } = await supabase
       .from('projects')
-      .insert([{
-        title: project.title,
-        description: project.description,
-        imageurl: project.imageUrl,
-        fileurl: project.fileUrl,
-        filetype: project.fileType,
-        tags: project.tags,
-        liveurl: project.liveUrl,
-        githuburl: project.githubUrl
-      }])
+      .insert([project])
       .select()
       .single();
 
     if (error) {
+      console.error("Error adding project:", error);
       throw error;
     }
 
@@ -101,17 +61,7 @@ export const addProject = async (project: Omit<Project, 'id'>): Promise<Project>
       throw new Error("No data returned from insert");
     }
 
-    return {
-      id: data.id,
-      title: data.title,
-      description: data.description,
-      imageUrl: data.imageurl,
-      fileUrl: data.fileurl,
-      fileType: data.filetype as 'image' | 'pdf' | undefined,
-      tags: data.tags,
-      liveUrl: data.liveurl,
-      githubUrl: data.githuburl
-    };
+    return data;
   } catch (error) {
     console.error("Error adding project:", error);
     throw error;
@@ -123,21 +73,13 @@ export const updateProject = async (project: Project): Promise<Project> => {
   try {
     const { data, error } = await supabase
       .from('projects')
-      .update({
-        title: project.title,
-        description: project.description,
-        imageurl: project.imageUrl,
-        fileurl: project.fileUrl,
-        filetype: project.fileType,
-        tags: project.tags,
-        liveurl: project.liveUrl,
-        githuburl: project.githubUrl
-      })
+      .update(project)
       .eq('id', project.id)
       .select()
       .single();
 
     if (error) {
+      console.error(`Error updating project with ID ${project.id}:`, error);
       throw error;
     }
 
@@ -145,17 +87,7 @@ export const updateProject = async (project: Project): Promise<Project> => {
       throw new Error("No data returned from update");
     }
 
-    return {
-      id: data.id,
-      title: data.title,
-      description: data.description,
-      imageUrl: data.imageurl,
-      fileUrl: data.fileurl,
-      fileType: data.filetype as 'image' | 'pdf' | undefined,
-      tags: data.tags,
-      liveUrl: data.liveurl,
-      githubUrl: data.githuburl
-    };
+    return data;
   } catch (error) {
     console.error(`Error updating project with ID ${project.id}:`, error);
     throw error;
@@ -171,6 +103,7 @@ export const deleteProject = async (id: string): Promise<void> => {
       .eq('id', id);
 
     if (error) {
+      console.error(`Error deleting project with ID ${id}:`, error);
       throw error;
     }
   } catch (error) {

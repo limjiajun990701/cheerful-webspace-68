@@ -1,6 +1,6 @@
 
 import { ExternalLink, Github, Edit, Trash2, FileText } from "lucide-react";
-import { Project } from "../utils/projectData";
+import { Project } from "@/types/database";
 
 interface AdminProjectCardProps {
   project: Project;
@@ -10,9 +10,9 @@ interface AdminProjectCardProps {
 
 const AdminProjectCard = ({ project, onEdit, onDelete }: AdminProjectCardProps) => {
   // Determine what to display in the media section
-  const hasUploadedImage = project.fileUrl && project.fileType === "image";
-  const hasUploadedPdf = project.fileUrl && project.fileType === "pdf";
-  const displayImage = hasUploadedImage ? project.fileUrl : project.imageUrl;
+  const hasUploadedImage = project.fileurl && project.filetype === "image";
+  const hasUploadedPdf = project.fileurl && project.filetype === "pdf";
+  const displayImage = hasUploadedImage ? project.fileurl : project.imageurl;
   
   return (
     <div className="bg-background rounded-xl overflow-hidden shadow-sm border border-border">
@@ -59,9 +59,9 @@ const AdminProjectCard = ({ project, onEdit, onDelete }: AdminProjectCardProps) 
             </div>
             
             <div className="flex gap-3">
-              {project.liveUrl && (
+              {project.liveurl && (
                 <a 
-                  href={project.liveUrl} 
+                  href={project.liveurl} 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
@@ -71,9 +71,9 @@ const AdminProjectCard = ({ project, onEdit, onDelete }: AdminProjectCardProps) 
                 </a>
               )}
               
-              {project.githubUrl && (
+              {project.githuburl && (
                 <a 
-                  href={project.githubUrl} 
+                  href={project.githuburl} 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
@@ -83,9 +83,9 @@ const AdminProjectCard = ({ project, onEdit, onDelete }: AdminProjectCardProps) 
                 </a>
               )}
               
-              {hasUploadedPdf && project.fileUrl && (
+              {hasUploadedPdf && project.fileurl && (
                 <a 
-                  href={project.fileUrl} 
+                  href={project.fileurl} 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
