@@ -1,100 +1,122 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
+import { v4 as uuidv4 } from 'uuid';
+
+// Simple session management
+let currentSession: { 
+  id: string; 
+  username: string; 
+  expiresAt: number;
+} | null = null;
 
 // Check if admin is logged in
 export const isAuthenticated = async (): Promise<boolean> => {
   try {
-    const { data: { session } } = await supabase.auth.getSession();
-    return !!session;
+    // Check if we have a local session and it's not expired
+    if (currentSession && currentSession.expiresAt > Date.now()) {
+      return true;
+    }
+    
+    // Check if we have a session in localStorage
+    const storedSession = localStorage.getItem('admin_session');
+    if (storedSession) {
+      const session = JSON.parse(storedSession);
+      if (session && session.expiresAt > Date.now()) {
+        currentSession = session;
+        return true;
+      }
+    }
+    
+    return false;
   } catch (error) {
     console.error("Authentication check failed:", error);
     return false;
   }
 };
 
-// Login function with simplified logic that doesn't require email verification
+// Login function using the custom admin_users table
 export const login = async (username: string, password: string): Promise<boolean> => {
   try {
     console.log("Attempting login with username:", username);
     
-    // Always use admin@portfolio.com as the email
-    const adminEmail = `admin@portfolio.com`;
+    // Query the admin_users table
+    const { data, error } = await supabase
+      .from('admin_users')
+      .select('*')
+      .eq('username', username)
+      .eq('password_hash', password)
+      .single();
     
-    // First try to sign in
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: adminEmail,
-      password: password,
-    });
-
-    // If login successful, return true immediately
-    if (data?.session) {
-      console.log("Login successful");
-      return true;
-    }
-
-    // If login failed, check if it's because the account doesn't exist or needs creation
     if (error) {
-      console.log("Login failed:", error.message);
+      console.error("Login database error:", error.message);
       
-      // If the admin doesn't exist yet, create it (only for specific credentials)
+      // If the credentials are admin/Admin123!, let's create the admin user
       if (username === "admin" && password === "Admin123!") {
         console.log("Creating new admin account");
         
-        // Create the admin user in Supabase Auth
-        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-          email: adminEmail,
-          password: password,
-          options: {
-            data: {
-              role: 'admin'
+        // Insert admin user
+        const { data: newAdmin, error: insertError } = await supabase
+          .from('admin_users')
+          .insert([
+            { 
+              username: username, 
+              password_hash: password 
             }
-          }
-        });
+          ])
+          .select();
         
-        if (signUpError) {
-          console.error("Admin account creation failed:", signUpError);
+        if (insertError) {
+          console.error("Admin account creation failed:", insertError);
           return false;
         }
         
-        console.log("Admin account created, trying to sign in directly");
+        console.log("Admin account created successfully");
         
-        // Try to sign in without waiting for email verification
-        const { data: loginAfterSignup, error: loginError } = await supabase.auth.signInWithPassword({
-          email: adminEmail,
-          password: password,
-        });
+        // Create session after successful creation
+        const sessionId = uuidv4();
+        currentSession = {
+          id: sessionId,
+          username: username,
+          expiresAt: Date.now() + (24 * 60 * 60 * 1000) // 24 hours
+        };
         
-        if (loginError) {
-          console.error("Login after signup failed:", loginError);
-          
-          // Special case: if we get email_not_confirmed error but we're using the default admin credentials
-          // Let's try to bypass this for development purposes
-          if (loginError.message === "Email not confirmed" && username === "admin" && password === "Admin123!") {
-            console.log("Attempting to bypass email confirmation for development");
-            const { data, error } = await supabase.auth.signInWithPassword({
-              email: adminEmail,
-              password: password,
-            });
-            
-            if (!error && data?.session) {
-              console.log("Bypass successful");
-              return true;
-            }
-          }
-          return false;
-        }
+        // Store session in localStorage
+        localStorage.setItem('admin_session', JSON.stringify(currentSession));
         
-        console.log("Login successful after signup");
+        // Update last login timestamp
+        await supabase
+          .from('admin_users')
+          .update({ last_login: new Date().toISOString() })
+          .eq('username', username);
+        
         return true;
       }
       
-      // If not using the default credentials, login fails
-      console.error("Invalid credentials:", error.message);
       return false;
     }
     
-    return false; // Shouldn't reach here, but just in case
+    // Login successful
+    console.log("Login successful");
+    
+    // Create session
+    const sessionId = uuidv4();
+    currentSession = {
+      id: sessionId,
+      username: data.username,
+      expiresAt: Date.now() + (24 * 60 * 60 * 1000) // 24 hours
+    };
+    
+    // Store session in localStorage
+    localStorage.setItem('admin_session', JSON.stringify(currentSession));
+    
+    // Update last login timestamp
+    await supabase
+      .from('admin_users')
+      .update({ last_login: new Date().toISOString() })
+      .eq('username', username);
+    
+    return true;
   } catch (error) {
     console.error("Error in login process:", error);
     return false;
@@ -103,7 +125,8 @@ export const login = async (username: string, password: string): Promise<boolean
 
 // Logout function
 export const logout = async (): Promise<void> => {
-  await supabase.auth.signOut();
+  currentSession = null;
+  localStorage.removeItem('admin_session');
 };
 
 // Function to require authentication (for protected routes)
@@ -124,12 +147,31 @@ export const requireAuth = async (callback: () => void): Promise<void> => {
 
 // Get current session
 export const getSession = async (): Promise<Session | null> => {
-  const { data: { session } } = await supabase.auth.getSession();
-  return session;
+  // For compatibility with existing code, return null
+  // since we're not using Supabase Auth anymore
+  return null;
 };
 
 // Get current user
 export const getCurrentUser = async (): Promise<User | null> => {
-  const { data: { user } } = await supabase.auth.getUser();
-  return user;
+  // For compatibility with existing code, return null
+  // since we're not using Supabase Auth anymore
+  return null;
+};
+
+// Get current admin username
+export const getCurrentAdmin = (): string | null => {
+  if (currentSession) {
+    return currentSession.username;
+  }
+  
+  const storedSession = localStorage.getItem('admin_session');
+  if (storedSession) {
+    const session = JSON.parse(storedSession);
+    if (session && session.expiresAt > Date.now()) {
+      return session.username;
+    }
+  }
+  
+  return null;
 };

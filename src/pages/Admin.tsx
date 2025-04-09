@@ -1,15 +1,13 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
-import { isAuthenticated as checkAuthentication, logout } from "../utils/authUtils";
+import { isAuthenticated, logout, getCurrentAdmin } from "../utils/authUtils";
 import { useToast } from "../hooks/use-toast";
 import BlogPostManager from "../components/admin/BlogPostManager";
 import ProjectManager from "../components/admin/ProjectManager";
 import CertificationManager from "../components/admin/CertificationManager";
 import ResumeManager from "../components/admin/ResumeManager";
-import { supabase } from "@/integrations/supabase/client";
 import { LogOut, LayoutDashboard, Settings, FileText, Award, Briefcase, User } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
@@ -18,7 +16,7 @@ const Admin = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("posts");
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthChecked, setIsAuthChecked] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [username, setUsername] = useState("Admin");
 
@@ -26,18 +24,19 @@ const Admin = () => {
     const checkAuth = async () => {
       try {
         setIsLoading(true);
-        const authenticated = await checkAuthentication();
+        const authenticated = await isAuthenticated();
         if (!authenticated) {
           navigate("/admin/login");
           return;
         }
-        setIsAuthenticated(true);
         
-        // Get user info
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          setUsername(user.email?.split('@')[0] || "Admin");
+        // Get admin username
+        const adminUsername = getCurrentAdmin();
+        if (adminUsername) {
+          setUsername(adminUsername);
         }
+        
+        setIsAuthChecked(true);
         
         // Check URL params for editing
         const editId = searchParams.get("edit");
@@ -60,19 +59,23 @@ const Admin = () => {
     
     checkAuth();
     
-    // Set up auth state change listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event) => {
-        if (event === 'SIGNED_OUT') {
-          navigate("/admin/login");
-        }
+    // Set up interval to periodically check authentication
+    const authCheckInterval = setInterval(async () => {
+      const authenticated = await isAuthenticated();
+      if (!authenticated && isAuthChecked) {
+        toast({
+          title: "Session expired",
+          description: "Your session has expired. Please log in again.",
+          variant: "destructive",
+        });
+        navigate("/admin/login");
       }
-    );
-
+    }, 5 * 60 * 1000); // Check every 5 minutes
+    
     return () => {
-      subscription.unsubscribe();
+      clearInterval(authCheckInterval);
     };
-  }, [searchParams, navigate]);
+  }, [searchParams, navigate, toast, isAuthChecked]);
 
   const handleLogout = async () => {
     await logout();
@@ -95,7 +98,7 @@ const Admin = () => {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthChecked) {
     return null;
   }
 
