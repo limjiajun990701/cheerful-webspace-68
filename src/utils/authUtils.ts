@@ -39,7 +39,8 @@ export const login = async (username: string, password: string): Promise<boolean
         const { data: userExists } = await supabase.auth.admin.listUsers();
         
         // Fix: Check if users array exists and if any user has matching email
-        const adminExists = userExists?.users?.some(user => 
+        // Explicitly type the user parameter to avoid TypeScript errors
+        const adminExists = userExists?.users?.some((user: { email?: string }) => 
           user.email === adminEmail
         );
         
