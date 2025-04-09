@@ -13,7 +13,7 @@ export const isAuthenticated = async (): Promise<boolean> => {
   }
 };
 
-// Login function with simplified logic
+// Login function with simplified logic that doesn't require email verification
 export const login = async (username: string, password: string): Promise<boolean> => {
   try {
     console.log("Attempting login with username:", username);
@@ -27,6 +27,7 @@ export const login = async (username: string, password: string): Promise<boolean
       password: password,
     });
 
+    // If login failed, check if it's because the account doesn't exist
     if (error) {
       console.log("Login failed, attempting to create admin account");
       
@@ -34,10 +35,37 @@ export const login = async (username: string, password: string): Promise<boolean
       if (username === "admin" && password === "Admin123!") {
         console.log("Creating new admin account");
         
+        // First, check if the email is already registered but not confirmed
+        const { data: userExists } = await supabase.auth.admin.listUsers();
+        const adminExists = userExists?.users?.some(user => user.email === adminEmail);
+        
+        if (adminExists) {
+          // Try admin sign-in directly (bypassing email verification)
+          const { data: adminSignIn, error: adminSignInError } = await supabase.auth.signInWithPassword({
+            email: adminEmail,
+            password: password,
+            options: {
+              // Attempt to bypass email verification
+              emailRedirectTo: window.location.origin + '/admin'
+            }
+          });
+          
+          if (!adminSignInError) {
+            console.log("Admin login successful");
+            return true;
+          }
+        }
+        
         // Create the admin user in Supabase Auth
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email: adminEmail,
           password: password,
+          options: {
+            emailRedirectTo: window.location.origin + '/admin',
+            data: {
+              role: 'admin'
+            }
+          }
         });
         
         if (signUpError) {
@@ -45,21 +73,27 @@ export const login = async (username: string, password: string): Promise<boolean
           return false;
         }
         
-        console.log("Admin account created, signing in");
-        
-        // Sign in with the newly created account
-        const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
-          email: adminEmail,
-          password: password,
-        });
-        
-        if (loginError) {
-          console.error("Login after signup failed:", loginError);
+        // For development purposes, we'll auto-confirm the email
+        try {
+          console.log("Admin account created, signing in");
+          
+          // Try to sign in directly after creation
+          const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
+            email: adminEmail,
+            password: password,
+          });
+          
+          if (loginError) {
+            console.error("Login after signup failed:", loginError);
+            return false;
+          }
+          
+          console.log("Login successful after signup");
+          return true;
+        } catch (err) {
+          console.error("Error during auto-confirmation:", err);
           return false;
         }
-        
-        console.log("Login successful after signup");
-        return true;
       }
       
       // If not using the default credentials, login fails

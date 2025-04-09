@@ -10,7 +10,8 @@ import ProjectManager from "../components/admin/ProjectManager";
 import CertificationManager from "../components/admin/CertificationManager";
 import ResumeManager from "../components/admin/ResumeManager";
 import { supabase } from "@/integrations/supabase/client";
-import { LogOut, LayoutDashboard, Settings, FileText, Award, Briefcase } from "lucide-react";
+import { LogOut, LayoutDashboard, Settings, FileText, Award, Briefcase, User } from "lucide-react";
+import { Card } from "@/components/ui/card";
 
 const Admin = () => {
   const [searchParams] = useSearchParams();
@@ -19,6 +20,7 @@ const Admin = () => {
   const [activeTab, setActiveTab] = useState("posts");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [username, setUsername] = useState("Admin");
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -30,6 +32,12 @@ const Admin = () => {
           return;
         }
         setIsAuthenticated(true);
+        
+        // Get user info
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          setUsername(user.email?.split('@')[0] || "Admin");
+        }
         
         // Check URL params for editing
         const editId = searchParams.get("edit");
@@ -78,8 +86,11 @@ const Admin = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin h-10 w-10 border-4 border-primary border-t-transparent rounded-full"></div>
+          <p className="text-muted-foreground">Loading admin panel...</p>
+        </div>
       </div>
     );
   }
@@ -90,47 +101,55 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="bg-card border-b border-border shadow-sm py-4">
-        <div className="container mx-auto px-4 flex justify-between items-center">
+      <header className="bg-card border-b border-border shadow-sm sticky top-0 z-10">
+        <div className="container mx-auto px-4 py-3 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <LayoutDashboard className="h-6 w-6 text-primary" />
             <h1 className="text-2xl font-bold">Portfolio Admin</h1>
           </div>
-          <Button variant="outline" onClick={handleLogout} className="gap-2">
-            <LogOut className="h-4 w-4" />
-            Logout
-          </Button>
+          <div className="flex items-center gap-3">
+            <Card className="bg-primary/5 border-primary/20 px-3 py-1 flex items-center gap-2">
+              <User className="h-4 w-4 text-primary" />
+              <span className="text-sm font-medium">{username}</span>
+            </Card>
+            <Button variant="outline" onClick={handleLogout} className="gap-2">
+              <LogOut className="h-4 w-4" />
+              <span className="hidden sm:inline">Logout</span>
+            </Button>
+          </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="bg-card rounded-xl border border-border shadow-sm p-6">
+      <main className="container mx-auto px-4 py-8">
+        <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid grid-cols-4 gap-2 bg-muted/50 p-1">
-              <TabsTrigger value="posts" className="flex items-center gap-2 data-[state=active]:bg-background">
-                <FileText className="h-4 w-4" />
-                <span className="hidden sm:inline">Blog Posts</span>
-                <span className="sm:hidden">Blog</span>
-              </TabsTrigger>
-              <TabsTrigger value="projects" className="flex items-center gap-2 data-[state=active]:bg-background">
-                <Briefcase className="h-4 w-4" />
-                <span className="hidden sm:inline">Projects</span>
-                <span className="sm:hidden">Projects</span>
-              </TabsTrigger>
-              <TabsTrigger value="certifications" className="flex items-center gap-2 data-[state=active]:bg-background">
-                <Award className="h-4 w-4" />
-                <span className="hidden sm:inline">Certifications</span>
-                <span className="sm:hidden">Certs</span>
-              </TabsTrigger>
-              <TabsTrigger value="resume" className="flex items-center gap-2 data-[state=active]:bg-background">
-                <Settings className="h-4 w-4" />
-                <span className="hidden sm:inline">Resume</span>
-                <span className="sm:hidden">Resume</span>
-              </TabsTrigger>
-            </TabsList>
+            <div className="border-b border-border px-6 pt-4">
+              <TabsList className="grid grid-cols-4 gap-2 bg-muted/50 p-1">
+                <TabsTrigger value="posts" className="flex items-center gap-2 data-[state=active]:bg-background">
+                  <FileText className="h-4 w-4" />
+                  <span className="hidden sm:inline">Blog Posts</span>
+                  <span className="sm:hidden">Blog</span>
+                </TabsTrigger>
+                <TabsTrigger value="projects" className="flex items-center gap-2 data-[state=active]:bg-background">
+                  <Briefcase className="h-4 w-4" />
+                  <span className="hidden sm:inline">Projects</span>
+                  <span className="sm:hidden">Projects</span>
+                </TabsTrigger>
+                <TabsTrigger value="certifications" className="flex items-center gap-2 data-[state=active]:bg-background">
+                  <Award className="h-4 w-4" />
+                  <span className="hidden sm:inline">Certifications</span>
+                  <span className="sm:hidden">Certs</span>
+                </TabsTrigger>
+                <TabsTrigger value="resume" className="flex items-center gap-2 data-[state=active]:bg-background">
+                  <Settings className="h-4 w-4" />
+                  <span className="hidden sm:inline">Resume</span>
+                  <span className="sm:hidden">Resume</span>
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
             {/* Content panels */}
-            <div className="p-1">
+            <div className="p-6">
               <TabsContent value="posts" className="mt-0 focus:outline-none">
                 <BlogPostManager />
               </TabsContent>
@@ -149,7 +168,7 @@ const Admin = () => {
             </div>
           </Tabs>
         </div>
-      </div>
+      </main>
     </div>
   );
 };

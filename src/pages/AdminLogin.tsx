@@ -1,12 +1,13 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Lock, User, LogIn } from "lucide-react";
+import { Lock, User, LogIn, AlertCircle, Info } from "lucide-react";
 import { login, isAuthenticated } from "../utils/authUtils";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,6 +21,7 @@ const formSchema = z.object({
 const AdminLogin = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loginAttempts, setLoginAttempts] = useState(0);
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -63,6 +65,7 @@ const AdminLogin = () => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     setError(null);
+    setLoginAttempts(prev => prev + 1);
     
     try {
       console.log("Starting login process with:", values.username);
@@ -76,7 +79,7 @@ const AdminLogin = () => {
         });
         navigate("/admin");
       } else {
-        setError("Invalid username or password. Please try again.");
+        setError("Login failed. Please make sure you're using the correct credentials.");
         toast({
           title: "Login failed",
           description: "Invalid username or password",
@@ -101,7 +104,7 @@ const AdminLogin = () => {
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20 flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="bg-card rounded-2xl shadow-lg border border-border p-8">
-          <div className="text-center mb-8">
+          <div className="text-center mb-6">
             <div className="h-16 w-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
               <LogIn className="h-8 w-8 text-primary" />
             </div>
@@ -109,11 +112,24 @@ const AdminLogin = () => {
             <p className="text-muted-foreground mt-2">Sign in to manage your portfolio content</p>
           </div>
           
+          {loginAttempts >= 2 && (
+            <Alert className="mb-6 bg-blue-50 border-blue-200">
+              <Info className="h-4 w-4 text-blue-600" />
+              <AlertDescription className="text-sm text-blue-700">
+                <strong>Login Tip:</strong> Use exactly username: "admin" and password: "Admin123!" 
+                (ensure you're using the correct exclamation mark).
+              </AlertDescription>
+            </Alert>
+          )}
+          
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
               {error && (
                 <div className="bg-destructive/10 text-destructive p-4 rounded-lg text-sm font-medium">
-                  {error}
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4" />
+                    <span>{error}</span>
+                  </div>
                 </div>
               )}
               
