@@ -37,7 +37,11 @@ export const login = async (username: string, password: string): Promise<boolean
         
         // First, check if the email is already registered but not confirmed
         const { data: userExists } = await supabase.auth.admin.listUsers();
-        const adminExists = userExists?.users?.some(user => user.email === adminEmail);
+        
+        // Fix: Check if users array exists and if any user has matching email
+        const adminExists = userExists?.users?.some(user => 
+          user.email === adminEmail
+        );
         
         if (adminExists) {
           // Try admin sign-in directly (bypassing email verification)
