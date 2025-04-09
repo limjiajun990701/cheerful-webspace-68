@@ -43,11 +43,7 @@ export const login = async (username: string, password: string): Promise<boolean
           // Try admin sign-in directly (bypassing email verification)
           const { data: adminSignIn, error: adminSignInError } = await supabase.auth.signInWithPassword({
             email: adminEmail,
-            password: password,
-            options: {
-              // Attempt to bypass email verification
-              emailRedirectTo: window.location.origin + '/admin'
-            }
+            password: password
           });
           
           if (!adminSignInError) {
@@ -61,7 +57,6 @@ export const login = async (username: string, password: string): Promise<boolean
           email: adminEmail,
           password: password,
           options: {
-            emailRedirectTo: window.location.origin + '/admin',
             data: {
               role: 'admin'
             }
