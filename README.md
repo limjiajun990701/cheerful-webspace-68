@@ -1,5 +1,5 @@
 
-# Lim Jia Jun's Portfolio Website
+# Portfolio Website
 
 ## Overview
 
@@ -37,7 +37,7 @@ This is a personal portfolio website showcasing my professional journey, skills,
 
 - **Deployment**:
   - Vite
-  - Lovable
+
 
 ## 📦 Prerequisites
 
@@ -91,8 +91,4 @@ Required environment variables (set in Lovable project settings):
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-## 📧 Contact
 
-- **Email**: jiajunlim0701@gmail.com
-- **LinkedIn**: [linkedin.com/in/LIMJIAJUN](https://linkedin.com/in/LIMJIAJUN)
-- **GitHub**: [github.com/LIMJIAJUN](https://github.com/LIMJIAJUN)
