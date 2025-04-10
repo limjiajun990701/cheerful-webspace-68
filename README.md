@@ -1,69 +1,98 @@
-# Welcome to your Lovable project
 
-## Project info
+# Lim Jia Jun's Portfolio Website
 
-**URL**: https://lovable.dev/projects/6a847718-0237-4ec6-bddb-a04a04b23ae2
+## Overview
 
-## How can I edit this code?
+This is a personal portfolio website showcasing my professional journey, skills, projects, certifications, and blog posts. Built with modern web technologies, the site provides a comprehensive view of my experience and expertise in software engineering.
 
-There are several ways of editing your application.
+## 🚀 Features
 
-**Use Lovable**
+- **Responsive Design**: Fully responsive and mobile-friendly layout
+- **Dynamic Sections**:
+  - Home page with introduction
+  - About me with detailed background
+  - Experience timeline
+  - Project showcase
+  - Certifications carousel
+  - Blog with article management
+- **Admin Dashboard**: 
+  - Manage blog posts
+  - Add and edit projects
+  - Upload and manage resume
+  - Certification management
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/6a847718-0237-4ec6-bddb-a04a04b23ae2) and start prompting.
+## 🛠 Technologies Used
 
-Changes made via Lovable will be committed automatically to this repo.
+- **Frontend**:
+  - React
+  - TypeScript
+  - Tailwind CSS
+  - Shadcn/ui
+  - React Router
+  - React Query
 
-**Use your preferred IDE**
+- **State Management**:
+  - Tanstack React Query
+  - Context API
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- **Deployment**:
+  - Vite
+  - Lovable
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 📦 Prerequisites
 
-Follow these steps:
+- Node.js (v16 or later)
+- npm
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## 🔧 Local Setup
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+1. Clone the repository
+```bash
+git clone <your-repo-url>
+```
 
-# Step 3: Install the necessary dependencies.
-npm i
+2. Install dependencies
+```bash
+npm install
+```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+3. Run the development server
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+4. Open [http://localhost:5173](http://localhost:5173) in your browser
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 🌐 Deployment
 
-**Use GitHub Codespaces**
+This project is deployed using Lovable. To deploy your own version:
+1. Create a Lovable account
+2. Import this repository
+3. Click "Publish"
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 📝 Customization
 
-## What technologies are used for this project?
+To customize the portfolio:
+- Update content in components
+- Modify styles in Tailwind configuration
+- Replace placeholder images and data
 
-This project is built with .
+## 🔒 Environment Variables
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Required environment variables (set in Lovable project settings):
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_ANON_KEY`
 
-## How can I deploy this project?
+## 📄 License
 
-Simply open [Lovable](https://lovable.dev/projects/6a847718-0237-4ec6-bddb-a04a04b23ae2) and click on Share -> Publish.
+[Insert your license here, e.g., MIT License]
 
-## I want to use a custom domain - is that possible?
+## 🤝 Contributing
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📧 Contact
+
+- **Email**: jiajunlim0701@gmail.com
+- **LinkedIn**: [linkedin.com/in/LIMJIAJUN](https://linkedin.com/in/LIMJIAJUN)
+- **GitHub**: [github.com/LIMJIAJUN](https://github.com/LIMJIAJUN)
