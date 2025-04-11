@@ -1,10 +1,9 @@
 
 import { useState } from "react";
-import { FileUp, AlertCircle, LogIn } from "lucide-react";
+import { FileUp, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { uploadResume } from "@/utils/resumeData";
 import { useToast } from "@/hooks/use-toast";
-import { Link } from "react-router-dom";
 
 const ResumeUploader = ({ onUploadSuccess }: { onUploadSuccess: () => void }) => {
   const [isUploading, setIsUploading] = useState(false);
@@ -36,23 +35,11 @@ const ResumeUploader = ({ onUploadSuccess }: { onUploadSuccess: () => void }) =>
       onUploadSuccess();
     } catch (error: any) {
       console.error("Upload error:", error);
-      
-      // Check if it's an authentication error
-      if (error?.name === "AuthenticationRequiredError" || 
-          error?.message?.includes("authentication") || 
-          error?.message?.includes("sign in")) {
-        toast({
-          title: "Authentication Required",
-          description: "You need to be signed in to upload a resume. Please go to Admin > Login.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Upload failed",
-          description: "Failed to upload resume. Please try again later.",
-          variant: "destructive",
-        });
-      }
+      toast({
+        title: "Upload failed",
+        description: "Failed to upload resume. Please try again later.",
+        variant: "destructive",
+      });
     } finally {
       setIsUploading(false);
     }

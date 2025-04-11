@@ -15,31 +15,25 @@ const DEFAULT_RESUME: Resume & { fileUrl: string; fileName: string } = {
   fileName: 'resume.pdf',
 };
 
-// Get the current user's resume
+// Get the current resume
 export const getCurrentResume = async (): Promise<(Resume & { fileUrl: string; fileName: string }) | null> => {
   try {
-    // First check if user is authenticated
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      console.log("No authenticated user, returning default resume");
-      return DEFAULT_RESUME;
-    }
-
-    // Query the resumes table for the current user
+    // Query the resumes table for the most recent resume
     const { data, error } = await supabase
       .from('resumes')
       .select('*')
-      .eq('user_id', session.user.id)
+      .order('upload_date', { ascending: false })
+      .limit(1)
       .single();
 
     if (error) {
       console.error("Error fetching resume:", error);
-      return null;
+      return DEFAULT_RESUME;
     }
 
     if (!data) {
-      console.log("No resume found for user");
-      return null;
+      console.log("No resume found");
+      return DEFAULT_RESUME;
     }
 
     // Get the public URL for the file
@@ -56,25 +50,17 @@ export const getCurrentResume = async (): Promise<(Resume & { fileUrl: string; f
     };
   } catch (error) {
     console.error("Error in getCurrentResume:", error);
-    return null;
+    return DEFAULT_RESUME;
   }
 };
 
 // Upload a new resume
 export const uploadResume = async (file: File): Promise<Resume & { fileUrl: string; fileName: string }> => {
   try {
-    // Check if user is authenticated
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      // Create a custom error with more descriptive message
-      const error = new Error('Authentication required. Please sign in to upload a resume.');
-      error.name = 'AuthenticationRequiredError';
-      throw error;
-    }
-
-    const userId = session.user.id;
+    // Generate a unique ID for the resume
+    const resumeId = uuidv4();
     const fileExt = file.name.split('.').pop();
-    const filePath = `${userId}/${uuidv4()}.${fileExt}`;
+    const filePath = `public/${resumeId}.${fileExt}`;
     
     // Check if the storage bucket exists first
     const { data: buckets } = await supabase.storage.listBuckets();
@@ -112,63 +98,33 @@ export const uploadResume = async (file: File): Promise<Resume & { fileUrl: stri
       .from(STORAGE_BUCKET)
       .getPublicUrl(filePath);
 
-    // Check if user already has a resume
-    const { data: existingResumes, error: existingError } = await supabase
-      .from('resumes')
-      .select('id')
-      .eq('user_id', userId);
-
-    if (existingError) {
-      console.error("Database error:", existingError);
-      throw existingError;
-    }
-
     // Define the resume data for database insertion/update
     const resumeData = {
-      user_id: userId,
+      user_id: 'public', // Use a fixed value instead of user ID
       file_name: file.name,
       file_path: filePath,
       file_size: file.size,
       upload_date: new Date().toISOString()
     };
     
-    let resumeResult;
-
-    if (existingResumes && existingResumes.length > 0) {
-      // Update existing resume
-      const { data, error } = await supabase
-        .from('resumes')
-        .update(resumeData)
-        .eq('id', existingResumes[0].id)
-        .select()
-        .single();
-        
-      if (error) {
-        console.error("Update error:", error);
-        throw error;
-      }
-      resumeResult = data;
-    } else {
-      // Insert new resume
-      const { data, error } = await supabase
-        .from('resumes')
-        .insert(resumeData)
-        .select()
-        .single();
-        
-      if (error) {
-        console.error("Insert error:", error);
-        throw error;
-      }
-      resumeResult = data;
+    // Insert new resume
+    const { data, error } = await supabase
+      .from('resumes')
+      .insert(resumeData)
+      .select()
+      .single();
+      
+    if (error) {
+      console.error("Insert error:", error);
+      throw error;
     }
     
-    if (!resumeResult) {
-      throw new Error("No data returned from insert/update");
+    if (!data) {
+      throw new Error("No data returned from insert");
     }
     
     return {
-      ...resumeResult,
+      ...data,
       fileUrl: publicUrlData.publicUrl,
       fileName: file.name
     };
@@ -181,19 +137,12 @@ export const uploadResume = async (file: File): Promise<Resume & { fileUrl: stri
 // Delete resume
 export const deleteResume = async (): Promise<void> => {
   try {
-    // Check if user is authenticated
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      throw new Error('User is not authenticated');
-    }
-
-    const userId = session.user.id;
-
-    // Get the resume record first
+    // Get the most recent resume record first
     const { data, error: fetchError } = await supabase
       .from('resumes')
-      .select('file_path')
-      .eq('user_id', userId)
+      .select('id, file_path')
+      .order('upload_date', { ascending: false })
+      .limit(1)
       .single();
 
     if (fetchError) {
@@ -215,7 +164,7 @@ export const deleteResume = async (): Promise<void> => {
       const { error: deleteError } = await supabase
         .from('resumes')
         .delete()
-        .eq('user_id', userId);
+        .eq('id', data.id);
 
       if (deleteError) {
         throw deleteError;
