@@ -66,12 +66,31 @@ export const uploadResume = async (file: File): Promise<Resume & { fileUrl: stri
     // Check if user is authenticated
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
-      throw new Error('User is not authenticated');
+      // Create a custom error with more descriptive message
+      const error = new Error('Authentication required. Please sign in to upload a resume.');
+      error.name = 'AuthenticationRequiredError';
+      throw error;
     }
 
     const userId = session.user.id;
     const fileExt = file.name.split('.').pop();
     const filePath = `${userId}/${uuidv4()}.${fileExt}`;
+    
+    // Check if the storage bucket exists first
+    const { data: buckets } = await supabase.storage.listBuckets();
+    const bucketExists = buckets?.some(bucket => bucket.name === STORAGE_BUCKET);
+    
+    // If bucket doesn't exist, create it
+    if (!bucketExists) {
+      const { error: createBucketError } = await supabase.storage.createBucket(STORAGE_BUCKET, {
+        public: true
+      });
+      
+      if (createBucketError) {
+        console.error("Error creating bucket:", createBucketError);
+        throw createBucketError;
+      }
+    }
     
     // Upload the file to storage
     const { error: storageError } = await supabase
@@ -83,6 +102,7 @@ export const uploadResume = async (file: File): Promise<Resume & { fileUrl: stri
       });
 
     if (storageError) {
+      console.error("Storage error:", storageError);
       throw storageError;
     }
 
@@ -99,6 +119,7 @@ export const uploadResume = async (file: File): Promise<Resume & { fileUrl: stri
       .eq('user_id', userId);
 
     if (existingError) {
+      console.error("Database error:", existingError);
       throw existingError;
     }
 
@@ -122,7 +143,10 @@ export const uploadResume = async (file: File): Promise<Resume & { fileUrl: stri
         .select()
         .single();
         
-      if (error) throw error;
+      if (error) {
+        console.error("Update error:", error);
+        throw error;
+      }
       resumeResult = data;
     } else {
       // Insert new resume
@@ -132,7 +156,10 @@ export const uploadResume = async (file: File): Promise<Resume & { fileUrl: stri
         .select()
         .single();
         
-      if (error) throw error;
+      if (error) {
+        console.error("Insert error:", error);
+        throw error;
+      }
       resumeResult = data;
     }
     

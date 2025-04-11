@@ -1,9 +1,10 @@
 
 import { useState } from "react";
-import { FileUp, AlertCircle } from "lucide-react";
+import { FileUp, AlertCircle, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { uploadResume } from "@/utils/resumeData";
 import { useToast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
 
 const ResumeUploader = ({ onUploadSuccess }: { onUploadSuccess: () => void }) => {
   const [isUploading, setIsUploading] = useState(false);
@@ -30,16 +31,38 @@ const ResumeUploader = ({ onUploadSuccess }: { onUploadSuccess: () => void }) =>
       await uploadResume(file);
       toast({
         title: "Resume updated",
-        description: "Your resume has been successfully uploaded to Supabase.",
+        description: "Your resume has been successfully uploaded.",
       });
       onUploadSuccess();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Upload error:", error);
-      toast({
-        title: "Upload failed",
-        description: "Failed to upload resume. Please sign in and try again.",
-        variant: "destructive",
-      });
+      
+      // Check if it's an authentication error
+      if (error?.name === "AuthenticationRequiredError" || 
+          error?.message?.includes("authentication") || 
+          error?.message?.includes("sign in")) {
+        toast({
+          title: "Authentication Required",
+          description: (
+            <div className="flex flex-col gap-2">
+              <p>You need to be signed in to upload a resume.</p>
+              <Button asChild variant="outline" size="sm">
+                <Link to="/admin/login" className="flex items-center gap-2">
+                  <LogIn className="h-4 w-4" />
+                  <span>Sign In</span>
+                </Link>
+              </Button>
+            </div>
+          ),
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Upload failed",
+          description: "Failed to upload resume. Please try again later.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsUploading(false);
     }
