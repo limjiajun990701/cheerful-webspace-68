@@ -43,17 +43,7 @@ const ResumeUploader = ({ onUploadSuccess }: { onUploadSuccess: () => void }) =>
           error?.message?.includes("sign in")) {
         toast({
           title: "Authentication Required",
-          description: (
-            <div className="flex flex-col gap-2">
-              <p>You need to be signed in to upload a resume.</p>
-              <Button asChild variant="outline" size="sm">
-                <Link to="/admin/login" className="flex items-center gap-2">
-                  <LogIn className="h-4 w-4" />
-                  <span>Sign In</span>
-                </Link>
-              </Button>
-            </div>
-          ),
+          description: "You need to be signed in to upload a resume. Please go to Admin > Login.",
           variant: "destructive",
         });
       } else {
