@@ -37,7 +37,7 @@ const ResumeUploader = ({ onUploadSuccess }: { onUploadSuccess: () => void }) =>
       console.error("Upload error:", error);
       toast({
         title: "Upload failed",
-        description: "Failed to upload resume. Please try again later.",
+        description: error.message || "Failed to upload resume. Please try again later.",
         variant: "destructive",
       });
     } finally {

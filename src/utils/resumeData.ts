@@ -62,23 +62,7 @@ export const uploadResume = async (file: File): Promise<Resume & { fileUrl: stri
     const fileExt = file.name.split('.').pop();
     const filePath = `public/${resumeId}.${fileExt}`;
     
-    // Check if the storage bucket exists first
-    const { data: buckets } = await supabase.storage.listBuckets();
-    const bucketExists = buckets?.some(bucket => bucket.name === STORAGE_BUCKET);
-    
-    // If bucket doesn't exist, create it
-    if (!bucketExists) {
-      const { error: createBucketError } = await supabase.storage.createBucket(STORAGE_BUCKET, {
-        public: true
-      });
-      
-      if (createBucketError) {
-        console.error("Error creating bucket:", createBucketError);
-        throw createBucketError;
-      }
-    }
-    
-    // Upload the file to storage
+    // Upload the file to storage - using the pre-created bucket
     const { error: storageError } = await supabase
       .storage
       .from(STORAGE_BUCKET)
