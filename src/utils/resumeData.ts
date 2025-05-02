@@ -82,19 +82,25 @@ export const uploadResume = async (file: File): Promise<Resume & { fileUrl: stri
       .from(STORAGE_BUCKET)
       .getPublicUrl(filePath);
 
-    // Define the resume data for database insertion/update
+    // Define the resume data for database insertion
     const resumeData = {
-      user_id: 'public', // Use a fixed value instead of user ID
+      user_id: 'public', // Use a fixed value
       file_name: file.name,
       file_path: filePath,
       file_size: file.size,
       upload_date: new Date().toISOString()
     };
     
-    // Insert new resume
+    // Insert new resume - explicitly listing columns to avoid any issues
     const { data, error } = await supabase
       .from('resumes')
-      .insert(resumeData)
+      .insert([{
+        user_id: resumeData.user_id,
+        file_name: resumeData.file_name,
+        file_path: resumeData.file_path,
+        file_size: resumeData.file_size,
+        upload_date: resumeData.upload_date
+      }])
       .select()
       .single();
       
