@@ -34,12 +34,34 @@ const ContactForm = () => {
   const onSubmit = async (data: ContactFormValues) => {
     setIsSubmitting(true);
     try {
-      // Here you would typically send the data to a backend API
-      // Since we don't have a backend set up yet, we'll just simulate a successful submission
-      console.log("Form data:", data);
+      // Actually send the email using EmailJS service
+      const serviceId = "service_gmail";  // Replace with your EmailJS service ID
+      const templateId = "template_contact"; // Replace with your EmailJS template ID
+      const userId = "YOUR_USER_ID"; // Replace with your EmailJS user ID
       
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const templateParams = {
+        from_name: data.name,
+        from_email: data.email,
+        message: data.message,
+        to_name: "Lim Jia Jun",
+      };
+      
+      const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          service_id: serviceId,
+          template_id: templateId,
+          user_id: userId,
+          template_params: templateParams
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to send email');
+      }
       
       toast({
         title: "Message sent!",

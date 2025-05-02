@@ -2,7 +2,6 @@
 import React from "react";
 import Hero from "../components/Hero";
 import CertificationsSection from "../components/CertificationsSection";
-import ContactSection from "../components/ContactSection";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -101,7 +100,14 @@ const Index = () => {
       
       <CertificationsSection />
       
-      <ContactSection />
+      <div className="text-center py-12">
+        <Link 
+          to="/contact" 
+          className="px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
+        >
+          Contact Me
+        </Link>
+      </div>
     </div>
   );
 };
