@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 const STORAGE_BUCKET = 'resumes';
 const DEFAULT_RESUME: Resume & { fileUrl: string; fileName: string } = {
   id: 'default',
-  user_id: '',
+  user_id: '00000000-0000-0000-0000-000000000000', // Using a valid UUID format
   file_name: 'resume.pdf',
   file_path: '/resume-sample.pdf',
   file_size: 0,
@@ -24,7 +24,7 @@ export const getCurrentResume = async (): Promise<(Resume & { fileUrl: string; f
       .select('*')
       .order('upload_date', { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle(); // Use maybeSingle instead of single to avoid errors when no data is found
 
     if (error) {
       console.error("Error fetching resume:", error);
@@ -60,9 +60,9 @@ export const uploadResume = async (file: File): Promise<Resume & { fileUrl: stri
     // Generate a unique ID for the resume
     const resumeId = uuidv4();
     const fileExt = file.name.split('.').pop();
-    const filePath = `public/${resumeId}.${fileExt}`;
+    const filePath = `${resumeId}.${fileExt}`;
     
-    // Upload the file to storage - using the pre-created bucket
+    // Upload the file to storage
     const { error: storageError } = await supabase
       .storage
       .from(STORAGE_BUCKET)
@@ -82,9 +82,12 @@ export const uploadResume = async (file: File): Promise<Resume & { fileUrl: stri
       .from(STORAGE_BUCKET)
       .getPublicUrl(filePath);
 
+    // Generate a valid UUID for user_id
+    const userId = uuidv4();
+    
     // Define the resume data for database insertion
     const resumeData = {
-      user_id: 'public', // Use a fixed value
+      user_id: userId, // Use a valid UUID
       file_name: file.name,
       file_path: filePath,
       file_size: file.size,
@@ -133,7 +136,7 @@ export const deleteResume = async (): Promise<void> => {
       .select('id, file_path')
       .order('upload_date', { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle(); // Use maybeSingle instead of single
 
     if (fetchError) {
       throw fetchError;

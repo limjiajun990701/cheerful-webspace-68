@@ -35,9 +35,18 @@ const ResumeUploader = ({ onUploadSuccess }: { onUploadSuccess: () => void }) =>
       onUploadSuccess();
     } catch (error: any) {
       console.error("Upload error:", error);
+      
+      // More detailed error message for better debugging
+      let errorMessage = "Failed to upload resume. Please try again later.";
+      if (error.message) {
+        errorMessage = error.message;
+      } else if (error.error_description) {
+        errorMessage = error.error_description;
+      }
+      
       toast({
         title: "Upload failed",
-        description: error.message || "Failed to upload resume. Please try again later.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
