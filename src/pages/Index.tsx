@@ -2,6 +2,7 @@
 import React from "react";
 import Hero from "../components/Hero";
 import CertificationsSection from "../components/CertificationsSection";
+import ContactSection from "../components/ContactSection";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -99,6 +100,8 @@ const Index = () => {
       </section>
       
       <CertificationsSection />
+      
+      <ContactSection />
     </div>
   );
 };
