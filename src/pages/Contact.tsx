@@ -6,7 +6,7 @@ import emailjs from "emailjs-com";
 const Contact = () => {
   useEffect(() => {
     // Initialize EmailJS with your user ID (public key)
-    emailjs.init("YOUR_USER_ID"); // Replace with your actual public key
+    emailjs.init("VkiOxLOb6BI_EDOQ-"); // Updated with the actual public key
   }, []);
 
   return (

@@ -51,7 +51,7 @@ const ContactForm = () => {
         serviceId,
         templateId,
         templateParams,
-        "YOUR_USER_ID" // Public key should be replaced with your actual public key
+        "VkiOxLOb6BI_EDOQ-" // Updated with the actual public key
       );
       
       toast({
