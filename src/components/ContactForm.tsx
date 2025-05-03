@@ -37,7 +37,7 @@ const ContactForm = () => {
     try {
       // Send the email using EmailJS
       const serviceId = "123456";  // Your EmailJS service ID
-      const templateId = "contact_form"; // Updated to a generic template ID name
+      const templateId = "template_b73pyoq"; // Updated to the correct template ID
       
       const templateParams = {
         from_name: data.name,
@@ -51,7 +51,7 @@ const ContactForm = () => {
         serviceId,
         templateId,
         templateParams,
-        "VkiOxLOb6BI_EDOQ-" // Updated with the actual public key
+        "VkiOxLOb6BI_EDOQ-" // Public key
       );
       
       toast({
