@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { SendIcon, Loader2 } from "lucide-react";
+import emailjs from "emailjs-com";
 
 const contactFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -34,34 +35,24 @@ const ContactForm = () => {
   const onSubmit = async (data: ContactFormValues) => {
     setIsSubmitting(true);
     try {
-      // Actually send the email using EmailJS service
-      const serviceId = "service_gmail";  // Replace with your EmailJS service ID
-      const templateId = "template_contact"; // Replace with your EmailJS template ID
-      const userId = "YOUR_USER_ID"; // Replace with your EmailJS user ID
+      // Send the email using EmailJS
+      const serviceId = "123456";  // Your EmailJS service ID
+      const templateId = "template_contact"; // Your EmailJS template ID
       
       const templateParams = {
         from_name: data.name,
         from_email: data.email,
         message: data.message,
         to_name: "Lim Jia Jun",
+        reply_to: data.email,
       };
       
-      const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          service_id: serviceId,
-          template_id: templateId,
-          user_id: userId,
-          template_params: templateParams
-        })
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to send email');
-      }
+      await emailjs.send(
+        serviceId,
+        templateId,
+        templateParams,
+        "YOUR_USER_ID" // Public key should be replaced with your actual public key
+      );
       
       toast({
         title: "Message sent!",
