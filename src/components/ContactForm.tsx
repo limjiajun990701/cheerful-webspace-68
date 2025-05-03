@@ -36,8 +36,8 @@ const ContactForm = () => {
     setIsSubmitting(true);
     try {
       // Send the email using EmailJS
-      const serviceId = "123456";  // Your EmailJS service ID
-      const templateId = "template_b73pyoq"; // Updated to the correct template ID
+      const serviceId = "service_4wy5lg7";  // Updated to a valid EmailJS service ID
+      const templateId = "template_b73pyoq"; // Your confirmed template ID
       
       const templateParams = {
         from_name: data.name,
@@ -45,13 +45,15 @@ const ContactForm = () => {
         message: data.message,
         to_name: "Lim Jia Jun",
         reply_to: data.email,
+        name: data.name, // Adding name parameter for template
+        time: new Date().toLocaleString(), // Adding time parameter for template
       };
       
       await emailjs.send(
         serviceId,
         templateId,
         templateParams,
-        "VkiOxLOb6BI_EDOQ-" // Public key
+        "VkiOxLOb6BI_EDOQ-" // Your public key
       );
       
       toast({
