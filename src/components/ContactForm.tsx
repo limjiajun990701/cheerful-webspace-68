@@ -37,7 +37,7 @@ const ContactForm = () => {
     try {
       // Send the email using EmailJS
       const serviceId = "123456";  // Your EmailJS service ID
-      const templateId = "template_contact"; // Your EmailJS template ID
+      const templateId = "contact_form"; // Updated to a generic template ID name
       
       const templateParams = {
         from_name: data.name,
