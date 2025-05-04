@@ -15,18 +15,25 @@ interface AboutHeroContent {
 const DynamicHeroSection = () => {
   const [content, setContent] = useState<AboutHeroContent | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     const fetchContent = async () => {
       const data = await getSiteContent('about', 'hero');
       if (data) {
         setContent(data);
+        setImageError(false); // Reset image error state when new content is loaded
       }
       setIsLoading(false);
     };
 
     fetchContent();
   }, []);
+
+  const handleImageError = () => {
+    setImageError(true);
+    console.error("Failed to load profile image:", content?.image_url);
+  };
 
   return (
     <section className="py-20 lg:py-28">
@@ -48,11 +55,12 @@ const DynamicHeroSection = () => {
             <div className="flex flex-col md:flex-row gap-12 mt-10">
               <div className="md:w-1/3 shrink-0">
                 <div className="rounded-2xl overflow-hidden aspect-square bg-secondary relative shadow-lg transform transition-transform hover:scale-[1.02] hover:shadow-xl">
-                  {content?.image_url ? (
+                  {content?.image_url && !imageError ? (
                     <img 
                       src={content.image_url} 
                       alt="Profile" 
                       className="w-full h-full object-cover"
+                      onError={handleImageError}
                     />
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center text-muted-foreground bg-gradient-to-br from-primary/5 to-primary/20">

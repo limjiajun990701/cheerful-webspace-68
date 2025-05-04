@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,7 +9,9 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/componen
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FormEvent } from "react";
-import { Loader2, Save, Upload } from "lucide-react";
+import { Loader2, Save, Upload, AlertCircle } from "lucide-react";
+import { uploadSiteImage, updateSiteContent } from "@/utils/contentUtils";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface SiteContent {
   id: string;
@@ -35,6 +36,7 @@ const ContentManager = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const pages = ["home", "about", "experience"];
 
@@ -103,6 +105,7 @@ const ContentManager = () => {
       } else {
         setImagePreview(null);
       }
+      setUploadError(null);
     } catch (error) {
       console.error("Error fetching content:", error);
       toast({
@@ -120,7 +123,21 @@ const ContentManager = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Validate file type
+    const fileType = file.type;
+    if (!fileType.startsWith('image/')) {
+      setUploadError('Please select a valid image file');
+      return;
+    }
+    
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setUploadError('Image size must be less than 5MB');
+      return;
+    }
+
     setImageFile(file);
+    setUploadError(null);
     
     const reader = new FileReader();
     reader.onloadend = () => {
@@ -134,22 +151,15 @@ const ContentManager = () => {
     
     setIsUploading(true);
     try {
-      const fileExt = imageFile.name.split('.').pop();
-      const filePath = `site-content/${selectedPage}/${selectedSection}-${Date.now()}.${fileExt}`;
+      // Use uploadSiteImage helper
+      const uploadPath = `${selectedPage}/${selectedSection}`;
+      const imageUrl = await uploadSiteImage(imageFile, uploadPath);
       
-      const { error: uploadError } = await supabase.storage
-        .from("site-images")
-        .upload(filePath, imageFile);
-
-      if (uploadError) {
-        throw uploadError;
+      if (!imageUrl) {
+        throw new Error("Failed to upload image");
       }
 
-      const { data } = supabase.storage
-        .from("site-images")
-        .getPublicUrl(filePath);
-
-      return data.publicUrl;
+      return imageUrl;
     } catch (error) {
       console.error("Error uploading image:", error);
       toast({
@@ -169,35 +179,44 @@ const ContentManager = () => {
     if (!content || !selectedPage || !selectedSection) return;
     
     setIsSaving(true);
+    setUploadError(null);
+    
     try {
       // Upload image if there's a new one
       let imageUrl = content.image_url;
       if (imageFile) {
         imageUrl = await uploadImage();
+        if (!imageUrl && imageFile) {
+          // If upload failed but we had a file, show error but continue with other updates
+          setUploadError("Image upload failed, but other content was updated");
+        }
       }
 
+      // Use updateSiteContent helper
       const updatedContent = {
         ...content,
         image_url: imageUrl,
-        updated_by: "admin", // Replace with actual admin username when available
+        updated_by: "admin",
       };
 
-      const { error } = await supabase
-        .from("site_content")
-        .update(updatedContent)
-        .eq("id", content.id);
+      const result = await updateSiteContent(content.id, updatedContent);
 
-      if (error) {
-        throw error;
+      if (!result.success) {
+        throw new Error("Failed to update content");
       }
 
       toast({
         title: "Success",
-        description: "Content updated successfully",
+        description: uploadError 
+          ? "Content updated but image upload failed" 
+          : "Content updated successfully",
       });
 
       // Refresh content from database
       fetchContent(selectedPage, selectedSection);
+      
+      // Clear the file input
+      setImageFile(null);
     } catch (error) {
       console.error("Error updating content:", error);
       toast({
@@ -280,6 +299,13 @@ const ContentManager = () => {
             </div>
           ) : content ? (
             <form onSubmit={handleSubmit} className="space-y-4">
+              {uploadError && (
+                <Alert variant="destructive" className="mb-4">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{uploadError}</AlertDescription>
+                </Alert>
+              )}
+              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-4">
                   <div className="space-y-2">
@@ -330,6 +356,9 @@ const ContentManager = () => {
                         <Loader2 className="h-4 w-4 animate-spin" />
                       )}
                     </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Supports: JPG, PNG, GIF, WEBP (Max: 5MB)
+                    </p>
                   </div>
                   
                   {imagePreview && (

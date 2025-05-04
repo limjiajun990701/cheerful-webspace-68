@@ -78,15 +78,24 @@ export const uploadSiteImage = async (file: File, path: string): Promise<string 
     // Ensure bucket exists
     await setupSiteImagesBucket();
     
+    // Generate a unique filename with timestamp
+    const timestamp = Date.now();
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${path}-${timestamp}.${fileExt}`;
+    const filePath = `${path}/${fileName}`;
+    
+    console.log(`Uploading image: ${filePath}`);
+    
     // Upload the file
     const { data, error } = await supabase.storage
       .from('site-images')
-      .upload(path, file, {
+      .upload(filePath, file, {
         cacheControl: '3600',
         upsert: true
       });
 
     if (error) {
+      console.error('Upload error:', error);
       throw error;
     }
 
@@ -95,6 +104,7 @@ export const uploadSiteImage = async (file: File, path: string): Promise<string 
       .from('site-images')
       .getPublicUrl(data.path);
 
+    console.log('Image uploaded successfully:', urlData.publicUrl);
     return urlData.publicUrl;
   } catch (error) {
     console.error('Error uploading image:', error);
