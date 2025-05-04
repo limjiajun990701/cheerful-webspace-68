@@ -162,6 +162,42 @@ export type Database = {
         }
         Relationships: []
       }
+      site_content: {
+        Row: {
+          description: string | null
+          id: string
+          image_url: string | null
+          page_name: string
+          section_name: string
+          subtitle: string | null
+          title: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          page_name: string
+          section_name: string
+          subtitle?: string | null
+          title?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          page_name?: string
+          section_name?: string
+          subtitle?: string | null
+          title?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

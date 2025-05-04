@@ -1,11 +1,17 @@
 
-import React from "react";
-import Hero from "../components/Hero";
+import React, { useEffect } from "react";
+import DynamicHero from "../components/DynamicHero";
 import CertificationsSection from "../components/CertificationsSection";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { setupSiteImagesBucket } from "@/utils/contentUtils";
 
 const Index = () => {
+  useEffect(() => {
+    // Set up storage bucket for site images if it doesn't exist
+    setupSiteImagesBucket();
+  }, []);
+
   const skills = [
     { name: "Flutter", color: "bg-blue-100 text-blue-800" },
     { name: "Vue.js", color: "bg-green-100 text-green-800" },
@@ -19,7 +25,7 @@ const Index = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Hero />
+      <DynamicHero />
 
       <section className="py-20 bg-secondary/50">
         <div className="container mx-auto px-4">

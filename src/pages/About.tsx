@@ -1,13 +1,13 @@
 
 import React from 'react';
-import HeroSection from '@/components/about/HeroSection';
+import DynamicHeroSection from '@/components/about/DynamicHeroSection';
 import SkillsSection from '@/components/about/SkillsSection';
 import ContactSection from '@/components/about/ContactSection';
 
 const About = () => {
   return (
     <div className="min-h-screen">
-      <HeroSection />
+      <DynamicHeroSection />
       <SkillsSection />
       <ContactSection />
     </div>

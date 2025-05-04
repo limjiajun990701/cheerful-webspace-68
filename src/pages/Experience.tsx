@@ -1,6 +1,7 @@
 
 import { BriefcaseIcon, GraduationCap } from "lucide-react";
 import ExperienceCard from "../components/ExperienceCard";
+import DynamicHeader from "../components/experience/DynamicHeader";
 
 const experienceData = [
   {
@@ -54,13 +55,7 @@ const Experience = () => {
     <div className="min-h-screen py-16 lg:py-24">
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto">
-          <div className="flex flex-col gap-6 mb-16 animate-fade-in">
-            <span className="text-sm font-medium text-primary">My Journey</span>
-            <h1 className="text-4xl md:text-5xl font-bold">Experience & Education</h1>
-            <p className="text-muted-foreground text-lg max-w-2xl">
-              A chronological overview of my professional experience and educational background.
-            </p>
-          </div>
+          <DynamicHeader />
           
           <div className="space-y-16">
             <section>

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "../components/ui/button";
@@ -8,7 +9,8 @@ import BlogPostManager from "../components/admin/BlogPostManager";
 import ProjectManager from "../components/admin/ProjectManager";
 import CertificationManager from "../components/admin/CertificationManager";
 import ResumeManager from "../components/admin/ResumeManager";
-import { LogOut, LayoutDashboard, Settings, FileText, Award, Briefcase, User } from "lucide-react";
+import ContentManager from "../components/admin/ContentManager";
+import { LogOut, LayoutDashboard, Settings, FileText, Award, Briefcase, User, PenTool } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
 const Admin = () => {
@@ -127,7 +129,7 @@ const Admin = () => {
         <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <div className="border-b border-border px-6 pt-4">
-              <TabsList className="grid grid-cols-4 gap-2 bg-muted/50 p-1">
+              <TabsList className="grid grid-cols-5 gap-2 bg-muted/50 p-1">
                 <TabsTrigger value="posts" className="flex items-center gap-2 data-[state=active]:bg-background">
                   <FileText className="h-4 w-4" />
                   <span className="hidden sm:inline">Blog Posts</span>
@@ -148,6 +150,11 @@ const Admin = () => {
                   <span className="hidden sm:inline">Resume</span>
                   <span className="sm:hidden">Resume</span>
                 </TabsTrigger>
+                <TabsTrigger value="content" className="flex items-center gap-2 data-[state=active]:bg-background">
+                  <PenTool className="h-4 w-4" />
+                  <span className="hidden sm:inline">Site Content</span>
+                  <span className="sm:hidden">Content</span>
+                </TabsTrigger>
               </TabsList>
             </div>
 
@@ -167,6 +174,10 @@ const Admin = () => {
 
               <TabsContent value="resume" className="mt-0 focus:outline-none">
                 <ResumeManager />
+              </TabsContent>
+
+              <TabsContent value="content" className="mt-0 focus:outline-none">
+                <ContentManager />
               </TabsContent>
             </div>
           </Tabs>
