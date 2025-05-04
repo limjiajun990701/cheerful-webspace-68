@@ -50,3 +50,260 @@ export const getSiteContent = async (pageName: string, sectionName: string) => {
     return null;
   }
 };
+
+// Helper function to update site content
+export const updateSiteContent = async (id: string, updates: any) => {
+  try {
+    const { data, error } = await supabase
+      .from('site_content')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error updating site content:', error);
+    return { success: false, error };
+  }
+};
+
+// Helper to upload an image to site-images bucket
+export const uploadSiteImage = async (file: File, path: string): Promise<string | null> => {
+  try {
+    // Ensure bucket exists
+    await setupSiteImagesBucket();
+    
+    // Upload the file
+    const { data, error } = await supabase.storage
+      .from('site-images')
+      .upload(path, file, {
+        cacheControl: '3600',
+        upsert: true
+      });
+
+    if (error) {
+      throw error;
+    }
+
+    // Get public URL
+    const { data: urlData } = supabase.storage
+      .from('site-images')
+      .getPublicUrl(data.path);
+
+    return urlData.publicUrl;
+  } catch (error) {
+    console.error('Error uploading image:', error);
+    return null;
+  }
+};
+
+// Helper to create a new skill group
+export const createSkillGroup = async (categoryName: string, items: string[] = []) => {
+  try {
+    const { data, error } = await supabase
+      .from('site_content')
+      .insert({
+        page_name: 'about',
+        section_name: `skill_${Date.now()}`,
+        title: categoryName,
+        description: JSON.stringify(items),
+        updated_by: 'admin'
+      })
+      .select()
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error creating skill group:', error);
+    return { success: false, error };
+  }
+};
+
+// Helper to update a skill group
+export const updateSkillGroup = async (id: string, categoryName: string, items: string[]) => {
+  try {
+    const { data, error } = await supabase
+      .from('site_content')
+      .update({
+        title: categoryName,
+        description: JSON.stringify(items),
+        updated_by: 'admin',
+        updated_at: new Date()
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error updating skill group:', error);
+    return { success: false, error };
+  }
+};
+
+// Helper to delete a skill group
+export const deleteSkillGroup = async (id: string) => {
+  try {
+    const { error } = await supabase
+      .from('site_content')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      throw error;
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error deleting skill group:', error);
+    return { success: false, error };
+  }
+};
+
+// Helper to get all skill groups
+export const getSkillGroups = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('site_content')
+      .select('*')
+      .eq('page_name', 'about')
+      .like('section_name', 'skill_%');
+
+    if (error) {
+      throw error;
+    }
+
+    return data.map(item => ({
+      id: item.id,
+      section_name: item.section_name,
+      category: item.title,
+      items: item.description ? JSON.parse(item.description) : []
+    }));
+  } catch (error) {
+    console.error('Error fetching skill groups:', error);
+    return [];
+  }
+};
+
+// Helper to create a new experience item
+export const createExperienceItem = async (type: 'work' | 'education', data: any) => {
+  try {
+    const { error } = await supabase
+      .from('site_content')
+      .insert({
+        page_name: 'experience',
+        section_name: `${type}_${Date.now()}`,
+        title: data.title,
+        subtitle: data.company,
+        description: data.description,
+        image_url: JSON.stringify({
+          location: data.location,
+          date: data.date,
+          type: type
+        }),
+        updated_by: 'admin'
+      });
+
+    if (error) {
+      throw error;
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error creating experience item:', error);
+    return { success: false, error };
+  }
+};
+
+// Helper to get all experience items
+export const getExperienceItems = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('site_content')
+      .select('*')
+      .eq('page_name', 'experience')
+      .or('section_name.like.work_%,section_name.like.education_%');
+
+    if (error) {
+      throw error;
+    }
+
+    return data.map(item => {
+      const metaData = item.image_url ? JSON.parse(item.image_url) : {};
+      return {
+        id: item.id,
+        type: metaData.type || (item.section_name.startsWith('work_') ? 'work' : 'education'),
+        title: item.title || '',
+        company: item.subtitle || '',
+        location: metaData.location || '',
+        date: metaData.date || '',
+        description: item.description || '',
+      };
+    });
+  } catch (error) {
+    console.error('Error fetching experience items:', error);
+    return [];
+  }
+};
+
+// Helper to update an experience item
+export const updateExperienceItem = async (id: string, data: any) => {
+  try {
+    const { error } = await supabase
+      .from('site_content')
+      .update({
+        title: data.title,
+        subtitle: data.company,
+        description: data.description,
+        image_url: JSON.stringify({
+          location: data.location,
+          date: data.date,
+          type: data.type
+        }),
+        updated_by: 'admin',
+        updated_at: new Date()
+      })
+      .eq('id', id);
+
+    if (error) {
+      throw error;
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating experience item:', error);
+    return { success: false, error };
+  }
+};
+
+// Helper to delete an experience item
+export const deleteExperienceItem = async (id: string) => {
+  try {
+    const { error } = await supabase
+      .from('site_content')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      throw error;
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error deleting experience item:', error);
+    return { success: false, error };
+  }
+};

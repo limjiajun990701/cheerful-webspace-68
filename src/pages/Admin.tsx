@@ -10,7 +10,9 @@ import ProjectManager from "../components/admin/ProjectManager";
 import CertificationManager from "../components/admin/CertificationManager";
 import ResumeManager from "../components/admin/ResumeManager";
 import ContentManager from "../components/admin/ContentManager";
-import { LogOut, LayoutDashboard, Settings, FileText, Award, Briefcase, User, PenTool } from "lucide-react";
+import SkillsManager from "../components/admin/SkillsManager";
+import ExperienceManager from "../components/admin/ExperienceManager";
+import { LogOut, LayoutDashboard, Settings, FileText, Award, Briefcase, User, PenTool, Code } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
 const Admin = () => {
@@ -128,8 +130,8 @@ const Admin = () => {
       <main className="container mx-auto px-4 py-8">
         <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <div className="border-b border-border px-6 pt-4">
-              <TabsList className="grid grid-cols-5 gap-2 bg-muted/50 p-1">
+            <div className="border-b border-border px-6 pt-4 overflow-x-auto">
+              <TabsList className="grid grid-cols-7 gap-2 bg-muted/50 p-1">
                 <TabsTrigger value="posts" className="flex items-center gap-2 data-[state=active]:bg-background">
                   <FileText className="h-4 w-4" />
                   <span className="hidden sm:inline">Blog Posts</span>
@@ -144,6 +146,16 @@ const Admin = () => {
                   <Award className="h-4 w-4" />
                   <span className="hidden sm:inline">Certifications</span>
                   <span className="sm:hidden">Certs</span>
+                </TabsTrigger>
+                <TabsTrigger value="skills" className="flex items-center gap-2 data-[state=active]:bg-background">
+                  <Code className="h-4 w-4" />
+                  <span className="hidden sm:inline">Skills</span>
+                  <span className="sm:hidden">Skills</span>
+                </TabsTrigger>
+                <TabsTrigger value="experiences" className="flex items-center gap-2 data-[state=active]:bg-background">
+                  <Briefcase className="h-4 w-4" />
+                  <span className="hidden sm:inline">Experiences</span>
+                  <span className="sm:hidden">Exp</span>
                 </TabsTrigger>
                 <TabsTrigger value="resume" className="flex items-center gap-2 data-[state=active]:bg-background">
                   <Settings className="h-4 w-4" />
@@ -170,6 +182,14 @@ const Admin = () => {
               
               <TabsContent value="certifications" className="mt-0 focus:outline-none">
                 <CertificationManager />
+              </TabsContent>
+
+              <TabsContent value="skills" className="mt-0 focus:outline-none">
+                <SkillsManager />
+              </TabsContent>
+
+              <TabsContent value="experiences" className="mt-0 focus:outline-none">
+                <ExperienceManager />
               </TabsContent>
 
               <TabsContent value="resume" className="mt-0 focus:outline-none">
