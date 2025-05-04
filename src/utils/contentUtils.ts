@@ -137,7 +137,7 @@ export const updateSkillGroup = async (id: string, categoryName: string, items: 
         title: categoryName,
         description: JSON.stringify(items),
         updated_by: 'admin',
-        updated_at: new Date()
+        updated_at: new Date().toISOString() // Fixed: Convert Date to ISO string
       })
       .eq('id', id)
       .select()
@@ -274,7 +274,7 @@ export const updateExperienceItem = async (id: string, data: any) => {
           type: data.type
         }),
         updated_by: 'admin',
-        updated_at: new Date()
+        updated_at: new Date().toISOString() // Fixed: Convert Date to ISO string
       })
       .eq('id', id);
 
