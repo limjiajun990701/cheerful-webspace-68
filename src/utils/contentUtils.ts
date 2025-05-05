@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 // Helper function to check if the bucket exists
@@ -17,7 +18,8 @@ export const setupSiteImagesBucket = async () => {
       console.log('Site-images bucket exists');
       return true;
     } else {
-      console.error('Site-images bucket not found but should have been created');
+      console.error('Site-images bucket not found');
+      // Instead of trying to create it, just return false since we need admin privileges
       return false;
     }
   } catch (error) {
@@ -75,7 +77,7 @@ export const uploadSiteImage = async (file: File, path: string): Promise<string 
     const bucketExists = await setupSiteImagesBucket();
     
     if (!bucketExists) {
-      throw new Error('Storage bucket not found. Please contact administrator.');
+      throw new Error('Storage bucket not available. Please contact administrator.');
     }
     
     // Generate a unique filename with timestamp

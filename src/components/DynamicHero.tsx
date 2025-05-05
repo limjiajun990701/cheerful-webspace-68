@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { ArrowRight, Github, Linkedin, Mail, Phone } from "lucide-react";
 import { Link } from "react-router-dom";
 import { getSiteContent } from "@/utils/contentUtils";
+import { useToast } from "@/hooks/use-toast";
 
 interface HeroContent {
   id: string;
@@ -16,14 +17,29 @@ const DynamicHero = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [content, setContent] = useState<HeroContent | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     const fetchContent = async () => {
-      const data = await getSiteContent('home', 'hero');
-      if (data) {
-        setContent(data);
+      try {
+        const data = await getSiteContent('home', 'hero');
+        if (data) {
+          setContent(data);
+          setImageError(false);
+        } else {
+          console.error("Home hero content not found");
+        }
+      } catch (error) {
+        console.error("Error fetching home content:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load home content",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
 
     fetchContent();
@@ -34,12 +50,27 @@ const DynamicHero = () => {
     }, 100);
     
     return () => clearTimeout(timer);
-  }, []);
+  }, [toast]);
+
+  const handleImageError = () => {
+    setImageError(true);
+    console.error("Failed to load hero image:", content?.image_url);
+  };
 
   return (
     <div className="relative min-h-[calc(100vh-5rem)] flex items-center">
       <div className="absolute inset-0 -z-10 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent" />
+        {content?.image_url && !imageError && (
+          <div className="absolute inset-0 opacity-10">
+            <img 
+              src={content.image_url} 
+              alt="Background" 
+              className="w-full h-full object-cover"
+              onError={handleImageError} 
+            />
+          </div>
+        )}
       </div>
       
       <div className="container mx-auto px-4 py-12 sm:py-16 md:py-24">

@@ -28,7 +28,7 @@ const DynamicHeroSection = () => {
           // Reset image error state when new content is loaded
           setImageError(false);
         } else {
-          console.error("Failed to fetch hero content");
+          console.error("Failed to fetch about hero content");
           toast({
             title: "Content Not Found",
             description: "About page content could not be loaded",
@@ -36,7 +36,7 @@ const DynamicHeroSection = () => {
           });
         }
       } catch (error) {
-        console.error("Error fetching content:", error);
+        console.error("Error fetching about content:", error);
         toast({
           title: "Error",
           description: "Failed to load about content",
@@ -53,7 +53,6 @@ const DynamicHeroSection = () => {
   const handleImageError = () => {
     setImageError(true);
     console.error("Failed to load profile image:", content?.image_url);
-    // Don't show toast for image error to prevent spam
   };
 
   return (
@@ -85,7 +84,10 @@ const DynamicHeroSection = () => {
                     />
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center text-muted-foreground bg-gradient-to-br from-primary/5 to-primary/20">
-                      <User className="w-20 h-20 text-primary/40" />
+                      <div className="text-center text-muted-foreground">
+                        <p className="text-sm">Profile image</p>
+                        <p className="text-xs">not available</p>
+                      </div>
                     </div>
                   )}
                 </div>
