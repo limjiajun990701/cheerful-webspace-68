@@ -25,9 +25,15 @@ const DynamicHeroSection = () => {
         const data = await getSiteContent('about', 'hero');
         if (data) {
           setContent(data);
-          setImageError(false); // Reset image error state when new content is loaded
+          // Reset image error state when new content is loaded
+          setImageError(false);
         } else {
           console.error("Failed to fetch hero content");
+          toast({
+            title: "Content Not Found",
+            description: "About page content could not be loaded",
+            variant: "destructive",
+          });
         }
       } catch (error) {
         console.error("Error fetching content:", error);
@@ -47,6 +53,7 @@ const DynamicHeroSection = () => {
   const handleImageError = () => {
     setImageError(true);
     console.error("Failed to load profile image:", content?.image_url);
+    // Don't show toast for image error to prevent spam
   };
 
   return (

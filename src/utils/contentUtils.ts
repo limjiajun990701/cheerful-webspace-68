@@ -1,20 +1,25 @@
 import { supabase } from '@/integrations/supabase/client';
 
-// Helper function to create storage bucket if it doesn't exist
+// Helper function to check if the bucket exists
 export const setupSiteImagesBucket = async () => {
   try {
     // Check if the bucket exists
-    const { data: buckets } = await supabase.storage.listBuckets();
+    const { data: buckets, error } = await supabase.storage.listBuckets();
     
-    const bucketExists = buckets?.some(bucket => bucket.name === 'site-images');
-    
-    if (!bucketExists) {
-      console.log('Site-images bucket not found. Please create it via SQL.');
+    if (error) {
+      console.error('Error checking storage buckets:', error);
       return false;
     }
     
-    console.log('Site-images bucket exists');
-    return true;
+    const bucketExists = buckets?.some(bucket => bucket.name === 'site-images');
+    
+    if (bucketExists) {
+      console.log('Site-images bucket exists');
+      return true;
+    } else {
+      console.error('Site-images bucket not found but should have been created');
+      return false;
+    }
   } catch (error) {
     console.error('Error checking site-images bucket:', error);
     return false;
@@ -66,8 +71,12 @@ export const updateSiteContent = async (id: string, updates: any) => {
 // Helper to upload an image to site-images bucket
 export const uploadSiteImage = async (file: File, path: string): Promise<string | null> => {
   try {
-    // Ensure bucket exists
-    await setupSiteImagesBucket();
+    // Check if bucket exists first
+    const bucketExists = await setupSiteImagesBucket();
+    
+    if (!bucketExists) {
+      throw new Error('Storage bucket not found. Please contact administrator.');
+    }
     
     // Generate a unique filename with timestamp
     const timestamp = Date.now();
@@ -99,7 +108,7 @@ export const uploadSiteImage = async (file: File, path: string): Promise<string 
     return urlData.publicUrl;
   } catch (error) {
     console.error('Error uploading image:', error);
-    return null;
+    throw error; // Re-throw to be handled by calling component
   }
 };
 
