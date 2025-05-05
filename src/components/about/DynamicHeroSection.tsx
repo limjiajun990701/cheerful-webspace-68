@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { User, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getSiteContent } from "@/utils/contentUtils";
+import { useToast } from "@/hooks/use-toast";
 
 interface AboutHeroContent {
   id: string;
@@ -13,22 +14,35 @@ interface AboutHeroContent {
 }
 
 const DynamicHeroSection = () => {
+  const { toast } = useToast();
   const [content, setContent] = useState<AboutHeroContent | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     const fetchContent = async () => {
-      const data = await getSiteContent('about', 'hero');
-      if (data) {
-        setContent(data);
-        setImageError(false); // Reset image error state when new content is loaded
+      try {
+        const data = await getSiteContent('about', 'hero');
+        if (data) {
+          setContent(data);
+          setImageError(false); // Reset image error state when new content is loaded
+        } else {
+          console.error("Failed to fetch hero content");
+        }
+      } catch (error) {
+        console.error("Error fetching content:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load about content",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
 
     fetchContent();
-  }, []);
+  }, [toast]);
 
   const handleImageError = () => {
     setImageError(true);

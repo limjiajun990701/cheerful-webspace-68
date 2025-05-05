@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 // Helper function to create storage bucket if it doesn't exist
@@ -10,22 +9,14 @@ export const setupSiteImagesBucket = async () => {
     const bucketExists = buckets?.some(bucket => bucket.name === 'site-images');
     
     if (!bucketExists) {
-      // Create bucket for site images
-      const { error } = await supabase.storage.createBucket('site-images', {
-        public: true
-      });
-      
-      if (error) {
-        console.error('Error creating site-images bucket:', error);
-        return false;
-      }
-      
-      console.log('Created site-images bucket successfully');
+      console.log('Site-images bucket not found. Please create it via SQL.');
+      return false;
     }
     
+    console.log('Site-images bucket exists');
     return true;
   } catch (error) {
-    console.error('Error setting up site-images bucket:', error);
+    console.error('Error checking site-images bucket:', error);
     return false;
   }
 };
@@ -147,7 +138,7 @@ export const updateSkillGroup = async (id: string, categoryName: string, items: 
         title: categoryName,
         description: JSON.stringify(items),
         updated_by: 'admin',
-        updated_at: new Date().toISOString() // Fixed: Convert Date to ISO string
+        updated_at: new Date().toISOString() // Convert Date to ISO string
       })
       .eq('id', id)
       .select()
@@ -284,7 +275,7 @@ export const updateExperienceItem = async (id: string, data: any) => {
           type: data.type
         }),
         updated_by: 'admin',
-        updated_at: new Date().toISOString() // Fixed: Convert Date to ISO string
+        updated_at: new Date().toISOString() // Convert Date to ISO string
       })
       .eq('id', id);
 

@@ -1,16 +1,11 @@
-
 import React, { useEffect } from "react";
 import DynamicHero from "../components/DynamicHero";
 import CertificationsSection from "../components/CertificationsSection";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import { setupSiteImagesBucket } from "@/utils/contentUtils";
 
 const Index = () => {
-  useEffect(() => {
-    // Set up storage bucket for site images if it doesn't exist
-    setupSiteImagesBucket();
-  }, []);
+  // Removed setupSiteImagesBucket call as it's now handled in ContentManager
 
   const skills = [
     { name: "Flutter", color: "bg-blue-100 text-blue-800" },
