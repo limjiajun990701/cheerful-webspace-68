@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { getSiteContent } from "@/utils/contentUtils";
 import { useToast } from "@/hooks/use-toast";
+import { UserRound } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 interface AboutHeroContent {
   id: string;
@@ -16,6 +18,7 @@ const DynamicHeroSection = () => {
   const { toast } = useToast();
   const [content, setContent] = useState<AboutHeroContent | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -23,6 +26,7 @@ const DynamicHeroSection = () => {
         const data = await getSiteContent('about', 'hero');
         if (data) {
           setContent(data);
+          setImageError(false);
         } else {
           console.error("Failed to fetch about hero content");
           toast({
@@ -46,6 +50,11 @@ const DynamicHeroSection = () => {
     fetchContent();
   }, [toast]);
 
+  const handleImageError = () => {
+    console.error("Failed to load image");
+    setImageError(true);
+  };
+
   return (
     <section className="py-20 lg:py-28">
       <div className="container mx-auto px-4">
@@ -63,8 +72,32 @@ const DynamicHeroSection = () => {
               </h1>
             </div>
             
-            <div className="mt-10">
-              <div className="w-full">
+            <div className="flex flex-col md:flex-row gap-12 mt-10">
+              {content?.image_url && (
+                <div className="md:w-1/3 shrink-0">
+                  <div className="rounded-2xl overflow-hidden aspect-square bg-secondary relative shadow-lg transform transition-transform hover:scale-[1.02] hover:shadow-xl">
+                    <img 
+                      src={content.image_url} 
+                      alt="Profile" 
+                      className="w-full h-full object-cover"
+                      onError={handleImageError}
+                    />
+                    {imageError && (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-primary/5 to-primary/20">
+                        <Avatar className="w-24 h-24 mb-2">
+                          <AvatarFallback className="bg-primary/10 text-primary">
+                            <UserRound className="w-12 h-12" />
+                          </AvatarFallback>
+                        </Avatar>
+                        <p className="text-muted-foreground text-sm font-medium">Profile Image</p>
+                        <p className="text-muted-foreground/70 text-xs">Not available</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div className={content?.image_url ? "md:w-2/3" : "w-full"}>
                 <div className="space-y-6">
                   {content?.description ? (
                     <div dangerouslySetInnerHTML={{ 
