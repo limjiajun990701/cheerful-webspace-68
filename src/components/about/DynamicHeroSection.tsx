@@ -1,9 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
-import { User, ExternalLink } from "lucide-react";
+import { UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getSiteContent } from "@/utils/contentUtils";
 import { useToast } from "@/hooks/use-toast";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface AboutHeroContent {
   id: string;
@@ -83,11 +84,14 @@ const DynamicHeroSection = () => {
                       onError={handleImageError}
                     />
                   ) : (
-                    <div className="absolute inset-0 flex items-center justify-center text-muted-foreground bg-gradient-to-br from-primary/5 to-primary/20">
-                      <div className="text-center text-muted-foreground">
-                        <p className="text-sm">Profile image</p>
-                        <p className="text-xs">not available</p>
-                      </div>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-primary/5 to-primary/20">
+                      <Avatar className="w-24 h-24 mb-2">
+                        <AvatarFallback className="bg-primary/10 text-primary">
+                          <UserRound className="w-12 h-12" />
+                        </AvatarFallback>
+                      </Avatar>
+                      <p className="text-muted-foreground text-sm font-medium">Profile Image</p>
+                      <p className="text-muted-foreground/70 text-xs">Not available</p>
                     </div>
                   )}
                 </div>
@@ -130,7 +134,9 @@ const DynamicHeroSection = () => {
                     className="group"
                   >
                     Get in Touch
-                    <ExternalLink className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1">
+                      <path d="M7 17l9.2-9.2M17 17V7H7" />
+                    </svg>
                   </Button>
                 </div>
               </div>
