@@ -71,6 +71,13 @@ const DynamicHero = () => {
             />
           </div>
         )}
+        
+        {/* Debug info - visible to admins only */}
+        {import.meta.env.DEV && content?.image_url && (
+          <div className="absolute bottom-2 right-2 bg-black/50 text-white text-xs p-1 rounded">
+            Image URL: {content.image_url.substring(0, 30)}...
+          </div>
+        )}
       </div>
       
       <div className="container mx-auto px-4 py-12 sm:py-16 md:py-24">

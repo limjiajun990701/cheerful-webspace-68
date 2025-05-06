@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { FormEvent } from "react";
 import { Loader2, Save, AlertCircle } from "lucide-react";
-import { uploadSiteImage, updateSiteContent, setupSiteImagesBucket } from "@/utils/contentUtils";
+import { updateSiteContent } from "@/utils/contentUtils";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface AboutContent {
@@ -27,27 +27,9 @@ const AboutManager = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [content, setContent] = useState<AboutContent | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-  const [isBucketReady, setIsBucketReady] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const checkBucketStatus = async () => {
-      const status = await setupSiteImagesBucket();
-      setIsBucketReady(status);
-      
-      if (!status) {
-        toast({
-          title: "Storage Setup Required",
-          description: "Storage setup is required for image uploads. Contact administrator.",
-          variant: "destructive",
-        });
-      }
-    };
-    
-    checkBucketStatus();
     fetchContent();
   }, []);
 
@@ -66,12 +48,7 @@ const AboutManager = () => {
       }
 
       setContent(data);
-      if (data.image_url) {
-        setImagePreview(data.image_url);
-      } else {
-        setImagePreview(null);
-      }
-      setUploadError(null);
+      setError(null);
     } catch (error) {
       console.error("Error fetching about content:", error);
       toast({
@@ -85,83 +62,18 @@ const AboutManager = () => {
     }
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // Validate file type
-    const fileType = file.type;
-    if (!fileType.startsWith('image/')) {
-      setUploadError('Please select a valid image file');
-      return;
-    }
-    
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      setUploadError('Image size must be less than 5MB');
-      return;
-    }
-
-    setImageFile(file);
-    setUploadError(null);
-    
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImagePreview(reader.result as string);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const uploadImage = async (): Promise<string | null> => {
-    if (!imageFile) return content?.image_url || null;
-    if (!isBucketReady) {
-      setUploadError('Storage bucket is not set up. Contact administrator.');
-      return null;
-    }
-    
-    setIsUploading(true);
-    try {
-      // Use uploadSiteImage helper
-      const uploadPath = 'about/hero';
-      const imageUrl = await uploadSiteImage(imageFile, uploadPath);
-      
-      if (!imageUrl) {
-        throw new Error("Failed to upload image");
-      }
-
-      return imageUrl;
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      setUploadError(error instanceof Error ? error.message : 'Failed to upload image');
-      return null;
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     
     if (!content) return;
     
     setIsSaving(true);
-    setUploadError(null);
+    setError(null);
     
     try {
-      // Upload image if there's a new one
-      let imageUrl = content.image_url;
-      if (imageFile) {
-        imageUrl = await uploadImage();
-        if (!imageUrl && imageFile) {
-          // If upload failed but we had a file, show error but continue with other updates
-          setUploadError("Image upload failed, but other content was updated");
-        }
-      }
-
       // Use updateSiteContent helper
       const updatedContent = {
         ...content,
-        image_url: imageUrl,
         updated_by: "admin",
       };
 
@@ -173,16 +85,11 @@ const AboutManager = () => {
 
       toast({
         title: "Success",
-        description: uploadError 
-          ? "Content updated but image upload failed" 
-          : "About page content updated successfully",
+        description: "About page content updated successfully"
       });
 
       // Refresh content from database
       fetchContent();
-      
-      // Clear the file input
-      setImageFile(null);
     } catch (error) {
       console.error("Error updating content:", error);
       toast({
@@ -215,7 +122,7 @@ const AboutManager = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Edit About Page Hero</CardTitle>
+          <CardTitle>Edit About Page Content</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -224,93 +131,60 @@ const AboutManager = () => {
             </div>
           ) : content ? (
             <form onSubmit={handleSubmit} className="space-y-4">
-              {uploadError && (
+              {error && (
                 <Alert variant="destructive" className="mb-4">
                   <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>{uploadError}</AlertDescription>
+                  <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="title">Title</Label>
-                    <Input
-                      id="title"
-                      value={content.title || ""}
-                      onChange={(e) => handleInputChange("title", e.target.value)}
-                      placeholder="Enter title"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="subtitle">Subtitle</Label>
-                    <Input
-                      id="subtitle"
-                      value={content.subtitle || ""}
-                      onChange={(e) => handleInputChange("subtitle", e.target.value)}
-                      placeholder="Enter subtitle"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea
-                      id="description"
-                      value={content.description || ""}
-                      onChange={(e) => handleInputChange("description", e.target.value)}
-                      placeholder="Enter description"
-                      rows={5}
-                      className="resize-none"
-                    />
-                  </div>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="title">Title</Label>
+                  <Input
+                    id="title"
+                    value={content.title || ""}
+                    onChange={(e) => handleInputChange("title", e.target.value)}
+                    placeholder="Enter title"
+                  />
                 </div>
                 
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="image">Profile Image</Label>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        id="image"
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageChange}
-                        className="w-full"
-                      />
-                      {isUploading && (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Supports: JPG, PNG, GIF, WEBP (Max: 5MB)
-                    </p>
-                  </div>
-                  
-                  {imagePreview && (
-                    <div className="mt-4">
-                      <p className="text-sm text-muted-foreground mb-2">Preview:</p>
-                      <div className="border rounded-md overflow-hidden">
-                        <img 
-                          src={imagePreview} 
-                          alt="Preview" 
-                          className="w-full h-auto max-h-[200px] object-contain"
-                        />
-                      </div>
-                    </div>
-                  )}
-                  
-                  <div className="pt-4">
-                    <p className="text-xs text-muted-foreground">
-                      Last updated: {new Date(content.updated_at).toLocaleString()} by {content.updated_by || "unknown"}
-                    </p>
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="subtitle">Subtitle</Label>
+                  <Input
+                    id="subtitle"
+                    value={content.subtitle || ""}
+                    onChange={(e) => handleInputChange("subtitle", e.target.value)}
+                    placeholder="Enter subtitle"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="description">Bio Description</Label>
+                  <Textarea
+                    id="description"
+                    value={content.description || ""}
+                    onChange={(e) => handleInputChange("description", e.target.value)}
+                    placeholder="Enter bio description"
+                    rows={8}
+                    className="resize-none"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Use line breaks to create paragraphs
+                  </p>
+                </div>
+                
+                <div className="pt-4">
+                  <p className="text-xs text-muted-foreground">
+                    Last updated: {new Date(content.updated_at).toLocaleString()} by {content.updated_by || "unknown"}
+                  </p>
                 </div>
               </div>
               
               <div className="flex justify-end">
                 <Button 
                   type="submit" 
-                  disabled={isSaving || isUploading}
+                  disabled={isSaving}
                   className="flex items-center gap-2"
                 >
                   {isSaving ? (

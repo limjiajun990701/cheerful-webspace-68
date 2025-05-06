@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { FormEvent } from "react";
-import { Loader2, Save, AlertCircle } from "lucide-react";
+import { Loader2, Save, AlertCircle, Image as ImageIcon } from "lucide-react";
 import { uploadSiteImage, updateSiteContent, setupSiteImagesBucket } from "@/utils/contentUtils";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
@@ -89,10 +89,12 @@ const HomeManager = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
+    // Validate file type - support multiple image formats
+    const acceptedFormats = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml', 'image/bmp'];
     const fileType = file.type;
-    if (!fileType.startsWith('image/')) {
-      setUploadError('Please select a valid image file');
+    
+    if (!acceptedFormats.includes(fileType)) {
+      setUploadError('Please select a valid image file (JPEG, PNG, GIF, WEBP, SVG, BMP)');
       return;
     }
     
@@ -268,7 +270,12 @@ const HomeManager = () => {
                 
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="image">Hero Image</Label>
+                    <Label htmlFor="image">
+                      Hero Background Image
+                      <span className="text-xs text-muted-foreground ml-2">
+                        (Will be displayed with overlay on homepage)
+                      </span>
+                    </Label>
                     <div className="flex items-center gap-2">
                       <Input
                         id="image"
@@ -282,20 +289,46 @@ const HomeManager = () => {
                       )}
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Supports: JPG, PNG, GIF, WEBP (Max: 5MB)
+                      Supports: JPG, PNG, GIF, WEBP, SVG, BMP (Max: 5MB)
                     </p>
                   </div>
                   
                   {imagePreview && (
-                    <div className="mt-4">
-                      <p className="text-sm text-muted-foreground mb-2">Preview:</p>
-                      <div className="border rounded-md overflow-hidden">
+                    <div className="mt-4 border rounded-md p-4 bg-muted/30">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-sm font-medium">Image Preview:</p>
+                        {content.image_url && (
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => window.open(content.image_url || '', '_blank')}
+                            className="text-xs"
+                          >
+                            View Full Size
+                          </Button>
+                        )}
+                      </div>
+                      <div className="border rounded-md overflow-hidden bg-card">
                         <img 
                           src={imagePreview} 
                           alt="Preview" 
                           className="w-full h-auto max-h-[200px] object-contain"
                         />
                       </div>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        This image will appear with a subtle overlay as the homepage hero background
+                      </p>
+                    </div>
+                  )}
+                  
+                  {!imagePreview && (
+                    <div className="mt-4 border rounded-md p-6 flex flex-col items-center justify-center bg-muted/30">
+                      <ImageIcon className="h-12 w-12 text-muted-foreground/50 mb-2" />
+                      <p className="text-sm text-muted-foreground">No image selected</p>
+                      <p className="text-xs text-muted-foreground/70">
+                        Upload an image to use as the homepage hero background
+                      </p>
                     </div>
                   )}
                   
