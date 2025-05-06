@@ -91,9 +91,11 @@ const AboutManager = () => {
     if (!file) return;
 
     // Validate file type
+    const acceptedFormats = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml', 'image/bmp'];
     const fileType = file.type;
-    if (!fileType.startsWith('image/')) {
-      setUploadError('Please select a valid image file');
+    
+    if (!acceptedFormats.includes(fileType)) {
+      setUploadError('Please select a valid image file (JPEG, PNG, GIF, WEBP, SVG, BMP)');
       return;
     }
     
@@ -129,7 +131,8 @@ const AboutManager = () => {
       if (!imageUrl) {
         throw new Error("Failed to upload image");
       }
-
+      
+      console.log("Successfully uploaded image:", imageUrl);
       return imageUrl;
     } catch (error) {
       console.error("Error uploading image:", error);
@@ -152,8 +155,11 @@ const AboutManager = () => {
       // Upload image if there's a new one
       let imageUrl = content.image_url;
       if (imageFile) {
-        imageUrl = await uploadImage();
-        if (!imageUrl && imageFile) {
+        const uploadedUrl = await uploadImage();
+        if (uploadedUrl) {
+          imageUrl = uploadedUrl;
+          console.log("New image URL set:", imageUrl);
+        } else if (imageFile) {
           // If upload failed but we had a file, show error but continue with other updates
           setUploadError("Image upload failed, but other content was updated");
         }
@@ -166,6 +172,7 @@ const AboutManager = () => {
         updated_by: "admin",
       };
 
+      console.log("Updating content with:", updatedContent);
       const result = await updateSiteContent(content.id, updatedContent);
 
       if (!result.success) {
@@ -206,6 +213,25 @@ const AboutManager = () => {
       ...content,
       [field]: value,
     });
+  };
+
+  const handleImageUrlChange = (url: string) => {
+    handleInputChange("image_url", url);
+    
+    // If URL is empty, clear preview
+    if (!url) {
+      setImagePreview(null);
+      return;
+    }
+    
+    // Set preview and test if the URL works
+    setImagePreview(url);
+    
+    // Create a test image to see if URL is valid
+    const img = new Image();
+    img.onload = () => setUploadError(null);
+    img.onerror = () => setUploadError("Warning: The image URL doesn't appear to be valid");
+    img.src = url;
   };
 
   return (
@@ -284,7 +310,7 @@ const AboutManager = () => {
                       <Input
                         id="image"
                         type="file"
-                        accept="image/*"
+                        accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml,image/bmp"
                         onChange={handleImageChange}
                         className="w-full"
                       />
@@ -293,7 +319,7 @@ const AboutManager = () => {
                       )}
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Supports: JPG, PNG, GIF, WEBP (Max: 5MB)
+                      Supports: JPG, PNG, GIF, WEBP, SVG, BMP (Max: 5MB)
                     </p>
                   </div>
                   
@@ -302,10 +328,7 @@ const AboutManager = () => {
                     <Input
                       id="imageUrl"
                       value={content.image_url || ""}
-                      onChange={(e) => {
-                        handleInputChange("image_url", e.target.value);
-                        setImagePreview(e.target.value);
-                      }}
+                      onChange={(e) => handleImageUrlChange(e.target.value)}
                       placeholder="Or enter image URL directly"
                     />
                     <p className="text-xs text-muted-foreground mt-1">
@@ -314,8 +337,21 @@ const AboutManager = () => {
                   </div>
                   
                   {imagePreview && (
-                    <div className="mt-4">
-                      <p className="text-sm text-muted-foreground mb-2">Preview:</p>
+                    <div className="mt-4 border rounded-md p-4 bg-muted/30">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-sm font-medium">Image Preview:</p>
+                        {content.image_url && (
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => window.open(content.image_url || '', '_blank')}
+                            className="text-xs"
+                          >
+                            View Full Size
+                          </Button>
+                        )}
+                      </div>
                       <div className="border rounded-md overflow-hidden">
                         <img 
                           src={imagePreview} 

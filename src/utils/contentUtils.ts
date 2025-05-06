@@ -42,6 +42,7 @@ export const getSiteContent = async (pageName: string, sectionName: string) => {
       throw error;
     }
 
+    console.log(`Fetched ${pageName}/${sectionName} content:`, data);
     return data;
   } catch (error) {
     console.error(`Error fetching ${pageName}/${sectionName} content:`, error);
@@ -52,6 +53,7 @@ export const getSiteContent = async (pageName: string, sectionName: string) => {
 // Helper function to update site content
 export const updateSiteContent = async (id: string, updates: any) => {
   try {
+    console.log(`Updating content ID ${id} with:`, updates);
     const { data, error } = await supabase
       .from('site_content')
       .update(updates)
@@ -60,9 +62,11 @@ export const updateSiteContent = async (id: string, updates: any) => {
       .single();
 
     if (error) {
+      console.error('Error in updateSiteContent:', error);
       throw error;
     }
 
+    console.log('Content updated successfully:', data);
     return { success: true, data };
   } catch (error) {
     console.error('Error updating site content:', error);
@@ -77,16 +81,17 @@ export const uploadSiteImage = async (file: File, path: string): Promise<string 
     const bucketExists = await setupSiteImagesBucket();
     
     if (!bucketExists) {
+      console.error('Storage bucket not available');
       throw new Error('Storage bucket not available. Please contact administrator.');
     }
     
     // Generate a unique filename with timestamp
     const timestamp = Date.now();
     const fileExt = file.name.split('.').pop();
-    const fileName = `${path}-${timestamp}.${fileExt}`;
+    const fileName = `${path.replace(/\//g, '-')}-${timestamp}.${fileExt}`;
     const filePath = `${path}/${fileName}`;
     
-    console.log(`Uploading image: ${filePath}`);
+    console.log(`Uploading image: ${filePath}`, file);
     
     // Upload the file
     const { data, error } = await supabase.storage
@@ -100,6 +105,8 @@ export const uploadSiteImage = async (file: File, path: string): Promise<string 
       console.error('Upload error:', error);
       throw error;
     }
+
+    console.log('Upload successful, data:', data);
 
     // Get public URL
     const { data: urlData } = supabase.storage
