@@ -96,6 +96,74 @@ export type Database = {
         }
         Relationships: []
       }
+      collection_items: {
+        Row: {
+          animation_type: string | null
+          collection_id: string
+          created_at: string
+          description: string | null
+          display_order: number | null
+          id: string
+          image_url: string
+          label: string
+          updated_at: string
+        }
+        Insert: {
+          animation_type?: string | null
+          collection_id: string
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          image_url: string
+          label: string
+          updated_at?: string
+        }
+        Update: {
+          animation_type?: string | null
+          collection_id?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          image_url?: string
+          label?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collection_items_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collections: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       projects: {
         Row: {
           date: string | null
