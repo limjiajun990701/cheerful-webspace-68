@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from "react";
-import { ArrowRight, ExternalLink, Award } from "lucide-react";
+import { ArrowRight, ExternalLink, Award, Smartphone, Code, Layout, Database, Server, Globe } from "lucide-react";
 import { Link } from "react-router-dom";
 import { getExpertiseContent } from "@/utils/contentUtils";
 import { Button } from "@/components/ui/button";
