@@ -13,7 +13,8 @@ import HomeManager from "../components/admin/HomeManager";
 import AboutManager from "../components/admin/AboutManager";
 import SkillsManager from "../components/admin/SkillsManager";
 import ExperienceManager from "../components/admin/ExperienceManager";
-import { LogOut, LayoutDashboard, Settings, FileText, Award, Briefcase, User, Home, Code } from "lucide-react";
+import ExpertiseManager from "../components/admin/ExpertiseManager";
+import { LogOut, LayoutDashboard, Settings, FileText, Award, Briefcase, User, Home, Code, Star } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
 const Admin = () => {
@@ -132,11 +133,16 @@ const Admin = () => {
         <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <div className="border-b border-border px-6 pt-4 overflow-x-auto">
-              <TabsList className="grid grid-cols-8 gap-2 bg-muted/50 p-1">
+              <TabsList className="grid grid-cols-9 gap-2 bg-muted/50 p-1">
                 <TabsTrigger value="home" className="flex items-center gap-2 data-[state=active]:bg-background">
                   <Home className="h-4 w-4" />
                   <span className="hidden sm:inline">Home Page</span>
                   <span className="sm:hidden">Home</span>
+                </TabsTrigger>
+                <TabsTrigger value="expertise" className="flex items-center gap-2 data-[state=active]:bg-background">
+                  <Star className="h-4 w-4" />
+                  <span className="hidden sm:inline">Expertise</span>
+                  <span className="sm:hidden">Expert</span>
                 </TabsTrigger>
                 <TabsTrigger value="about" className="flex items-center gap-2 data-[state=active]:bg-background">
                   <User className="h-4 w-4" />
@@ -180,6 +186,10 @@ const Admin = () => {
             <div className="p-6">
               <TabsContent value="home" className="mt-0 focus:outline-none">
                 <HomeManager />
+              </TabsContent>
+              
+              <TabsContent value="expertise" className="mt-0 focus:outline-none">
+                <ExpertiseManager />
               </TabsContent>
               
               <TabsContent value="about" className="mt-0 focus:outline-none">

@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 // Helper function to check if the bucket exists
@@ -323,6 +322,70 @@ export const deleteExperienceItem = async (id: string) => {
     return { success: true };
   } catch (error) {
     console.error('Error deleting experience item:', error);
+    return { success: false, error };
+  }
+};
+
+// Helper to get expertise data
+export const getExpertiseContent = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('site_content')
+      .select('*')
+      .eq('page_name', 'home')
+      .eq('section_name', 'expertise');
+
+    if (error) {
+      throw error;
+    }
+
+    return data[0] || null;
+  } catch (error) {
+    console.error('Error fetching expertise content:', error);
+    return null;
+  }
+};
+
+// Helper to create or update expertise content
+export const updateExpertiseContent = async (id: string | null, content: any) => {
+  try {
+    if (id) {
+      // Update existing expertise content
+      const { data, error } = await supabase
+        .from('site_content')
+        .update({
+          title: content.title,
+          subtitle: content.subtitle,
+          description: content.description, // This will store the JSON string of expertise items
+          updated_by: 'admin',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return { success: true, data };
+    } else {
+      // Create new expertise content
+      const { data, error } = await supabase
+        .from('site_content')
+        .insert({
+          page_name: 'home',
+          section_name: 'expertise',
+          title: content.title,
+          subtitle: content.subtitle,
+          description: content.description, // This will store the JSON string of expertise items
+          updated_by: 'admin'
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return { success: true, data };
+    }
+  } catch (error) {
+    console.error('Error updating expertise content:', error);
     return { success: false, error };
   }
 };
