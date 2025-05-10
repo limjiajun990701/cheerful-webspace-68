@@ -59,15 +59,22 @@ const CollectionCarousel = ({ collectionId }: CollectionCarouselProps) => {
     fetchCollectionItems();
   }, [collectionId]);
   
-  // Auto-scroll effect that continuously scrolls right to left
+  // Auto-scroll effect that continuously scrolls right to left (loop scrollPrev)
+  // with more precise delay control (using exact millisecond timing)
   useEffect(() => {
     if (!currentApi || items.length <= 1) return;
     
-    const interval = setInterval(() => {
-      currentApi.scrollPrev(); // Changed from scrollNext to scrollPrev to go right to left
-    }, 3000);
+    // More precise timing control (2500ms exactly)
+    const intervalDelay = 2500;
     
-    return () => clearInterval(interval);
+    const interval = setInterval(() => {
+      currentApi.scrollPrev();
+    }, intervalDelay);
+    
+    // Clean up the interval when component unmounts
+    return () => {
+      clearInterval(interval);
+    };
   }, [currentApi, items.length]);
   
   // Render loading state
@@ -99,7 +106,10 @@ const CollectionCarousel = ({ collectionId }: CollectionCarouselProps) => {
         <Carousel
           setApi={setCurrentApi}
           className="max-w-4xl mx-auto"
-          opts={{ loop: true }}
+          opts={{ 
+            loop: true,
+            dragFree: false
+          }}
         >
           <CarouselContent>
             {items.map((item) => (
@@ -119,7 +129,7 @@ const CollectionCarousel = ({ collectionId }: CollectionCarouselProps) => {
                           )}
                           style={{ backgroundImage: `url(${item.image_url})` }}
                         >
-                          {/* Label div removed as requested */}
+                          {/* No labels as requested */}
                         </div>
                       </CardContent>
                     </Card>
@@ -134,7 +144,7 @@ const CollectionCarousel = ({ collectionId }: CollectionCarouselProps) => {
               </CarouselItem>
             ))}
           </CarouselContent>
-          {/* Hide the navigation buttons as auto-scrolling is enabled */}
+          {/* No control buttons as requested */}
         </Carousel>
       </div>
     </div>
