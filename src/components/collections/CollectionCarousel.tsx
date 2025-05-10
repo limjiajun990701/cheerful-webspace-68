@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Card, CardContent } from "@/components/ui/card";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -23,7 +22,6 @@ interface CollectionCarouselProps {
 const CollectionCarousel = ({ collectionId }: CollectionCarouselProps) => {
   const [items, setItems] = useState<CollectionItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentApi, setCurrentApi] = useState<any>(null);
   
   // Fetch collection items from the database
   useEffect(() => {
@@ -59,24 +57,6 @@ const CollectionCarousel = ({ collectionId }: CollectionCarouselProps) => {
     fetchCollectionItems();
   }, [collectionId]);
   
-  // Auto-scroll effect that continuously scrolls right to left (loop scrollPrev)
-  // with more precise delay control (using exact millisecond timing)
-  useEffect(() => {
-    if (!currentApi || items.length <= 1) return;
-    
-    // More precise timing control (2500ms exactly)
-    const intervalDelay = 2500;
-    
-    const interval = setInterval(() => {
-      currentApi.scrollPrev();
-    }, intervalDelay);
-    
-    // Clean up the interval when component unmounts
-    return () => {
-      clearInterval(interval);
-    };
-  }, [currentApi, items.length]);
-  
   // Render loading state
   if (isLoading) {
     return (
@@ -98,26 +78,25 @@ const CollectionCarousel = ({ collectionId }: CollectionCarouselProps) => {
     return null;
   }
   
+  // Duplicate the items to create a seamless loop effect
+  const duplicatedItems = [...items, ...items];
+  
   return (
-    <div className="w-full py-8 bg-secondary/10">
+    <div className="w-full py-6 bg-secondary/10 overflow-hidden">
       <div className="container mx-auto px-4">
-        <h2 className="text-2xl font-bold text-center mb-6">Gallery</h2>
+        <h2 className="text-2xl font-bold text-center mb-4">Gallery</h2>
         
-        <Carousel
-          setApi={setCurrentApi}
-          className="max-w-4xl mx-auto"
-          opts={{ 
-            loop: true,
-            dragFree: false
-          }}
-        >
-          <CarouselContent>
-            {items.map((item) => (
-              <CarouselItem key={item.id} className="md:basis-1/3 lg:basis-1/4">
+        <div className="relative max-w-5xl mx-auto">
+          <div className="animate-scroll-rtl flex">
+            {duplicatedItems.map((item, index) => (
+              <div 
+                key={`${item.id}-${index}`} 
+                className="flex-shrink-0 w-[200px] px-2"
+              >
                 <HoverCard>
                   <HoverCardTrigger asChild>
                     <Card 
-                      className="overflow-hidden border-none h-48 cursor-pointer"
+                      className="overflow-hidden border-none h-40 cursor-pointer"
                     >
                       <CardContent className="p-0 h-full">
                         <div 
@@ -141,11 +120,10 @@ const CollectionCarousel = ({ collectionId }: CollectionCarouselProps) => {
                     </div>
                   </HoverCardContent>
                 </HoverCard>
-              </CarouselItem>
+              </div>
             ))}
-          </CarouselContent>
-          {/* No control buttons as requested */}
-        </Carousel>
+          </div>
+        </div>
       </div>
     </div>
   );
