@@ -118,7 +118,7 @@ export default {
         'scale-in': 'scale-in 0.3s ease-out',
         'slide-up': 'slide-up 0.5s ease-out',
         'slide-down': 'slide-down 0.5s ease-out',
-        'scroll-rtl': 'scroll-rtl 30s linear infinite'
+        'scroll-rtl': 'scroll-rtl 15s linear infinite' // Faster animation: 30s -> 15s
       }
     }
   },

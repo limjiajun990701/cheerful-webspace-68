@@ -78,8 +78,11 @@ const CollectionCarousel = ({ collectionId }: CollectionCarouselProps) => {
     return null;
   }
   
-  // Duplicate the items to create a seamless loop effect
-  const duplicatedItems = [...items, ...items];
+  // Check if we have only a single item
+  const isSingleItem = items.length === 1;
+  
+  // Duplicate the items to create a seamless loop effect, but only if we have more than one item
+  const displayItems = isSingleItem ? items : [...items, ...items];
   
   return (
     <div className="w-full py-6 bg-secondary/10 overflow-hidden">
@@ -87,16 +90,25 @@ const CollectionCarousel = ({ collectionId }: CollectionCarouselProps) => {
         <h2 className="text-2xl font-bold text-center mb-4">Gallery</h2>
         
         <div className="relative max-w-5xl mx-auto">
-          <div className="animate-scroll-rtl flex">
-            {duplicatedItems.map((item, index) => (
+          <div className={cn(
+            "flex",
+            !isSingleItem && "animate-scroll-rtl" // Only apply animation if we have multiple items
+          )}>
+            {displayItems.map((item, index) => (
               <div 
                 key={`${item.id}-${index}`} 
-                className="flex-shrink-0 w-[200px] px-2"
+                className={cn(
+                  "flex-shrink-0 px-2",
+                  isSingleItem ? "w-full flex justify-center" : "w-[200px]"
+                )}
               >
                 <HoverCard>
                   <HoverCardTrigger asChild>
                     <Card 
-                      className="overflow-hidden border-none h-40 cursor-pointer"
+                      className={cn(
+                        "overflow-hidden border-none h-40 cursor-pointer",
+                        isSingleItem && "w-[280px]"
+                      )}
                     >
                       <CardContent className="p-0 h-full">
                         <div 
