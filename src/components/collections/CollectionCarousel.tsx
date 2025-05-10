@@ -23,7 +23,6 @@ interface CollectionCarouselProps {
 const CollectionCarousel = ({ collectionId }: CollectionCarouselProps) => {
   const [items, setItems] = useState<CollectionItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isPaused, setIsPaused] = useState(false);
   const [currentApi, setCurrentApi] = useState<any>(null);
   
   // Fetch collection items from the database
@@ -60,16 +59,16 @@ const CollectionCarousel = ({ collectionId }: CollectionCarouselProps) => {
     fetchCollectionItems();
   }, [collectionId]);
   
-  // Auto-scroll effect that pauses on hover
+  // Auto-scroll effect that continuously scrolls left
   useEffect(() => {
-    if (!currentApi || isPaused || items.length <= 1) return;
+    if (!currentApi || items.length <= 1) return;
     
     const interval = setInterval(() => {
       currentApi.scrollNext();
     }, 3000);
     
     return () => clearInterval(interval);
-  }, [currentApi, isPaused, items.length]);
+  }, [currentApi, items.length]);
   
   // Render loading state
   if (isLoading) {
@@ -109,8 +108,6 @@ const CollectionCarousel = ({ collectionId }: CollectionCarouselProps) => {
                   <HoverCardTrigger asChild>
                     <Card 
                       className="overflow-hidden border-none h-64 cursor-pointer"
-                      onMouseEnter={() => setIsPaused(true)}
-                      onMouseLeave={() => setIsPaused(false)}
                     >
                       <CardContent className="p-0 h-full">
                         <div 
@@ -122,9 +119,7 @@ const CollectionCarousel = ({ collectionId }: CollectionCarouselProps) => {
                           )}
                           style={{ backgroundImage: `url(${item.image_url})` }}
                         >
-                          <div className="absolute bottom-0 left-0 right-0 bg-black/60 p-4 text-white">
-                            <h3 className="font-medium">{item.label}</h3>
-                          </div>
+                          {/* Label div removed as requested */}
                         </div>
                       </CardContent>
                     </Card>
@@ -139,10 +134,7 @@ const CollectionCarousel = ({ collectionId }: CollectionCarouselProps) => {
               </CarouselItem>
             ))}
           </CarouselContent>
-          <div className="flex justify-center mt-8 gap-4">
-            <CarouselPrevious className="relative static" />
-            <CarouselNext className="relative static" />
-          </div>
+          {/* Hide the navigation buttons as auto-scrolling is enabled */}
         </Carousel>
       </div>
     </div>
