@@ -59,12 +59,12 @@ const CollectionCarousel = ({ collectionId }: CollectionCarouselProps) => {
     fetchCollectionItems();
   }, [collectionId]);
   
-  // Auto-scroll effect that continuously scrolls left
+  // Auto-scroll effect that continuously scrolls right to left
   useEffect(() => {
     if (!currentApi || items.length <= 1) return;
     
     const interval = setInterval(() => {
-      currentApi.scrollNext();
+      currentApi.scrollPrev(); // Changed from scrollNext to scrollPrev to go right to left
     }, 3000);
     
     return () => clearInterval(interval);
@@ -73,13 +73,13 @@ const CollectionCarousel = ({ collectionId }: CollectionCarouselProps) => {
   // Render loading state
   if (isLoading) {
     return (
-      <div className="w-full py-10">
+      <div className="w-full py-6">
         <div className="container mx-auto">
-          <Skeleton className="h-6 w-48 mb-6" />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Skeleton className="h-64 rounded-lg" />
-            <Skeleton className="h-64 rounded-lg" />
-            <Skeleton className="h-64 rounded-lg" />
+          <Skeleton className="h-4 w-32 mb-4" />
+          <div className="grid grid-cols-3 gap-3">
+            <Skeleton className="h-40 rounded-lg" />
+            <Skeleton className="h-40 rounded-lg" />
+            <Skeleton className="h-40 rounded-lg" />
           </div>
         </div>
       </div>
@@ -92,22 +92,22 @@ const CollectionCarousel = ({ collectionId }: CollectionCarouselProps) => {
   }
   
   return (
-    <div className="w-full py-16 bg-secondary/10">
+    <div className="w-full py-8 bg-secondary/10">
       <div className="container mx-auto px-4">
-        <h2 className="text-3xl font-bold text-center mb-10">Gallery</h2>
+        <h2 className="text-2xl font-bold text-center mb-6">Gallery</h2>
         
         <Carousel
           setApi={setCurrentApi}
-          className="max-w-5xl mx-auto"
+          className="max-w-4xl mx-auto"
           opts={{ loop: true }}
         >
           <CarouselContent>
             {items.map((item) => (
-              <CarouselItem key={item.id} className="md:basis-1/2 lg:basis-1/3">
+              <CarouselItem key={item.id} className="md:basis-1/3 lg:basis-1/4">
                 <HoverCard>
                   <HoverCardTrigger asChild>
                     <Card 
-                      className="overflow-hidden border-none h-64 cursor-pointer"
+                      className="overflow-hidden border-none h-48 cursor-pointer"
                     >
                       <CardContent className="p-0 h-full">
                         <div 
@@ -124,9 +124,9 @@ const CollectionCarousel = ({ collectionId }: CollectionCarouselProps) => {
                       </CardContent>
                     </Card>
                   </HoverCardTrigger>
-                  <HoverCardContent className="w-80 p-4">
+                  <HoverCardContent className="w-72 p-3">
                     <div>
-                      <h4 className="font-semibold mb-2">{item.label}</h4>
+                      <h4 className="font-semibold mb-1">{item.label}</h4>
                       <p className="text-sm text-muted-foreground">{item.description}</p>
                     </div>
                   </HoverCardContent>
