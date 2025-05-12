@@ -81,44 +81,28 @@ const CollectionCarousel = ({ collectionId }: CollectionCarouselProps) => {
   // Check if we have only a single item
   const isSingleItem = items.length === 1;
   
-  // Duplicate the items to create a seamless loop effect, but only if we have more than one item
-  const displayItems = isSingleItem ? items : [...items, ...items];
-  
   return (
     <div className="w-full py-6 bg-secondary/10 overflow-hidden">
       <div className="container mx-auto px-4">
         <h2 className="text-2xl font-bold text-center mb-4">Gallery</h2>
         
         <div className="relative max-w-5xl mx-auto">
-          <div className={cn(
-            "flex",
-            !isSingleItem && "animate-scroll-rtl" // Only apply animation if we have multiple items
-          )}>
-            {displayItems.map((item, index) => (
-              <div 
-                key={`${item.id}-${index}`} 
-                className={cn(
-                  "flex-shrink-0 px-2",
-                  isSingleItem ? "w-full flex justify-center" : "w-[200px]"
-                )}
-              >
+          {isSingleItem ? (
+            // For a single item, just display it centered
+            <div className="flex justify-center">
+              <div className="flex-shrink-0 px-2">
                 <HoverCard>
                   <HoverCardTrigger asChild>
-                    <Card 
-                      className={cn(
-                        "overflow-hidden border-none h-40 cursor-pointer",
-                        isSingleItem && "w-[280px]"
-                      )}
-                    >
+                    <Card className="overflow-hidden border-none h-40 w-[280px] cursor-pointer">
                       <CardContent className="p-0 h-full">
                         <div 
                           className={cn(
                             "w-full h-full bg-cover bg-center transition-all duration-500",
-                            item.animation_type === 'scale' && "hover:scale-110",
-                            item.animation_type === 'move' && "hover:translate-y-[-10px]",
-                            item.animation_type === 'fade' && "hover:opacity-80"
+                            items[0].animation_type === 'scale' && "hover:scale-110",
+                            items[0].animation_type === 'move' && "hover:translate-y-[-10px]",
+                            items[0].animation_type === 'fade' && "hover:opacity-80"
                           )}
-                          style={{ backgroundImage: `url(${item.image_url})` }}
+                          style={{ backgroundImage: `url(${items[0].image_url})` }}
                         >
                           {/* No labels as requested */}
                         </div>
@@ -127,14 +111,53 @@ const CollectionCarousel = ({ collectionId }: CollectionCarouselProps) => {
                   </HoverCardTrigger>
                   <HoverCardContent className="w-72 p-3">
                     <div>
-                      <h4 className="font-semibold mb-1">{item.label}</h4>
-                      <p className="text-sm text-muted-foreground">{item.description}</p>
+                      <h4 className="font-semibold mb-1">{items[0].label}</h4>
+                      <p className="text-sm text-muted-foreground">{items[0].description}</p>
                     </div>
                   </HoverCardContent>
                 </HoverCard>
               </div>
-            ))}
-          </div>
+            </div>
+          ) : (
+            // For multiple items, create a scrolling container
+            <div 
+              className="animate-scroll-rtl flex"
+              style={{ "--item-count": items.length } as React.CSSProperties}
+            >
+              {items.map((item, index) => (
+                <div 
+                  key={`${item.id}-${index}`} 
+                  className="flex-shrink-0 w-[200px] px-2"
+                >
+                  <HoverCard>
+                    <HoverCardTrigger asChild>
+                      <Card className="overflow-hidden border-none h-40 cursor-pointer">
+                        <CardContent className="p-0 h-full">
+                          <div 
+                            className={cn(
+                              "w-full h-full bg-cover bg-center transition-all duration-500",
+                              item.animation_type === 'scale' && "hover:scale-110",
+                              item.animation_type === 'move' && "hover:translate-y-[-10px]",
+                              item.animation_type === 'fade' && "hover:opacity-80"
+                            )}
+                            style={{ backgroundImage: `url(${item.image_url})` }}
+                          >
+                            {/* No labels as requested */}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </HoverCardTrigger>
+                    <HoverCardContent className="w-72 p-3">
+                      <div>
+                        <h4 className="font-semibold mb-1">{item.label}</h4>
+                        <p className="text-sm text-muted-foreground">{item.description}</p>
+                      </div>
+                    </HoverCardContent>
+                  </HoverCard>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
