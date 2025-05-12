@@ -1,20 +1,26 @@
 import { supabase } from '@/integrations/supabase/client';
 
-// Helper function to create storage bucket if it doesn't exist
+// Helper function to check if the bucket exists
 export const setupSiteImagesBucket = async () => {
   try {
     // Check if the bucket exists
-    const { data: buckets } = await supabase.storage.listBuckets();
+    const { data: buckets, error } = await supabase.storage.listBuckets();
     
-    const bucketExists = buckets?.some(bucket => bucket.name === 'site-images');
-    
-    if (!bucketExists) {
-      console.log('Site-images bucket not found. Please create it via SQL.');
+    if (error) {
+      console.error('Error checking storage buckets:', error);
       return false;
     }
     
-    console.log('Site-images bucket exists');
-    return true;
+    const bucketExists = buckets?.some(bucket => bucket.name === 'site-images');
+    
+    if (bucketExists) {
+      console.log('Site-images bucket exists');
+      return true;
+    } else {
+      console.error('Site-images bucket not found');
+      // Instead of trying to create it, just return false since we need admin privileges
+      return false;
+    }
   } catch (error) {
     console.error('Error checking site-images bucket:', error);
     return false;
@@ -35,6 +41,7 @@ export const getSiteContent = async (pageName: string, sectionName: string) => {
       throw error;
     }
 
+    console.log(`Fetched ${pageName}/${sectionName} content:`, data);
     return data;
   } catch (error) {
     console.error(`Error fetching ${pageName}/${sectionName} content:`, error);
@@ -45,6 +52,7 @@ export const getSiteContent = async (pageName: string, sectionName: string) => {
 // Helper function to update site content
 export const updateSiteContent = async (id: string, updates: any) => {
   try {
+    console.log(`Updating content ID ${id} with:`, updates);
     const { data, error } = await supabase
       .from('site_content')
       .update(updates)
@@ -53,9 +61,11 @@ export const updateSiteContent = async (id: string, updates: any) => {
       .single();
 
     if (error) {
+      console.error('Error in updateSiteContent:', error);
       throw error;
     }
 
+    console.log('Content updated successfully:', data);
     return { success: true, data };
   } catch (error) {
     console.error('Error updating site content:', error);
@@ -66,16 +76,21 @@ export const updateSiteContent = async (id: string, updates: any) => {
 // Helper to upload an image to site-images bucket
 export const uploadSiteImage = async (file: File, path: string): Promise<string | null> => {
   try {
-    // Ensure bucket exists
-    await setupSiteImagesBucket();
+    // Check if bucket exists first
+    const bucketExists = await setupSiteImagesBucket();
+    
+    if (!bucketExists) {
+      console.error('Storage bucket not available');
+      throw new Error('Storage bucket not available. Please contact administrator.');
+    }
     
     // Generate a unique filename with timestamp
     const timestamp = Date.now();
     const fileExt = file.name.split('.').pop();
-    const fileName = `${path}-${timestamp}.${fileExt}`;
+    const fileName = `${path.replace(/\//g, '-')}-${timestamp}.${fileExt}`;
     const filePath = `${path}/${fileName}`;
     
-    console.log(`Uploading image: ${filePath}`);
+    console.log(`Uploading image: ${filePath}`, file);
     
     // Upload the file
     const { data, error } = await supabase.storage
@@ -90,6 +105,8 @@ export const uploadSiteImage = async (file: File, path: string): Promise<string 
       throw error;
     }
 
+    console.log('Upload successful, data:', data);
+
     // Get public URL
     const { data: urlData } = supabase.storage
       .from('site-images')
@@ -99,7 +116,7 @@ export const uploadSiteImage = async (file: File, path: string): Promise<string 
     return urlData.publicUrl;
   } catch (error) {
     console.error('Error uploading image:', error);
-    return null;
+    throw error; // Re-throw to be handled by calling component
   }
 };
 
@@ -305,6 +322,70 @@ export const deleteExperienceItem = async (id: string) => {
     return { success: true };
   } catch (error) {
     console.error('Error deleting experience item:', error);
+    return { success: false, error };
+  }
+};
+
+// Helper to get expertise data
+export const getExpertiseContent = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('site_content')
+      .select('*')
+      .eq('page_name', 'home')
+      .eq('section_name', 'expertise');
+
+    if (error) {
+      throw error;
+    }
+
+    return data[0] || null;
+  } catch (error) {
+    console.error('Error fetching expertise content:', error);
+    return null;
+  }
+};
+
+// Helper to create or update expertise content
+export const updateExpertiseContent = async (id: string | null, content: any) => {
+  try {
+    if (id) {
+      // Update existing expertise content
+      const { data, error } = await supabase
+        .from('site_content')
+        .update({
+          title: content.title,
+          subtitle: content.subtitle,
+          description: content.description, // This will store the JSON string of expertise items
+          updated_by: 'admin',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return { success: true, data };
+    } else {
+      // Create new expertise content
+      const { data, error } = await supabase
+        .from('site_content')
+        .insert({
+          page_name: 'home',
+          section_name: 'expertise',
+          title: content.title,
+          subtitle: content.subtitle,
+          description: content.description, // This will store the JSON string of expertise items
+          updated_by: 'admin'
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return { success: true, data };
+    }
+  } catch (error) {
+    console.error('Error updating expertise content:', error);
     return { success: false, error };
   }
 };

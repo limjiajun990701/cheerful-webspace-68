@@ -9,17 +9,20 @@ import BlogPostManager from "../components/admin/BlogPostManager";
 import ProjectManager from "../components/admin/ProjectManager";
 import CertificationManager from "../components/admin/CertificationManager";
 import ResumeManager from "../components/admin/ResumeManager";
-import ContentManager from "../components/admin/ContentManager";
+import HomeManager from "../components/admin/HomeManager";
+import AboutManager from "../components/admin/AboutManager";
 import SkillsManager from "../components/admin/SkillsManager";
 import ExperienceManager from "../components/admin/ExperienceManager";
-import { LogOut, LayoutDashboard, Settings, FileText, Award, Briefcase, User, PenTool, Code } from "lucide-react";
+import ExpertiseManager from "../components/admin/ExpertiseManager";
+import CollectionManager from "../components/admin/CollectionManager";
+import { LogOut, LayoutDashboard, Settings, FileText, Award, Briefcase, User, Home, Code, Star, Image } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
 const Admin = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState("posts");
+  const [activeTab, setActiveTab] = useState("home");
   const [isAuthChecked, setIsAuthChecked] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [username, setUsername] = useState("Admin");
@@ -131,7 +134,27 @@ const Admin = () => {
         <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <div className="border-b border-border px-6 pt-4 overflow-x-auto">
-              <TabsList className="grid grid-cols-7 gap-2 bg-muted/50 p-1">
+              <TabsList className="grid grid-cols-10 gap-2 bg-muted/50 p-1">
+                <TabsTrigger value="home" className="flex items-center gap-2 data-[state=active]:bg-background">
+                  <Home className="h-4 w-4" />
+                  <span className="hidden sm:inline">Home Page</span>
+                  <span className="sm:hidden">Home</span>
+                </TabsTrigger>
+                <TabsTrigger value="expertise" className="flex items-center gap-2 data-[state=active]:bg-background">
+                  <Star className="h-4 w-4" />
+                  <span className="hidden sm:inline">Expertise</span>
+                  <span className="sm:hidden">Expert</span>
+                </TabsTrigger>
+                <TabsTrigger value="collections" className="flex items-center gap-2 data-[state=active]:bg-background">
+                  <Image className="h-4 w-4" />
+                  <span className="hidden sm:inline">Collections</span>
+                  <span className="sm:hidden">Coll</span>
+                </TabsTrigger>
+                <TabsTrigger value="about" className="flex items-center gap-2 data-[state=active]:bg-background">
+                  <User className="h-4 w-4" />
+                  <span className="hidden sm:inline">About Page</span>
+                  <span className="sm:hidden">About</span>
+                </TabsTrigger>
                 <TabsTrigger value="posts" className="flex items-center gap-2 data-[state=active]:bg-background">
                   <FileText className="h-4 w-4" />
                   <span className="hidden sm:inline">Blog Posts</span>
@@ -162,16 +185,27 @@ const Admin = () => {
                   <span className="hidden sm:inline">Resume</span>
                   <span className="sm:hidden">Resume</span>
                 </TabsTrigger>
-                <TabsTrigger value="content" className="flex items-center gap-2 data-[state=active]:bg-background">
-                  <PenTool className="h-4 w-4" />
-                  <span className="hidden sm:inline">Site Content</span>
-                  <span className="sm:hidden">Content</span>
-                </TabsTrigger>
               </TabsList>
             </div>
 
             {/* Content panels */}
             <div className="p-6">
+              <TabsContent value="home" className="mt-0 focus:outline-none">
+                <HomeManager />
+              </TabsContent>
+              
+              <TabsContent value="expertise" className="mt-0 focus:outline-none">
+                <ExpertiseManager />
+              </TabsContent>
+              
+              <TabsContent value="collections" className="mt-0 focus:outline-none">
+                <CollectionManager />
+              </TabsContent>
+              
+              <TabsContent value="about" className="mt-0 focus:outline-none">
+                <AboutManager />
+              </TabsContent>
+
               <TabsContent value="posts" className="mt-0 focus:outline-none">
                 <BlogPostManager />
               </TabsContent>
@@ -194,10 +228,6 @@ const Admin = () => {
 
               <TabsContent value="resume" className="mt-0 focus:outline-none">
                 <ResumeManager />
-              </TabsContent>
-
-              <TabsContent value="content" className="mt-0 focus:outline-none">
-                <ContentManager />
               </TabsContent>
             </div>
           </Tabs>
