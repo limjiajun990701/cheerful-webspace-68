@@ -8,6 +8,7 @@ import MobileMenu from "./navbar/MobileMenu";
 import BlogNavOptions from "./navbar/BlogNavOptions";
 import SearchBar from "./navbar/SearchBar";
 import ResumeButton from "./navbar/ResumeButton";
+import { ThemeToggle } from "./ThemeToggle";
 
 const navItems = [
   { name: "Home", path: "/" },
@@ -53,8 +54,8 @@ const Navbar = () => {
     <header
       className={`fixed top-0 w-full z-50 transition-all duration-300 ${
         scrolled 
-          ? "bg-white/90 backdrop-blur-md border-b border-border shadow-sm" 
-          : isBlogPage ? "bg-white/70 backdrop-blur-sm" : "bg-transparent"
+          ? "bg-background/90 backdrop-blur-md border-b border-border shadow-sm" 
+          : isBlogPage ? "bg-background/70 backdrop-blur-sm" : "bg-transparent"
       }`}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -74,11 +75,13 @@ const Navbar = () => {
             {!isBlogPage ? (
               <>
                 <NavLinks navItems={navItems} />
+                <ThemeToggle />
                 <ResumeButton />
               </>
             ) : (
               <div className="flex items-center space-x-4">
                 <NavLinks navItems={[]} isBlogPage={true} />
+                <ThemeToggle />
                 <ResumeButton />
                 <BlogNavOptions 
                   setShowSearch={setShowSearch} 
@@ -90,6 +93,7 @@ const Navbar = () => {
           </nav>
           
           <div className="md:hidden flex items-center">
+            <ThemeToggle />
             <ResumeButton />
             {isBlogPage && (
               <BlogNavOptions 
