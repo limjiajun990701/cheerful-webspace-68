@@ -8,8 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { FormEvent } from "react";
-import { Loader2, Save, AlertCircle, Upload } from "lucide-react";
-import { updateSiteContent, uploadSiteImage, setupSiteImagesBucket } from "@/utils/contentUtils";
+import { Loader2, Save, AlertCircle } from "lucide-react";
+import { uploadSiteImage, updateSiteContent, setupSiteImagesBucket } from "@/utils/contentUtils";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface AboutContent {
@@ -27,7 +27,6 @@ const AboutManager = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [content, setContent] = useState<AboutContent | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -72,7 +71,7 @@ const AboutManager = () => {
       } else {
         setImagePreview(null);
       }
-      setError(null);
+      setUploadError(null);
     } catch (error) {
       console.error("Error fetching about content:", error);
       toast({
@@ -91,11 +90,9 @@ const AboutManager = () => {
     if (!file) return;
 
     // Validate file type
-    const acceptedFormats = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml', 'image/bmp'];
     const fileType = file.type;
-    
-    if (!acceptedFormats.includes(fileType)) {
-      setUploadError('Please select a valid image file (JPEG, PNG, GIF, WEBP, SVG, BMP)');
+    if (!fileType.startsWith('image/')) {
+      setUploadError('Please select a valid image file');
       return;
     }
     
@@ -125,14 +122,13 @@ const AboutManager = () => {
     setIsUploading(true);
     try {
       // Use uploadSiteImage helper
-      const uploadPath = `about/hero`;
+      const uploadPath = 'about/hero';
       const imageUrl = await uploadSiteImage(imageFile, uploadPath);
       
       if (!imageUrl) {
         throw new Error("Failed to upload image");
       }
-      
-      console.log("Successfully uploaded image:", imageUrl);
+
       return imageUrl;
     } catch (error) {
       console.error("Error uploading image:", error);
@@ -149,17 +145,14 @@ const AboutManager = () => {
     if (!content) return;
     
     setIsSaving(true);
-    setError(null);
+    setUploadError(null);
     
     try {
       // Upload image if there's a new one
       let imageUrl = content.image_url;
       if (imageFile) {
-        const uploadedUrl = await uploadImage();
-        if (uploadedUrl) {
-          imageUrl = uploadedUrl;
-          console.log("New image URL set:", imageUrl);
-        } else if (imageFile) {
+        imageUrl = await uploadImage();
+        if (!imageUrl && imageFile) {
           // If upload failed but we had a file, show error but continue with other updates
           setUploadError("Image upload failed, but other content was updated");
         }
@@ -172,7 +165,6 @@ const AboutManager = () => {
         updated_by: "admin",
       };
 
-      console.log("Updating content with:", updatedContent);
       const result = await updateSiteContent(content.id, updatedContent);
 
       if (!result.success) {
@@ -183,7 +175,7 @@ const AboutManager = () => {
         title: "Success",
         description: uploadError 
           ? "Content updated but image upload failed" 
-          : "Content updated successfully"
+          : "About page content updated successfully",
       });
 
       // Refresh content from database
@@ -215,25 +207,6 @@ const AboutManager = () => {
     });
   };
 
-  const handleImageUrlChange = (url: string) => {
-    handleInputChange("image_url", url);
-    
-    // If URL is empty, clear preview
-    if (!url) {
-      setImagePreview(null);
-      return;
-    }
-    
-    // Set preview and test if the URL works
-    setImagePreview(url);
-    
-    // Create a test image to see if URL is valid
-    const img = new Image();
-    img.onload = () => setUploadError(null);
-    img.onerror = () => setUploadError("Warning: The image URL doesn't appear to be valid");
-    img.src = url;
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -242,7 +215,7 @@ const AboutManager = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Edit About Page Content</CardTitle>
+          <CardTitle>Edit About Page Hero</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -251,13 +224,6 @@ const AboutManager = () => {
             </div>
           ) : content ? (
             <form onSubmit={handleSubmit} className="space-y-4">
-              {error && (
-                <Alert variant="destructive" className="mb-4">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-
               {uploadError && (
                 <Alert variant="destructive" className="mb-4">
                   <AlertCircle className="h-4 w-4" />
@@ -288,18 +254,15 @@ const AboutManager = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="description">Bio Description</Label>
+                    <Label htmlFor="description">Description</Label>
                     <Textarea
                       id="description"
                       value={content.description || ""}
                       onChange={(e) => handleInputChange("description", e.target.value)}
-                      placeholder="Enter bio description"
-                      rows={8}
+                      placeholder="Enter description"
+                      rows={5}
                       className="resize-none"
                     />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Use line breaks to create paragraphs
-                    </p>
                   </div>
                 </div>
                 
@@ -310,7 +273,7 @@ const AboutManager = () => {
                       <Input
                         id="image"
                         type="file"
-                        accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml,image/bmp"
+                        accept="image/*"
                         onChange={handleImageChange}
                         className="w-full"
                       />
@@ -319,48 +282,18 @@ const AboutManager = () => {
                       )}
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Supports: JPG, PNG, GIF, WEBP, SVG, BMP (Max: 5MB)
-                    </p>
-                  </div>
-                  
-                  <div className="space-y-2 mt-4">
-                    <Label htmlFor="imageUrl">Image URL (Optional)</Label>
-                    <Input
-                      id="imageUrl"
-                      value={content.image_url || ""}
-                      onChange={(e) => handleImageUrlChange(e.target.value)}
-                      placeholder="Or enter image URL directly"
-                    />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Enter a URL to use an existing image
+                      Supports: JPG, PNG, GIF, WEBP (Max: 5MB)
                     </p>
                   </div>
                   
                   {imagePreview && (
-                    <div className="mt-4 border rounded-md p-4 bg-muted/30">
-                      <div className="flex items-center justify-between mb-2">
-                        <p className="text-sm font-medium">Image Preview:</p>
-                        {content.image_url && (
-                          <Button 
-                            type="button" 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => window.open(content.image_url || '', '_blank')}
-                            className="text-xs"
-                          >
-                            View Full Size
-                          </Button>
-                        )}
-                      </div>
+                    <div className="mt-4">
+                      <p className="text-sm text-muted-foreground mb-2">Preview:</p>
                       <div className="border rounded-md overflow-hidden">
                         <img 
                           src={imagePreview} 
                           alt="Preview" 
                           className="w-full h-auto max-h-[200px] object-contain"
-                          onError={() => {
-                            setImagePreview(null);
-                            setUploadError("Invalid image URL");
-                          }}
                         />
                       </div>
                     </div>
