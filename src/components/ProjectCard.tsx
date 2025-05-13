@@ -1,6 +1,7 @@
 
 import { ExternalLink, Github, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 interface ProjectCardProps {
   title: string;
@@ -29,7 +30,7 @@ const ProjectCard = ({
   
   return (
     <div className="bg-background rounded-xl overflow-hidden shadow-sm border border-border hover:shadow-md transition-all">
-      <div className="aspect-video relative overflow-hidden bg-muted">
+      <AspectRatio ratio={16/9} className="bg-muted">
         {displayImage ? (
           <div 
             className="absolute inset-0 bg-muted flex items-center justify-center"
@@ -47,7 +48,7 @@ const ProjectCard = ({
             <span className="text-muted-foreground">Project Image</span>
           </div>
         )}
-      </div>
+      </AspectRatio>
       
       <div className="p-6">
         <h3 className="text-xl font-semibold mb-2">{title}</h3>
