@@ -57,6 +57,11 @@ const CollectionCarousel = ({ collectionId }: CollectionCarouselProps) => {
     fetchCollectionItems();
   }, [collectionId]);
   
+  // Check if an image URL is a data URL with transparent background
+  const hasTransparentBackground = (url: string) => {
+    return url.startsWith('blob:') || url.startsWith('data:image/png;base64,');
+  };
+  
   // Render loading state
   if (isLoading) {
     return (
@@ -97,14 +102,24 @@ const CollectionCarousel = ({ collectionId }: CollectionCarouselProps) => {
                       <CardContent className="p-0 h-full">
                         <div 
                           className={cn(
-                            "w-full h-full bg-cover bg-center transition-all duration-500",
+                            "w-full h-full transition-all duration-500",
                             items[0].animation_type === 'scale' && "hover:scale-110",
                             items[0].animation_type === 'move' && "hover:translate-y-[-10px]",
-                            items[0].animation_type === 'fade' && "hover:opacity-80"
+                            items[0].animation_type === 'fade' && "hover:opacity-80",
+                            hasTransparentBackground(items[0].image_url) ? "bg-gradient-to-r from-secondary/30 to-background" : "bg-cover bg-center"
                           )}
-                          style={{ backgroundImage: `url(${items[0].image_url})` }}
+                          style={hasTransparentBackground(items[0].image_url) 
+                            ? {} 
+                            : { backgroundImage: `url(${items[0].image_url})` }
+                          }
                         >
-                          {/* No labels as requested */}
+                          {hasTransparentBackground(items[0].image_url) && (
+                            <img 
+                              src={items[0].image_url} 
+                              alt={items[0].label}
+                              className="w-full h-full object-contain" 
+                            />
+                          )}
                         </div>
                       </CardContent>
                     </Card>
@@ -135,14 +150,24 @@ const CollectionCarousel = ({ collectionId }: CollectionCarouselProps) => {
                         <CardContent className="p-0 h-full">
                           <div 
                             className={cn(
-                              "w-full h-full bg-cover bg-center transition-all duration-500",
+                              "w-full h-full transition-all duration-500",
                               item.animation_type === 'scale' && "hover:scale-110",
                               item.animation_type === 'move' && "hover:translate-y-[-10px]",
-                              item.animation_type === 'fade' && "hover:opacity-80"
+                              item.animation_type === 'fade' && "hover:opacity-80",
+                              hasTransparentBackground(item.image_url) ? "bg-gradient-to-r from-secondary/30 to-background" : "bg-cover bg-center"
                             )}
-                            style={{ backgroundImage: `url(${item.image_url})` }}
+                            style={hasTransparentBackground(item.image_url) 
+                              ? {} 
+                              : { backgroundImage: `url(${item.image_url})` }
+                            }
                           >
-                            {/* No labels as requested */}
+                            {hasTransparentBackground(item.image_url) && (
+                              <img 
+                                src={item.image_url} 
+                                alt={item.label}
+                                className="w-full h-full object-contain" 
+                              />
+                            )}
                           </div>
                         </CardContent>
                       </Card>

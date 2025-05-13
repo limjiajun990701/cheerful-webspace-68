@@ -1,3 +1,4 @@
+
 import { pipeline, env } from '@huggingface/transformers';
 
 // Configure transformers.js to optimize downloads
@@ -118,5 +119,16 @@ export const loadImage = (file: Blob): Promise<HTMLImageElement> => {
     img.onload = () => resolve(img);
     img.onerror = reject;
     img.src = URL.createObjectURL(file);
+  });
+};
+
+// New function to load an image from a URL
+export const loadImageFromUrl = (url: string): Promise<HTMLImageElement> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous"; // To handle CORS issues
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = url;
   });
 };

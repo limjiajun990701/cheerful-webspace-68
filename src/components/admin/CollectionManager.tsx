@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -9,7 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { v4 as uuidv4 } from 'uuid';
-import { Trash, Plus, Image, Pencil, Save, X } from "lucide-react";
+import { Trash, Plus, Image, Pencil, Save, X, Loader2, ImageOff } from "lucide-react";
+import { loadImageFromUrl, removeBackground } from "@/utils/imageProcessing";
 
 interface Collection {
   id: string;
@@ -44,6 +44,9 @@ const CollectionManager = () => {
     display_order: 0
   });
   const [editingItem, setEditingItem] = useState<string | null>(null);
+  const [isProcessingImage, setIsProcessingImage] = useState(false);
+  const [processedImageUrl, setProcessedImageUrl] = useState<string | null>(null);
+  const [imageToProcess, setImageToProcess] = useState<string | null>(null);
   
   // Fetch all collections
   const fetchCollections = async () => {
@@ -181,6 +184,62 @@ const CollectionManager = () => {
     }
   };
   
+  // Remove background from image URL
+  const handleRemoveBackground = async (imageUrl: string, isNewItem: boolean = true) => {
+    try {
+      setIsProcessingImage(true);
+      setImageToProcess(imageUrl);
+      
+      toast({
+        title: "Processing Image",
+        description: "Removing background - this may take a moment...",
+      });
+      
+      // Load the image from URL
+      const img = await loadImageFromUrl(imageUrl);
+      
+      // Remove the background
+      const processedBlob = await removeBackground(img);
+      
+      // Create URL from blob
+      const processedUrl = URL.createObjectURL(processedBlob);
+      setProcessedImageUrl(processedUrl);
+      
+      // Update the appropriate state
+      if (isNewItem) {
+        setNewItem(prev => ({ ...prev, image_url: processedUrl }));
+      } else if (editingItem) {
+        // Update the edited item's image URL
+        setCollectionItems(prev => 
+          prev.map(item => item.id === editingItem 
+            ? { ...item, image_url: processedUrl } 
+            : item
+          )
+        );
+      }
+      
+      toast({
+        title: "Success",
+        description: "Background removed successfully!",
+      });
+    } catch (error) {
+      console.error("Error removing background:", error);
+      toast({
+        title: "Error",
+        description: "Failed to remove background. Please try a different image.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessingImage(false);
+    }
+  };
+  
+  // Reset image processing states
+  const resetImageProcessing = () => {
+    setProcessedImageUrl(null);
+    setImageToProcess(null);
+  };
+  
   // Add new item to a collection
   const handleAddItem = async () => {
     if (!selectedCollection) {
@@ -233,6 +292,7 @@ const CollectionManager = () => {
         animation_type: "scale",
         display_order: 0
       });
+      resetImageProcessing();
       setIsAddingItem(false);
       fetchCollectionItems(selectedCollection);
     } catch (error) {
@@ -267,6 +327,7 @@ const CollectionManager = () => {
       });
       
       setEditingItem(null);
+      resetImageProcessing();
       if (selectedCollection) {
         fetchCollectionItems(selectedCollection);
       }
@@ -316,6 +377,35 @@ const CollectionManager = () => {
   const handleCollectionChange = (collectionId: string) => {
     setSelectedCollection(collectionId);
     fetchCollectionItems(collectionId);
+  };
+  
+  // Image preview component
+  const ImagePreview = ({ src, alt = "Image preview" }: { src: string, alt?: string }) => {
+    const isProcessed = src === processedImageUrl;
+    const isBeingProcessed = src === imageToProcess && isProcessingImage;
+    
+    return (
+      <div className="relative h-40 w-full border rounded-md overflow-hidden">
+        {isBeingProcessed ? (
+          <div className="h-full w-full flex items-center justify-center bg-secondary/20">
+            <Loader2 className="h-10 w-10 animate-spin text-primary" />
+          </div>
+        ) : (
+          <>
+            <img 
+              src={src} 
+              alt={alt} 
+              className="h-full w-full object-contain"
+            />
+            {isProcessed && (
+              <div className="absolute top-2 right-2 bg-green-500 text-white text-xs rounded-full px-2 py-1">
+                Background Removed
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    );
   };
   
   return (
@@ -404,12 +494,36 @@ const CollectionManager = () => {
                   <div className="space-y-4">
                     <div>
                       <label className="text-sm font-medium mb-1 block">Image URL</label>
-                      <Input
-                        value={newItem.image_url}
-                        onChange={(e) => setNewItem(prev => ({ ...prev, image_url: e.target.value }))}
-                        placeholder="https://example.com/image.jpg"
-                      />
+                      <div className="flex gap-2">
+                        <Input
+                          value={newItem.image_url}
+                          onChange={(e) => {
+                            if (processedImageUrl && e.target.value !== processedImageUrl) {
+                              resetImageProcessing();
+                            }
+                            setNewItem(prev => ({ ...prev, image_url: e.target.value }));
+                          }}
+                          placeholder="https://example.com/image.jpg"
+                        />
+                        <Button 
+                          variant="outline" 
+                          onClick={() => handleRemoveBackground(newItem.image_url)}
+                          disabled={!newItem.image_url || isProcessingImage}
+                          title="Remove Background"
+                          className="shrink-0"
+                        >
+                          <ImageOff className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
+                    
+                    {newItem.image_url && (
+                      <div>
+                        <label className="text-sm font-medium mb-1 block">Image Preview</label>
+                        <ImagePreview src={newItem.image_url} />
+                      </div>
+                    )}
+                    
                     <div>
                       <label className="text-sm font-medium mb-1 block">Label</label>
                       <Input
@@ -445,7 +559,10 @@ const CollectionManager = () => {
                   </div>
                 </CardContent>
                 <CardFooter className="flex justify-end gap-2">
-                  <Button variant="outline" onClick={() => setIsAddingItem(false)}>Cancel</Button>
+                  <Button variant="outline" onClick={() => {
+                    setIsAddingItem(false);
+                    resetImageProcessing();
+                  }}>Cancel</Button>
                   <Button onClick={handleAddItem}>Add Item</Button>
                 </CardFooter>
               </Card>
@@ -491,14 +608,38 @@ const CollectionManager = () => {
                                 <div className="space-y-4">
                                   <div>
                                     <label className="text-sm font-medium mb-1 block">Image URL</label>
-                                    <Input
-                                      value={item.image_url}
-                                      onChange={(e) => setCollectionItems(prev => 
-                                        prev.map(i => i.id === item.id ? {...i, image_url: e.target.value} : i)
-                                      )}
-                                      placeholder="https://example.com/image.jpg"
-                                    />
+                                    <div className="flex gap-2">
+                                      <Input
+                                        value={item.image_url}
+                                        onChange={(e) => {
+                                          if (processedImageUrl && e.target.value !== processedImageUrl) {
+                                            resetImageProcessing();
+                                          }
+                                          setCollectionItems(prev => 
+                                            prev.map(i => i.id === item.id ? {...i, image_url: e.target.value} : i)
+                                          );
+                                        }}
+                                        placeholder="https://example.com/image.jpg"
+                                      />
+                                      <Button 
+                                        variant="outline" 
+                                        onClick={() => handleRemoveBackground(item.image_url, false)}
+                                        disabled={!item.image_url || isProcessingImage}
+                                        title="Remove Background"
+                                        className="shrink-0"
+                                      >
+                                        <ImageOff className="h-4 w-4" />
+                                      </Button>
+                                    </div>
                                   </div>
+                                  
+                                  {item.image_url && (
+                                    <div>
+                                      <label className="text-sm font-medium mb-1 block">Image Preview</label>
+                                      <ImagePreview src={item.image_url} />
+                                    </div>
+                                  )}
+                                  
                                   <div>
                                     <label className="text-sm font-medium mb-1 block">Label</label>
                                     <Input
@@ -550,7 +691,10 @@ const CollectionManager = () => {
                                 </div>
                               </CardContent>
                               <CardFooter className="flex justify-end gap-2">
-                                <Button variant="outline" onClick={() => setEditingItem(null)}>Cancel</Button>
+                                <Button variant="outline" onClick={() => {
+                                  setEditingItem(null);
+                                  resetImageProcessing();
+                                }}>Cancel</Button>
                                 <Button onClick={() => handleUpdateItem(item)}>Save Changes</Button>
                               </CardFooter>
                             </Card>
