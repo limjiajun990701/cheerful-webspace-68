@@ -5,11 +5,6 @@ import ExperienceCard from "../components/ExperienceCard";
 import DynamicHeader from "../components/experience/DynamicHeader";
 import { getExperienceItems } from "@/utils/contentUtils";
 
-interface Achievement {
-  title: string;
-  value: string;
-}
-
 interface ExperienceItem {
   id: string;
   type: 'work' | 'education';
@@ -18,9 +13,6 @@ interface ExperienceItem {
   location: string;
   date: string;
   description: string;
-  skills?: string[];
-  achievements?: Achievement[];
-  durationInMonths?: number;
 }
 
 const Experience = () => {
@@ -42,7 +34,7 @@ const Experience = () => {
     fetchExperiences();
   }, []);
 
-  // Default data as fallback with enhanced properties
+  // Default data as fallback with simplified properties
   const defaultExperienceData = [
     {
       id: "default-1",
@@ -53,12 +45,6 @@ const Experience = () => {
       description: 
         "Collaborated on the development and enhancement of the Linksay social chat app, focusing on multimedia sharing and user experience improvements. Contributed to UI enhancements, bug fixes, and integration of Web3 wallet and blockchain token functionality. Led the implementation of key features that improved user retention metrics and app performance on low-end devices.",
       type: "work" as const,
-      skills: ["Flutter", "Dart", "Firebase", "Web3", "UI/UX", "Git"],
-      achievements: [
-        { title: "App performance improvement", value: "+35%" },
-        { title: "User retention increase", value: "+18%" }
-      ],
-      durationInMonths: 6
     },
     {
       id: "default-2",
@@ -69,12 +55,6 @@ const Experience = () => {
       description: 
         "Designed and developed microservices APIs, enhanced reporting systems by improving template functionality, and built full-stack solutions leveraging modern frameworks and database technologies. Projects included microservices API development, PHPJasper report development, and a fullstack hostel report system using Vue.js, TypeScript, Quarkus, and MariaDB. Worked closely with cross-functional teams to ensure all deliverables met business requirements while maintaining high code quality standards.",
       type: "work" as const,
-      skills: ["Vue.js", "TypeScript", "Quarkus", "MariaDB", "Microservices", "REST API", "PHP", "Jasper"],
-      achievements: [
-        { title: "Report generation time", value: "-45%" },
-        { title: "API response time", value: "-30%" }
-      ],
-      durationInMonths: 7
     },
     {
       id: "default-3",
@@ -85,12 +65,6 @@ const Experience = () => {
       description: 
         "Specialized in Software Engineering with a CGPA of 3.34/4.00. Developed strong foundations in software development principles, programming languages, and system design methodologies. Participated in multiple hackathons and coding competitions, securing top positions. Completed capstone project on cloud-based solutions for small businesses.",
       type: "education" as const,
-      skills: ["Java", "Python", "C++", "Software Engineering", "Database Design", "Cloud Computing", "UI/UX Design"],
-      achievements: [
-        { title: "CGPA", value: "3.34/4.00" },
-        { title: "Dean's List", value: "3 semesters" }
-      ],
-      durationInMonths: 48
     },
     {
       id: "default-4",
@@ -101,8 +75,6 @@ const Experience = () => {
       description: 
         "Completed pre-university education, establishing strong academic foundations before pursuing higher education in Information Technology. Focused on science and mathematics subjects with additional coursework in computer literacy.",
       type: "education" as const,
-      skills: ["Mathematics", "Physics", "Chemistry", "Computer Literacy"],
-      durationInMonths: 24
     },
   ];
 
@@ -173,9 +145,6 @@ const Experience = () => {
                         date={experience.date}
                         description={experience.description}
                         type={experience.type}
-                        skills={experience.skills}
-                        achievements={experience.achievements}
-                        durationInMonths={experience.durationInMonths}
                       />
                     </div>
                   ))
@@ -206,9 +175,6 @@ const Experience = () => {
                         date={experience.date}
                         description={experience.description}
                         type={experience.type}
-                        skills={experience.skills}
-                        achievements={experience.achievements}
-                        durationInMonths={experience.durationInMonths}
                       />
                     </div>
                   ))
