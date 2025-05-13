@@ -1,12 +1,15 @@
+
 import { useState, useEffect, ChangeEvent } from "react";
-import { Save, Upload, FileText } from "lucide-react";
+import { Save, Upload, FileText, Image as ImageIcon } from "lucide-react";
 import { Project } from "../../types/database";
 import { getProjectById } from "../../utils/projectData";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Card, CardContent } from "../ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { useToast } from "../../hooks/use-toast";
+import BackgroundRemover from "../BackgroundRemover";
 
 interface ProjectEditorProps {
   editingId: string | null;
@@ -24,6 +27,7 @@ const ProjectEditor = ({ editingId, onSave, onCancel }: ProjectEditorProps) => {
   const [tags, setTags] = useState("");
   const [liveurl, setLiveUrl] = useState("");
   const [githuburl, setGithubUrl] = useState("");
+  const [backgroundRemoved, setBackgroundRemoved] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -70,6 +74,7 @@ const ProjectEditor = ({ editingId, onSave, onCancel }: ProjectEditorProps) => {
     setTags("");
     setLiveUrl("");
     setGithubUrl("");
+    setBackgroundRemoved(null);
   };
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -90,6 +95,7 @@ const ProjectEditor = ({ editingId, onSave, onCancel }: ProjectEditorProps) => {
 
     setFile(selectedFile);
     setFileType(isImage ? "image" : "pdf");
+    setBackgroundRemoved(null); // Reset background removed state
 
     if (isImage) {
       const reader = new FileReader();
@@ -100,6 +106,10 @@ const ProjectEditor = ({ editingId, onSave, onCancel }: ProjectEditorProps) => {
     } else {
       setFilePreview(null);
     }
+  };
+
+  const handleProcessedImage = (processedImageUrl: string) => {
+    setBackgroundRemoved(processedImageUrl);
   };
 
   const handleSave = () => {
@@ -117,7 +127,10 @@ const ProjectEditor = ({ editingId, onSave, onCancel }: ProjectEditorProps) => {
       .map(tag => tag.trim())
       .filter(tag => tag !== "");
 
-    if (file) {
+    // Use background removed image if available
+    const finalFileUrl = backgroundRemoved || filePreview;
+    
+    if (file && !backgroundRemoved) {
       const reader = new FileReader();
       reader.onloadend = () => {
         const fileurl = reader.result as string;
@@ -140,7 +153,7 @@ const ProjectEditor = ({ editingId, onSave, onCancel }: ProjectEditorProps) => {
         title,
         description,
         imageurl: imageurl || undefined,
-        fileurl: filePreview || undefined,
+        fileurl: finalFileUrl || undefined,
         filetype: filetype || undefined,
         tags: tagArray,
         liveurl: liveurl || undefined,
@@ -179,51 +192,74 @@ const ProjectEditor = ({ editingId, onSave, onCancel }: ProjectEditorProps) => {
             />
           </div>
 
-          <div>
-            <label htmlFor="projectFile" className="block text-sm font-medium mb-1">
-              Project File (PDF or Image)
-            </label>
-            <div className="flex flex-col space-y-2">
-              <Input
-                id="projectFile"
-                type="file"
-                accept="image/jpeg,image/png,image/webp,image/gif,application/pdf"
-                onChange={handleFileChange}
-                className="file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
-              />
-              
-              {filePreview && filetype === "image" ? (
-                <div className="mt-2 w-full max-w-xs h-32 border rounded-md overflow-hidden">
-                  <img 
-                    src={filePreview} 
-                    alt="Preview" 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ) : filetype === "pdf" ? (
-                <div className="mt-2 flex items-center space-x-2 p-2 border rounded-md max-w-xs">
-                  <FileText className="text-primary" size={20} />
-                  <span className="text-sm">PDF Document</span>
-                </div>
-              ) : null}
-            </div>
-            
-            <p className="text-xs text-muted-foreground mt-1">
-              Supported formats: JPG, PNG, WebP, PDF
-            </p>
-          </div>
+          <Tabs defaultValue="upload" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="upload">Upload File</TabsTrigger>
+              <TabsTrigger value="remove-bg">Remove Background</TabsTrigger>
+            </TabsList>
 
-          <div>
-            <label htmlFor="projectImageUrl" className="block text-sm font-medium mb-1">
-              Image URL (optional, fallback if no file uploaded)
-            </label>
-            <Input
-              id="projectImageUrl"
-              value={imageurl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              placeholder="Enter image URL"
-            />
-          </div>
+            <TabsContent value="upload" className="space-y-4">
+              <div>
+                <label htmlFor="projectFile" className="block text-sm font-medium mb-1">
+                  Project File (PDF or Image)
+                </label>
+                <div className="flex flex-col space-y-2">
+                  <Input
+                    id="projectFile"
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif,application/pdf"
+                    onChange={handleFileChange}
+                    className="file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+                  />
+                  
+                  {filePreview && filetype === "image" ? (
+                    <div className="mt-2 w-full max-w-xs h-32 border rounded-md overflow-hidden">
+                      <img 
+                        src={backgroundRemoved || filePreview} 
+                        alt="Preview" 
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+                  ) : filetype === "pdf" ? (
+                    <div className="mt-2 flex items-center space-x-2 p-2 border rounded-md max-w-xs">
+                      <FileText className="text-primary" size={20} />
+                      <span className="text-sm">PDF Document</span>
+                    </div>
+                  ) : null}
+                </div>
+                
+                <p className="text-xs text-muted-foreground mt-1">
+                  Supported formats: JPG, PNG, WebP, PDF
+                </p>
+              </div>
+
+              <div>
+                <label htmlFor="projectImageUrl" className="block text-sm font-medium mb-1">
+                  Image URL (optional, fallback if no file uploaded)
+                </label>
+                <Input
+                  id="projectImageUrl"
+                  value={imageurl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                  placeholder="Enter image URL"
+                />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="remove-bg" className="space-y-4">
+              {filetype === "image" && filePreview ? (
+                <BackgroundRemover onProcessedImage={handleProcessedImage} />
+              ) : (
+                <div className="flex flex-col items-center justify-center py-8 text-center">
+                  <ImageIcon className="h-12 w-12 text-muted-foreground mb-2" />
+                  <h3 className="text-lg font-medium">No Image Selected</h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Please upload an image file first in the "Upload File" tab
+                  </p>
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
 
           <div>
             <label htmlFor="projectTags" className="block text-sm font-medium mb-1">

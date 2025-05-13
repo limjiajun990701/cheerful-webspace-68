@@ -2,6 +2,7 @@
 import { ExternalLink, Github, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { cn } from "@/lib/utils";
 
 interface ProjectCardProps {
   title: string;
@@ -27,15 +28,31 @@ const ProjectCard = ({
   // Determine what to display in the media section
   const displayImage = fileUrl && fileType === "image" ? fileUrl : imageUrl;
   const isPdf = fileUrl && fileType === "pdf";
+  const hasTransparentBg = displayImage?.includes("data:image/png;base64,");
   
   return (
     <div className="bg-background rounded-xl overflow-hidden shadow-sm border border-border hover:shadow-md transition-all">
-      <AspectRatio ratio={16/9} className="bg-muted">
+      <AspectRatio ratio={16/9} className={cn(
+        "bg-muted relative",
+        hasTransparentBg && "bg-gradient-to-r from-secondary/30 to-background"
+      )}>
         {displayImage ? (
           <div 
-            className="absolute inset-0 bg-muted flex items-center justify-center"
-            style={{ backgroundImage: `url(${displayImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
-          />
+            className="absolute inset-0 flex items-center justify-center"
+            style={{ 
+              backgroundImage: hasTransparentBg ? 'none' : `url(${displayImage})`, 
+              backgroundSize: 'cover',
+              backgroundPosition: 'center' 
+            }}
+          >
+            {hasTransparentBg && (
+              <img 
+                src={displayImage} 
+                alt={title}
+                className="max-h-full max-w-full object-contain" 
+              />
+            )}
+          </div>
         ) : isPdf ? (
           <div className="absolute inset-0 bg-muted flex items-center justify-center">
             <div className="flex flex-col items-center justify-center">
