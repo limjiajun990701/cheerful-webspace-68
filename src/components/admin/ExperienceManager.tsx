@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -52,6 +51,12 @@ const formSchema = z.object({
   location: z.string(),
   date: z.string(),
   description: z.string().min(1, { message: "Description is required" }),
+  skills: z.array(z.string()).default([]),
+  achievements: z.array(z.object({
+    title: z.string(),
+    value: z.string()
+  })).default([]),
+  durationInMonths: z.number().min(0).default(0)
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -64,6 +69,9 @@ interface ExperienceItem {
   location: string;
   date: string;
   description: string;
+  skills: string[];
+  achievements: { title: string, value: string }[];
+  durationInMonths: number;
 }
 
 const ExperienceManager = () => {
@@ -82,6 +90,9 @@ const ExperienceManager = () => {
       location: '',
       date: '',
       description: '',
+      skills: [],
+      achievements: [],
+      durationInMonths: 0
     },
   });
 
@@ -106,6 +117,9 @@ const ExperienceManager = () => {
       location: experience.location,
       date: experience.date,
       description: experience.description,
+      skills: experience.skills || [],
+      achievements: experience.achievements || [],
+      durationInMonths: experience.durationInMonths || 0
     });
     setIsOpen(true);
   };
@@ -172,6 +186,41 @@ const ExperienceManager = () => {
   const workExperiences = experiences.filter(exp => exp.type === 'work');
   const educationExperiences = experiences.filter(exp => exp.type === 'education');
 
+  // Add a handler for skills and achievements
+  const [newSkill, setNewSkill] = useState('');
+  const [newAchievementTitle, setNewAchievementTitle] = useState('');
+  const [newAchievementValue, setNewAchievementValue] = useState('');
+
+  const addSkill = () => {
+    if (newSkill.trim()) {
+      const currentSkills = form.getValues('skills') || [];
+      form.setValue('skills', [...currentSkills, newSkill.trim()]);
+      setNewSkill('');
+    }
+  };
+
+  const removeSkill = (index: number) => {
+    const currentSkills = form.getValues('skills') || [];
+    form.setValue('skills', currentSkills.filter((_, i) => i !== index));
+  };
+
+  const addAchievement = () => {
+    if (newAchievementTitle.trim() && newAchievementValue.trim()) {
+      const currentAchievements = form.getValues('achievements') || [];
+      form.setValue('achievements', [...currentAchievements, {
+        title: newAchievementTitle.trim(),
+        value: newAchievementValue.trim()
+      }]);
+      setNewAchievementTitle('');
+      setNewAchievementValue('');
+    }
+  };
+
+  const removeAchievement = (index: number) => {
+    const currentAchievements = form.getValues('achievements') || [];
+    form.setValue('achievements', currentAchievements.filter((_, i) => i !== index));
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -180,6 +229,9 @@ const ExperienceManager = () => {
           setIsOpen(open);
           if (!open) {
             form.reset();
+            setNewSkill('');
+            setNewAchievementTitle('');
+            setNewAchievementValue('');
           }
         }}>
           <DialogTrigger asChild>
@@ -188,7 +240,7 @@ const ExperienceManager = () => {
               Add Experience
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[600px]">
+          <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 {form.getValues('id') ? 'Edit Experience' : 'Add New Experience'}
@@ -291,6 +343,26 @@ const ExperienceManager = () => {
                 
                 <FormField
                   control={form.control}
+                  name="durationInMonths"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Duration (months)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          min="0" 
+                          placeholder="Duration in months" 
+                          {...field} 
+                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
                   name="description"
                   render={({ field }) => (
                     <FormItem>
@@ -306,6 +378,93 @@ const ExperienceManager = () => {
                     </FormItem>
                   )}
                 />
+                
+                {/* Skills section */}
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-sm font-medium">Skills</h3>
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-2">
+                    {form.getValues('skills')?.map((skill, index) => (
+                      <div key={index} className="flex items-center gap-1 bg-secondary rounded-full px-3 py-1">
+                        <span className="text-sm">{skill}</span>
+                        <button 
+                          type="button" 
+                          onClick={() => removeSkill(index)}
+                          className="text-muted-foreground hover:text-destructive"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <Input
+                      value={newSkill}
+                      onChange={(e) => setNewSkill(e.target.value)}
+                      placeholder="Add a skill"
+                      className="flex-1"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          addSkill();
+                        }
+                      }}
+                    />
+                    <Button type="button" variant="outline" onClick={addSkill}>Add</Button>
+                  </div>
+                </div>
+                
+                {/* Achievements section */}
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-sm font-medium">Achievements</h3>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    {form.getValues('achievements')?.map((achievement, index) => (
+                      <div key={index} className="flex items-center gap-2 bg-secondary rounded-lg p-2">
+                        <div className="flex-1">
+                          <div className="flex justify-between">
+                            <span className="text-sm font-medium">{achievement.title}</span>
+                            <span className="text-sm text-primary">{achievement.value}</span>
+                          </div>
+                        </div>
+                        <button 
+                          type="button" 
+                          onClick={() => removeAchievement(index)}
+                          className="text-muted-foreground hover:text-destructive"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div className="grid grid-cols-3 gap-2">
+                    <Input
+                      value={newAchievementTitle}
+                      onChange={(e) => setNewAchievementTitle(e.target.value)}
+                      placeholder="Title"
+                      className="col-span-2"
+                    />
+                    <Input
+                      value={newAchievementValue}
+                      onChange={(e) => setNewAchievementValue(e.target.value)}
+                      placeholder="Value"
+                    />
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={addAchievement}
+                      className="col-span-3"
+                    >
+                      Add Achievement
+                    </Button>
+                  </div>
+                </div>
                 
                 <DialogFooter>
                   <Button type="submit">

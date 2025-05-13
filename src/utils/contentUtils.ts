@@ -230,7 +230,10 @@ export const createExperienceItem = async (type: 'work' | 'education', data: any
         image_url: JSON.stringify({
           location: data.location,
           date: data.date,
-          type: type
+          type: type,
+          skills: data.skills || [],
+          achievements: data.achievements || [],
+          durationInMonths: data.durationInMonths || 0
         }),
         updated_by: 'admin'
       });
@@ -269,6 +272,9 @@ export const getExperienceItems = async () => {
         location: metaData.location || '',
         date: metaData.date || '',
         description: item.description || '',
+        skills: metaData.skills || [],
+        achievements: metaData.achievements || [],
+        durationInMonths: metaData.durationInMonths || 0
       };
     });
   } catch (error) {
@@ -289,7 +295,10 @@ export const updateExperienceItem = async (id: string, data: any) => {
         image_url: JSON.stringify({
           location: data.location,
           date: data.date,
-          type: data.type
+          type: data.type,
+          skills: data.skills || [],
+          achievements: data.achievements || [],
+          durationInMonths: data.durationInMonths || 0
         }),
         updated_by: 'admin',
         updated_at: new Date().toISOString() // Convert Date to ISO string

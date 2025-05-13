@@ -168,3 +168,32 @@
 .reveal-delay-4 {
   animation-delay: 0.4s;
 }
+
+@keyframes slow-move {
+  0% {
+    transform: translateX(-25%) translateY(-25%);
+  }
+  50% {
+    transform: translateX(25%) translateY(25%);
+  }
+  100% {
+    transform: translateX(-25%) translateY(-25%);
+  }
+}
+
+.animate-slow-move {
+  animation: slow-move 20s infinite alternate ease-in-out;
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 1s ease-out forwards;
+}
