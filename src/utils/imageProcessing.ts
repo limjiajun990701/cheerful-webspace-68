@@ -1,3 +1,4 @@
+
 import { pipeline, env } from '@huggingface/transformers';
 
 // Configure transformers.js to optimize downloads
@@ -64,6 +65,10 @@ export const removeBackground = async (imageElement: HTMLImageElement): Promise<
     formData.append('size', 'auto');
     
     // Call the remove.bg API
+    // NOTE: To use this service, you need to:
+    // 1. Create an account at remove.bg
+    // 2. Get your API key from https://www.remove.bg/api
+    // 3. Replace the placeholder below with your actual API key
     const response = await fetch('https://api.remove.bg/v1.0/removebg', {
       method: 'POST',
       headers: {

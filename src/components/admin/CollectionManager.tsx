@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { v4 as uuidv4 } from 'uuid';
-import { Trash, Plus, Image, Pencil, Save, X, Loader2, ImageOff } from "lucide-react";
+import { Trash, Plus, Image, Pencil, Save, X, Loader2, ImageOff, ExternalLink } from "lucide-react";
 import { loadImageFromUrl, removeBackground } from "@/utils/imageProcessing";
 
 interface Collection {
@@ -422,6 +422,29 @@ const CollectionManager = () => {
     );
   };
   
+  // Create a reusable background removal button with external link group
+  const BackgroundRemovalTools = ({ imageUrl, isEditMode = false }) => (
+    <div className="flex gap-2">
+      <Button 
+        variant="outline" 
+        onClick={() => handleRemoveBackground(imageUrl, !isEditMode)}
+        disabled={!imageUrl || isProcessingImage}
+        title="Remove Background"
+        className="shrink-0"
+      >
+        <ImageOff className="h-4 w-4" />
+      </Button>
+      <Button
+        variant="outline"
+        onClick={() => window.open('https://www.remove.bg/upload', '_blank')}
+        title="Use remove.bg website"
+        className="shrink-0"
+      >
+        <ExternalLink className="h-4 w-4" />
+      </Button>
+    </div>
+  );
+  
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -519,15 +542,18 @@ const CollectionManager = () => {
                           }}
                           placeholder="https://example.com/image.jpg"
                         />
-                        <Button 
-                          variant="outline" 
-                          onClick={() => handleRemoveBackground(newItem.image_url)}
-                          disabled={!newItem.image_url || isProcessingImage}
-                          title="Remove Background"
-                          className="shrink-0"
+                        <BackgroundRemovalTools imageUrl={newItem.image_url} />
+                      </div>
+                      <div className="mt-1 text-xs text-muted-foreground">
+                        <span>Background removal options: </span>
+                        <a 
+                          href="https://www.remove.bg" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline"
                         >
-                          <ImageOff className="h-4 w-4" />
-                        </Button>
+                          remove.bg
+                        </a>
                       </div>
                     </div>
                     
@@ -635,15 +661,18 @@ const CollectionManager = () => {
                                         }}
                                         placeholder="https://example.com/image.jpg"
                                       />
-                                      <Button 
-                                        variant="outline" 
-                                        onClick={() => handleRemoveBackground(item.image_url, false)}
-                                        disabled={!item.image_url || isProcessingImage}
-                                        title="Remove Background"
-                                        className="shrink-0"
+                                      <BackgroundRemovalTools imageUrl={item.image_url} isEditMode={true} />
+                                    </div>
+                                    <div className="mt-1 text-xs text-muted-foreground">
+                                      <span>Background removal options: </span>
+                                      <a 
+                                        href="https://www.remove.bg" 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="text-primary hover:underline"
                                       >
-                                        <ImageOff className="h-4 w-4" />
-                                      </Button>
+                                        remove.bg
+                                      </a>
                                     </div>
                                   </div>
                                   
