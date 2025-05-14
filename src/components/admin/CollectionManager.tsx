@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -97,20 +98,19 @@ const CollectionManager = () => {
       const currentYear = now.getFullYear();
       
       const { data, error } = await supabase
-        .from('api_usage')
-        .select('*')
-        .eq('api_name', 'remove_bg')
-        .eq('month', currentMonth)
-        .eq('year', currentYear)
-        .single();
+        .rpc('get_api_usage', {
+          api_name_param: 'remove_bg',
+          month_param: currentMonth,
+          year_param: currentYear
+        });
       
-      if (error && error.code !== 'PGRST116') {
+      if (error) {
         console.error('Error fetching API usage:', error);
         return;
       }
       
       if (data) {
-        setApiUsage(data as ApiUsage);
+        setApiUsage({ count: data.count || 0, month: currentMonth, year: currentYear });
       } else {
         setApiUsage({ count: 0, month: currentMonth, year: currentYear });
       }
@@ -508,7 +508,7 @@ const CollectionManager = () => {
   return (
     <div className="space-y-6">
       {apiUsage && apiUsage.count >= MONTHLY_API_LIMIT - 10 && (
-        <div className={`p-3 rounded-md flex gap-2 items-center ${apiUsage.count >= MONTHLY_API_LIMIT ? 'bg-destructive/20 text-destructive' : 'bg-warning/20 text-warning'}`}>
+        <div className={`p-3 rounded-md flex gap-2 items-center ${apiUsage.count >= MONTHLY_API_LIMIT ? 'bg-destructive/20 text-destructive' : 'bg-yellow-500/20 text-yellow-700 dark:text-yellow-400'}`}>
           <AlertTriangle className="h-5 w-5" />
           <div>
             <strong>

@@ -1,4 +1,3 @@
-
 import { pipeline, env } from '@huggingface/transformers';
 import { supabase } from "@/integrations/supabase/client";
 
@@ -9,29 +8,10 @@ env.useBrowserCache = true;
 const MAX_IMAGE_DIMENSION = 1024;
 const MONTHLY_API_LIMIT = 49; // Setting the limit to 49 calls per month
 
-function resizeImageIfNeeded(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, image: HTMLImageElement) {
-  let width = image.naturalWidth;
-  let height = image.naturalHeight;
-
-  if (width > MAX_IMAGE_DIMENSION || height > MAX_IMAGE_DIMENSION) {
-    if (width > height) {
-      height = Math.round((height * MAX_IMAGE_DIMENSION) / width);
-      width = MAX_IMAGE_DIMENSION;
-    } else {
-      width = Math.round((width * MAX_IMAGE_DIMENSION) / height);
-      height = MAX_IMAGE_DIMENSION;
-    }
-
-    canvas.width = width;
-    canvas.height = height;
-    ctx.drawImage(image, 0, 0, width, height);
-    return true;
-  }
-
-  canvas.width = width;
-  canvas.height = height;
-  ctx.drawImage(image, 0, 0);
-  return false;
+interface ApiUsageRow {
+  count: number;
+  month: number;
+  year: number;
 }
 
 /**
@@ -47,42 +27,26 @@ async function canUseRemoveBgApi(): Promise<boolean> {
     
     // Check if we already have a record for the current month
     const { data: usageData, error: fetchError } = await supabase
-      .from('api_usage')
-      .select('*')
-      .eq('api_name', 'remove_bg')
-      .eq('month', currentMonth)
-      .eq('year', currentYear)
-      .single();
+      .rpc('get_api_usage', {
+        api_name_param: 'remove_bg',
+        month_param: currentMonth,
+        year_param: currentYear
+      });
     
-    if (fetchError && fetchError.code !== 'PGRST116') {
-      // If there's an error other than "no rows returned", log it
+    if (fetchError) {
+      // If there's an error, log it
       console.error('Error checking API usage:', fetchError);
       // Default to using the fallback method if there's an error
       return false;
     }
     
     // If we have data and the count is below the limit, we can use the API
-    if (usageData) {
+    if (usageData && usageData.count !== undefined) {
       console.log(`Current remove.bg API usage: ${usageData.count}/${MONTHLY_API_LIMIT} for ${currentMonth}/${currentYear}`);
       return usageData.count < MONTHLY_API_LIMIT;
     } else {
       // No record for this month yet, so we're definitely under the limit
-      // Create a new record for this month
-      console.log(`Creating new API usage record for ${currentMonth}/${currentYear}`);
-      const { error: insertError } = await supabase
-        .from('api_usage')
-        .insert({
-          api_name: 'remove_bg',
-          month: currentMonth,
-          year: currentYear,
-          count: 0
-        });
-      
-      if (insertError) {
-        console.error('Error creating API usage record:', insertError);
-        return false;
-      }
-      
+      console.log(`No API usage record found for ${currentMonth}/${currentYear}`);
       return true;
     }
   } catch (error) {
@@ -297,3 +261,28 @@ export const loadImageFromUrl = (url: string): Promise<HTMLImageElement> => {
     img.src = url;
   });
 };
+
+function resizeImageIfNeeded(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, image: HTMLImageElement) {
+  let width = image.naturalWidth;
+  let height = image.naturalHeight;
+
+  if (width > MAX_IMAGE_DIMENSION || height > MAX_IMAGE_DIMENSION) {
+    if (width > height) {
+      height = Math.round((height * MAX_IMAGE_DIMENSION) / width);
+      width = MAX_IMAGE_DIMENSION;
+    } else {
+      width = Math.round((width * MAX_IMAGE_DIMENSION) / height);
+      height = MAX_IMAGE_DIMENSION;
+    }
+
+    canvas.width = width;
+    canvas.height = height;
+    ctx.drawImage(image, 0, 0, width, height);
+    return true;
+  }
+
+  canvas.width = width;
+  canvas.height = height;
+  ctx.drawImage(image, 0, 0);
+  return false;
+}

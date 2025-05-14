@@ -33,6 +33,36 @@ export type Database = {
         }
         Relationships: []
       }
+      api_usage: {
+        Row: {
+          api_name: string
+          count: number
+          created_at: string
+          id: string
+          month: number
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          api_name: string
+          count?: number
+          created_at?: string
+          id?: string
+          month: number
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          api_name?: string
+          count?: number
+          created_at?: string
+          id?: string
+          month?: number
+          updated_at?: string
+          year?: number
+        }
+        Relationships: []
+      }
       blog_posts: {
         Row: {
           content: string
@@ -271,7 +301,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      increment_api_usage: {
+        Args: {
+          api_name_param: string
+          month_param: number
+          year_param: number
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
