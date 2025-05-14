@@ -224,9 +224,19 @@ const CollectionManager = () => {
       });
     } catch (error) {
       console.error("Error removing background:", error);
+      
+      // Provide more specific error messages based on the error
+      let errorMessage = "Failed to remove background. Please try a different image.";
+      
+      if (error.message && error.message.includes("webgpu")) {
+        errorMessage = "WebGPU is not supported in your browser. Please try a modern browser like Chrome or Edge.";
+      } else if (error.message && error.message.includes("CORS")) {
+        errorMessage = "The image URL has CORS restrictions. Try uploading the image directly or use a different image source.";
+      }
+      
       toast({
         title: "Error",
-        description: "Failed to remove background. Please try a different image.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
