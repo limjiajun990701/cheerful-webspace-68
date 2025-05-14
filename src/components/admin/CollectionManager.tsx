@@ -232,6 +232,10 @@ const CollectionManager = () => {
         errorMessage = "WebGPU is not supported in your browser. Please try a modern browser like Chrome or Edge.";
       } else if (error.message && error.message.includes("CORS")) {
         errorMessage = "The image URL has CORS restrictions. Try uploading the image directly or use a different image source.";
+      } else if (error.message && error.message.includes("API error")) {
+        errorMessage = "Background removal API error. Please try again later or with a different image.";
+      } else if (error.message && error.message.includes("X-Api-Key")) {
+        errorMessage = "API key missing or invalid. Please contact your administrator.";
       }
       
       toast({
