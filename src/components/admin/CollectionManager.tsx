@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { v4 as uuidv4 } from 'uuid';
-import { Trash, Plus, Image, Pencil, Save, X, Loader2, ImageOff, ExternalLink } from "lucide-react";
+import { Trash, Plus, Image, Pencil, Save, X, Loader2, ImageOff, ExternalLink, AlertTriangle } from "lucide-react";
 import { loadImageFromUrl, removeBackground } from "@/utils/imageProcessing";
 
 interface Collection {
@@ -26,6 +26,14 @@ interface CollectionItem {
   animation_type: string | null;
   display_order: number | null;
 }
+
+interface ApiUsage {
+  count: number;
+  month: number;
+  year: number;
+}
+
+const MONTHLY_API_LIMIT = 49;
 
 const CollectionManager = () => {
   const { toast } = useToast();
@@ -47,6 +55,7 @@ const CollectionManager = () => {
   const [isProcessingImage, setIsProcessingImage] = useState(false);
   const [processedImageUrl, setProcessedImageUrl] = useState<string | null>(null);
   const [imageToProcess, setImageToProcess] = useState<string | null>(null);
+  const [apiUsage, setApiUsage] = useState<ApiUsage | null>(null);
   
   // Fetch all collections
   const fetchCollections = async () => {
@@ -80,6 +89,36 @@ const CollectionManager = () => {
     }
   };
   
+  // Fetch API usage data
+  const fetchApiUsage = async () => {
+    try {
+      const now = new Date();
+      const currentMonth = now.getMonth() + 1;
+      const currentYear = now.getFullYear();
+      
+      const { data, error } = await supabase
+        .from('api_usage')
+        .select('*')
+        .eq('api_name', 'remove_bg')
+        .eq('month', currentMonth)
+        .eq('year', currentYear)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching API usage:', error);
+        return;
+      }
+      
+      if (data) {
+        setApiUsage(data as ApiUsage);
+      } else {
+        setApiUsage({ count: 0, month: currentMonth, year: currentYear });
+      }
+    } catch (error) {
+      console.error('Error in fetchApiUsage:', error);
+    }
+  };
+  
   // Fetch items for a specific collection
   const fetchCollectionItems = async (collectionId: string) => {
     try {
@@ -107,6 +146,7 @@ const CollectionManager = () => {
   // Load collections on component mount
   useEffect(() => {
     fetchCollections();
+    fetchApiUsage();
   }, []);
   
   // Add new collection
@@ -190,10 +230,27 @@ const CollectionManager = () => {
       setIsProcessingImage(true);
       setImageToProcess(imageUrl);
       
-      toast({
-        title: "Processing Image",
-        description: "Removing background - this may take a moment...",
-      });
+      // Check API usage before proceeding
+      await fetchApiUsage();
+      
+      if (apiUsage && apiUsage.count >= MONTHLY_API_LIMIT) {
+        toast({
+          title: "API Limit Reached",
+          description: "Monthly remove.bg API limit reached (49/50). Using local processing method instead.",
+          variant: "destructive",
+        });
+      } else if (apiUsage && apiUsage.count >= MONTHLY_API_LIMIT - 5) {
+        toast({
+          title: "API Limit Warning",
+          description: `Monthly remove.bg API usage: ${apiUsage.count}/49. Consider using remove.bg website directly.`,
+          variant: "warning",
+        });
+      } else {
+        toast({
+          title: "Processing Image",
+          description: "Removing background - this may take a moment...",
+        });
+      }
       
       // Load the image from URL
       const img = await loadImageFromUrl(imageUrl);
@@ -217,6 +274,9 @@ const CollectionManager = () => {
           )
         );
       }
+      
+      // Refresh API usage count
+      fetchApiUsage();
       
       toast({
         title: "Success",
@@ -447,6 +507,26 @@ const CollectionManager = () => {
   
   return (
     <div className="space-y-6">
+      {apiUsage && apiUsage.count >= MONTHLY_API_LIMIT - 10 && (
+        <div className={`p-3 rounded-md flex gap-2 items-center ${apiUsage.count >= MONTHLY_API_LIMIT ? 'bg-destructive/20 text-destructive' : 'bg-warning/20 text-warning'}`}>
+          <AlertTriangle className="h-5 w-5" />
+          <div>
+            <strong>
+              {apiUsage.count >= MONTHLY_API_LIMIT
+                ? "API Limit Reached!"
+                : "API Limit Warning!"
+              }
+            </strong>
+            <p className="text-sm">
+              {apiUsage.count >= MONTHLY_API_LIMIT
+                ? `You've used all ${MONTHLY_API_LIMIT} monthly remove.bg API calls. The system is now using the local method.`
+                : `${apiUsage.count}/${MONTHLY_API_LIMIT} monthly remove.bg API calls used. Consider using the website directly.`
+              }
+            </p>
+          </div>
+        </div>
+      )}
+      
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Collection Manager</h2>
         <Button onClick={() => setIsAddingCollection(!isAddingCollection)} variant="outline">
