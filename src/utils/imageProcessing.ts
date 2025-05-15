@@ -1,5 +1,6 @@
 import { pipeline, env } from '@huggingface/transformers';
 import { supabase } from "@/integrations/supabase/client";
+import type { ApiUsageRpcResult } from "@/types/api";
 
 // Configure transformers.js to optimize downloads
 env.allowLocalModels = false;
@@ -31,7 +32,7 @@ async function canUseRemoveBgApi(): Promise<boolean> {
         api_name_param: 'remove_bg',
         month_param: currentMonth,
         year_param: currentYear
-      });
+      }) as { data: ApiUsageRpcResult, error: any };
     
     if (fetchError) {
       // If there's an error, log it

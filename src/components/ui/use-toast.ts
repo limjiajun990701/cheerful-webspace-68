@@ -8,7 +8,7 @@ export const showApiLimitToast = () => {
   toast({
     title: "API Limit Warning",
     description: "Monthly remove.bg API limit is close to being reached. Using local processing method instead.",
-    variant: "warning",
+    variant: "default",
     duration: 7000,
   });
 };

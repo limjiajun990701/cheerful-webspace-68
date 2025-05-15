@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -28,7 +27,7 @@ interface CollectionItem {
   display_order: number | null;
 }
 
-interface ApiUsage {
+interface ApiUsageData {
   count: number;
   month: number;
   year: number;
@@ -56,7 +55,7 @@ const CollectionManager = () => {
   const [isProcessingImage, setIsProcessingImage] = useState(false);
   const [processedImageUrl, setProcessedImageUrl] = useState<string | null>(null);
   const [imageToProcess, setImageToProcess] = useState<string | null>(null);
-  const [apiUsage, setApiUsage] = useState<ApiUsage | null>(null);
+  const [apiUsage, setApiUsage] = useState<ApiUsageData | null>(null);
   
   // Fetch all collections
   const fetchCollections = async () => {
@@ -102,7 +101,7 @@ const CollectionManager = () => {
           api_name_param: 'remove_bg',
           month_param: currentMonth,
           year_param: currentYear
-        });
+        }) as { data: ApiUsageData, error: any };
       
       if (error) {
         console.error('Error fetching API usage:', error);
@@ -110,7 +109,7 @@ const CollectionManager = () => {
       }
       
       if (data) {
-        setApiUsage({ count: data.count || 0, month: currentMonth, year: currentYear });
+        setApiUsage(data);
       } else {
         setApiUsage({ count: 0, month: currentMonth, year: currentYear });
       }
@@ -243,7 +242,7 @@ const CollectionManager = () => {
         toast({
           title: "API Limit Warning",
           description: `Monthly remove.bg API usage: ${apiUsage.count}/49. Consider using remove.bg website directly.`,
-          variant: "warning",
+          variant: "default",
         });
       } else {
         toast({

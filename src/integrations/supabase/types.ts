@@ -301,6 +301,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_api_usage: {
+        Args: {
+          api_name_param: string
+          month_param: number
+          year_param: number
+        }
+        Returns: Json
+      }
       increment_api_usage: {
         Args: {
           api_name_param: string
