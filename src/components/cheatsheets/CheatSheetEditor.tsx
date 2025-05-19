@@ -106,18 +106,23 @@ const CheatSheetEditor: React.FC = () => {
 
   const saveCheatSheetMutation = useMutation({
     mutationFn: async () => {
+      // Get the current user
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData?.user?.id) {
+        throw new Error("User not authenticated");
+      }
+
       // Create the cheatsheet
       const { data: cheatsheetData, error: cheatsheetError } = await supabase
         .from('cheatsheets')
-        .insert([
-          {
-            title,
-            description,
-            language,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          }
-        ])
+        .insert({
+          title,
+          description,
+          language,
+          created_by: userData.user.id, // Add the user ID as created_by
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
         .select()
         .single();
 
