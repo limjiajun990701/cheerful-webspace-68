@@ -22,6 +22,9 @@ import NotFound from "./pages/NotFound";
 import Contact from "./pages/Contact";
 import CheatSheets from "./pages/CheatSheets";
 
+// Import styles
+import "./styles/cheatsheet-print.css";
+
 // Create a client
 const queryClient = new QueryClient({
   defaultOptions: {

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import CheatSheetViewer from "./CheatSheetViewer";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { CheatSheet } from "@/types/cheatsheet";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface CheatSheetGalleryProps {
   isAdmin: boolean;
@@ -45,6 +45,11 @@ const CheatSheetGallery: React.FC<CheatSheetGalleryProps> = ({ isAdmin }) => {
   // Delete cheatsheet mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
+      // Check if user is admin before allowing deletion
+      if (!isAdmin) {
+        throw new Error("Unauthorized: Only admins can delete cheat sheets");
+      }
+      
       const { error } = await supabase
         .from('cheatsheets')
         .delete()
@@ -93,7 +98,31 @@ const CheatSheetGallery: React.FC<CheatSheetGalleryProps> = ({ isAdmin }) => {
     setFilteredSheets(filtered);
   };
 
+  const handleEditCheatSheet = (sheet: CheatSheet) => {
+    if (!isAdmin) {
+      toast({
+        title: "Access Denied",
+        description: "Only administrators can edit cheat sheets",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Navigate to edit tab with the selected sheet ID
+    const navigate = useNavigate();
+    navigate(`/cheatsheets?tab=create&id=${sheet.id}`);
+  };
+
   const handleDeleteCheatSheet = async (id: string) => {
+    if (!isAdmin) {
+      toast({
+        title: "Access Denied",
+        description: "Only administrators can delete cheat sheets",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     try {
       await deleteMutation.mutateAsync(id);
     } catch (error) {
@@ -199,7 +228,7 @@ const CheatSheetGallery: React.FC<CheatSheetGalleryProps> = ({ isAdmin }) => {
                             </Button>
                             {isAdmin && (
                               <>
-                                <Button size="sm" variant="ghost">
+                                <Button size="sm" variant="ghost" onClick={() => handleEditCheatSheet(sheet)}>
                                   <Edit className="h-4 w-4" />
                                 </Button>
                                 <Button 
@@ -240,7 +269,7 @@ const CheatSheetGallery: React.FC<CheatSheetGalleryProps> = ({ isAdmin }) => {
                         </Button>
                         {isAdmin && (
                           <div className="flex space-x-2">
-                            <Button size="sm" variant="outline">
+                            <Button size="sm" variant="outline" onClick={() => handleEditCheatSheet(sheet)}>
                               <Edit className="h-4 w-4 mr-1" />
                               Edit
                             </Button>
