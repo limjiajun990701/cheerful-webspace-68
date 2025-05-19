@@ -126,6 +126,97 @@ export type Database = {
         }
         Relationships: []
       }
+      cheatsheet_entries: {
+        Row: {
+          command: string | null
+          description: string | null
+          display_order: number
+          group_id: string
+          id: string
+        }
+        Insert: {
+          command?: string | null
+          description?: string | null
+          display_order?: number
+          group_id: string
+          id?: string
+        }
+        Update: {
+          command?: string | null
+          description?: string | null
+          display_order?: number
+          group_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cheatsheet_entries_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "cheatsheet_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cheatsheet_groups: {
+        Row: {
+          cheatsheet_id: string
+          display_order: number
+          id: string
+          title: string
+        }
+        Insert: {
+          cheatsheet_id: string
+          display_order?: number
+          id?: string
+          title: string
+        }
+        Update: {
+          cheatsheet_id?: string
+          display_order?: number
+          id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cheatsheet_groups_cheatsheet_id_fkey"
+            columns: ["cheatsheet_id"]
+            isOneToOne: false
+            referencedRelation: "cheatsheets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cheatsheets: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          language: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          language: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          language?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       collection_items: {
         Row: {
           animation_type: string | null

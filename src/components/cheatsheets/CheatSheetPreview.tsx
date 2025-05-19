@@ -1,8 +1,6 @@
 
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Copy } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 
 interface CheatSheetPreviewProps {
   title: string;
@@ -17,17 +15,6 @@ const CheatSheetPreview: React.FC<CheatSheetPreviewProps> = ({
   language,
   groups
 }) => {
-  const { toast } = useToast();
-  
-  const copyCommand = (command: string) => {
-    navigator.clipboard.writeText(command);
-    toast({
-      title: "Copied",
-      description: "Command copied to clipboard",
-      duration: 2000
-    });
-  };
-  
   return (
     <div className="space-y-6 pb-10">
       <div>
@@ -51,16 +38,10 @@ const CheatSheetPreview: React.FC<CheatSheetPreviewProps> = ({
                 {group.entries.map((entry: any) => (
                   <div key={entry.id} className="p-4">
                     <div className="space-y-1">
-                      <div className="relative group">
+                      <div>
                         <pre className="text-sm font-mono bg-muted/30 p-2 rounded overflow-x-auto">
                           {entry.command || "Command not specified"}
                         </pre>
-                        <button 
-                          className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-muted"
-                          onClick={() => copyCommand(entry.command)}
-                        >
-                          <Copy className="h-3.5 w-3.5" />
-                        </button>
                       </div>
                       <p className="text-sm text-muted-foreground">
                         {entry.description || "No description provided"}

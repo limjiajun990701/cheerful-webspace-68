@@ -8,8 +8,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import { Plus, X, FileDown, Copy, Save, Trash2, MoveVertical, FileText, Code } from "lucide-react";
+import { Plus, X, Save, Trash2, MoveVertical } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { v4 as uuidv4 } from "uuid";
+import { useAuth } from "@/hooks/useAuth";
 import CheatSheetPreview from "./CheatSheetPreview";
 
 interface CheatSheetEntry {
@@ -31,19 +35,22 @@ const CheatSheetEditor: React.FC = () => {
   const [language, setLanguage] = useState("javascript");
   const [groups, setGroups] = useState<CheatSheetGroup[]>([
     {
-      id: "group-1",
+      id: uuidv4(),
       title: "Basic Commands",
       entries: [
-        { id: "entry-1", command: "npm install", description: "Install dependencies" },
-        { id: "entry-2", command: "npm start", description: "Start development server" }
+        { id: uuidv4(), command: "npm install", description: "Install dependencies" },
+        { id: uuidv4(), command: "npm start", description: "Start development server" }
       ]
     }
   ]);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const { isLoggedIn } = useAuth();
+  const [isSaving, setIsSaving] = useState(false);
 
   const addGroup = () => {
     const newGroup: CheatSheetGroup = {
-      id: `group-${Date.now()}`,
+      id: uuidv4(),
       title: "New Group",
       entries: []
     };
@@ -62,7 +69,7 @@ const CheatSheetEditor: React.FC = () => {
 
   const addEntry = (groupId: string) => {
     const newEntry: CheatSheetEntry = {
-      id: `entry-${Date.now()}`,
+      id: uuidv4(),
       command: "",
       description: ""
     };
@@ -97,37 +104,101 @@ const CheatSheetEditor: React.FC = () => {
     ));
   };
 
-  const saveCheatSheet = async () => {
-    try {
-      // This would be replaced with actual Supabase insert/update
+  const saveCheatSheetMutation = useMutation({
+    mutationFn: async () => {
+      // Create the cheatsheet
+      const { data: cheatsheetData, error: cheatsheetError } = await supabase
+        .from('cheatsheets')
+        .insert([
+          {
+            title,
+            description,
+            language,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }
+        ])
+        .select()
+        .single();
+
+      if (cheatsheetError) throw new Error(cheatsheetError.message);
+      
+      // Create groups with display order
+      const groupsWithOrder = groups.map((group, index) => ({
+        cheatsheet_id: cheatsheetData.id,
+        title: group.title,
+        display_order: index,
+        id: group.id
+      }));
+      
+      const { error: groupsError } = await supabase
+        .from('cheatsheet_groups')
+        .insert(groupsWithOrder);
+
+      if (groupsError) throw new Error(groupsError.message);
+      
+      // Create entries for each group with display order
+      const entriesData = groups.flatMap(group => 
+        group.entries.map((entry, index) => ({
+          group_id: group.id,
+          command: entry.command,
+          description: entry.description,
+          display_order: index
+        }))
+      );
+      
+      if (entriesData.length > 0) {
+        const { error: entriesError } = await supabase
+          .from('cheatsheet_entries')
+          .insert(entriesData);
+
+        if (entriesError) throw new Error(entriesError.message);
+      }
+      
+      return cheatsheetData;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cheatsheets'] });
       toast({
         title: "Success",
         description: "Cheat sheet saved successfully",
       });
-    } catch (error) {
+      
+      // Reset form
+      setTitle("New Cheat Sheet");
+      setDescription("");
+      setLanguage("javascript");
+      setGroups([{
+        id: uuidv4(),
+        title: "Group Title",
+        entries: []
+      }]);
+    },
+    onError: (error) => {
       console.error("Error saving cheat sheet:", error);
       toast({
         title: "Error",
-        description: "Failed to save cheat sheet",
+        description: `Failed to save cheat sheet: ${error.message}`,
         variant: "destructive"
       });
+    },
+    onSettled: () => {
+      setIsSaving(false);
     }
-  };
+  });
 
-  const exportCheatSheet = (format: string) => {
-    // This would implement export functionality based on format
-    toast({
-      title: "Export Started",
-      description: `Exporting as ${format}...`,
-    });
-  };
-
-  const copyToClipboard = (format: string) => {
-    // This would implement clipboard copy functionality for HTML or Markdown
-    toast({
-      title: "Copied!",
-      description: `${format} copied to clipboard`,
-    });
+  const saveCheatSheet = async () => {
+    if (!isLoggedIn) {
+      toast({
+        title: "Authentication Required",
+        description: "You must be logged in as an admin to create cheat sheets",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setIsSaving(true);
+    saveCheatSheetMutation.mutate();
   };
 
   const onDragEnd = (result: any) => {
@@ -385,50 +456,13 @@ const CheatSheetEditor: React.FC = () => {
           
           {/* Action Buttons */}
           <div className="flex flex-wrap gap-3 pt-4 border-t">
-            <Button onClick={saveCheatSheet} className="flex-1 sm:flex-none">
+            <Button 
+              onClick={saveCheatSheet}
+              className="flex-1 sm:flex-none"
+              disabled={isSaving}
+            >
               <Save className="h-4 w-4 mr-2" />
-              Save
-            </Button>
-            
-            <div className="dropdown relative ml-auto">
-              <Button variant="outline" className="flex-1 sm:flex-none">
-                <FileDown className="h-4 w-4 mr-2" />
-                Export
-              </Button>
-              <div className="dropdown-content hidden absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-popover border z-10 p-1">
-                <Button variant="ghost" className="w-full justify-start" onClick={() => exportCheatSheet("pdf")}>
-                  Export as PDF
-                </Button>
-                <Button variant="ghost" className="w-full justify-start" onClick={() => exportCheatSheet("image")}>
-                  Export as Image
-                </Button>
-                <Button variant="ghost" className="w-full justify-start" onClick={() => exportCheatSheet("html")}>
-                  Export as HTML
-                </Button>
-                <Button variant="ghost" className="w-full justify-start" onClick={() => exportCheatSheet("markdown")}>
-                  Export as Markdown
-                </Button>
-              </div>
-            </div>
-            
-            <div className="dropdown relative">
-              <Button variant="outline" className="flex-1 sm:flex-none">
-                <Copy className="h-4 w-4 mr-2" />
-                Copy
-              </Button>
-              <div className="dropdown-content hidden absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-popover border z-10 p-1">
-                <Button variant="ghost" className="w-full justify-start" onClick={() => copyToClipboard("html")}>
-                  Copy as HTML
-                </Button>
-                <Button variant="ghost" className="w-full justify-start" onClick={() => copyToClipboard("markdown")}>
-                  Copy as Markdown
-                </Button>
-              </div>
-            </div>
-            
-            <Button variant="outline" className="flex-1 sm:flex-none">
-              <Code className="h-4 w-4 mr-2" />
-              Templates
+              {isSaving ? "Saving..." : "Save"}
             </Button>
           </div>
         </TabsContent>

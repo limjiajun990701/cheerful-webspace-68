@@ -3,93 +3,76 @@ import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Search, FileText, Grid2X2, List, Edit, Trash2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import CheatSheetViewer from "./CheatSheetViewer";
-
-interface CheatSheet {
-  id: string;
-  title: string;
-  description: string;
-  language: string;
-  created_at: string;
-  updated_at: string;
-  created_by: string;
-  tags: string[];
-}
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { CheatSheet } from "@/types/cheatsheet";
 
 interface CheatSheetGalleryProps {
   isAdmin: boolean;
 }
 
 const CheatSheetGallery: React.FC<CheatSheetGalleryProps> = ({ isAdmin }) => {
-  const [cheatSheets, setCheatSheets] = useState<CheatSheet[]>([]);
   const [filteredSheets, setFilteredSheets] = useState<CheatSheet[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [language, setLanguage] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [selectedSheet, setSelectedSheet] = useState<CheatSheet | null>(null);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    fetchCheatSheets();
-  }, []);
+  // Fetch cheatsheets from Supabase
+  const { data: cheatSheets = [], isLoading } = useQuery({
+    queryKey: ['cheatsheets'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('cheatsheets')
+        .select('*')
+        .order('updated_at', { ascending: false });
+
+      if (error) {
+        console.error("Error fetching cheat sheets:", error);
+        throw new Error(error.message);
+      }
+
+      return data as CheatSheet[];
+    }
+  });
+
+  // Delete cheatsheet mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('cheatsheets')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        throw new Error(error.message);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cheatsheets'] });
+      toast({
+        title: "Success",
+        description: "Cheat sheet deleted successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: `Failed to delete cheat sheet: ${error.message}`,
+        variant: "destructive"
+      });
+    }
+  });
 
   useEffect(() => {
     filterCheatSheets();
   }, [searchQuery, language, cheatSheets]);
-
-  const fetchCheatSheets = async () => {
-    try {
-      // This would be replaced with actual Supabase query
-      // For now using placeholder data
-      const dummyData: CheatSheet[] = [
-        {
-          id: "1",
-          title: "Git Commands",
-          description: "Essential Git commands for daily use",
-          language: "git",
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          created_by: "admin",
-          tags: ["version control", "git", "development"]
-        },
-        {
-          id: "2",
-          title: "JavaScript Array Methods",
-          description: "Common array methods in JavaScript",
-          language: "javascript",
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          created_by: "admin",
-          tags: ["javascript", "programming", "arrays"]
-        },
-        {
-          id: "3",
-          title: "Linux Terminal Commands",
-          description: "Useful commands for Linux terminal",
-          language: "bash",
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          created_by: "admin",
-          tags: ["linux", "terminal", "commands"]
-        }
-      ];
-      
-      setCheatSheets(dummyData);
-      setFilteredSheets(dummyData);
-    } catch (error) {
-      console.error("Error fetching cheat sheets:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load cheat sheets",
-        variant: "destructive"
-      });
-    }
-  };
 
   const filterCheatSheets = () => {
     let filtered = [...cheatSheets];
@@ -98,8 +81,7 @@ const CheatSheetGallery: React.FC<CheatSheetGalleryProps> = ({ isAdmin }) => {
     if (searchQuery) {
       filtered = filtered.filter(sheet => 
         sheet.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        sheet.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        sheet.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+        (sheet.description && sheet.description.toLowerCase().includes(searchQuery.toLowerCase()))
       );
     }
     
@@ -113,21 +95,9 @@ const CheatSheetGallery: React.FC<CheatSheetGalleryProps> = ({ isAdmin }) => {
 
   const handleDeleteCheatSheet = async (id: string) => {
     try {
-      // This would be replaced with actual Supabase deletion
-      setCheatSheets(cheatSheets.filter(sheet => sheet.id !== id));
-      setFilteredSheets(filteredSheets.filter(sheet => sheet.id !== id));
-      
-      toast({
-        title: "Success",
-        description: "Cheat sheet deleted successfully",
-      });
+      await deleteMutation.mutateAsync(id);
     } catch (error) {
-      console.error("Error deleting cheat sheet:", error);
-      toast({
-        title: "Error",
-        description: "Failed to delete cheat sheet",
-        variant: "destructive"
-      });
+      console.error("Error in delete handler:", error);
     }
   };
 
@@ -146,7 +116,7 @@ const CheatSheetGallery: React.FC<CheatSheetGalleryProps> = ({ isAdmin }) => {
           <Button variant="outline" onClick={closeCheatSheet}>
             Back to Gallery
           </Button>
-          <CheatSheetViewer cheatSheet={selectedSheet} />
+          <CheatSheetViewer cheatSheet={selectedSheet} isAdmin={isAdmin} />
         </div>
       ) : (
         <>
@@ -173,7 +143,7 @@ const CheatSheetGallery: React.FC<CheatSheetGalleryProps> = ({ isAdmin }) => {
                   <SelectItem value="typescript">TypeScript</SelectItem>
                   <SelectItem value="python">Python</SelectItem>
                   <SelectItem value="git">Git</SelectItem>
-                  <SelectItem value="bash">Bash/Terminal</SelectItem>
+                  <SelectItem value="bash">Bash</SelectItem>
                   <SelectItem value="html">HTML</SelectItem>
                   <SelectItem value="css">CSS</SelectItem>
                 </SelectContent>
@@ -200,7 +170,12 @@ const CheatSheetGallery: React.FC<CheatSheetGalleryProps> = ({ isAdmin }) => {
             </div>
           </div>
           
-          {filteredSheets.length === 0 ? (
+          {isLoading ? (
+            <div className="text-center py-12">
+              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
+              <p className="mt-4 text-muted-foreground">Loading cheat sheets...</p>
+            </div>
+          ) : filteredSheets.length === 0 ? (
             <div className="text-center py-12">
               <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
               <h3 className="mt-4 text-lg font-semibold">No cheat sheets found</h3>
@@ -257,11 +232,6 @@ const CheatSheetGallery: React.FC<CheatSheetGalleryProps> = ({ isAdmin }) => {
                           <span className="inline-block px-2 py-1 text-xs rounded-md bg-primary/10 text-primary">
                             {sheet.language}
                           </span>
-                          {sheet.tags.slice(0, 3).map((tag, index) => (
-                            <span key={index} className="inline-block px-2 py-1 text-xs rounded-md bg-secondary/20 text-secondary-foreground">
-                              {tag}
-                            </span>
-                          ))}
                         </div>
                       </CardContent>
                       <CardFooter className="flex justify-between">

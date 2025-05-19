@@ -1,0 +1,53 @@
+
+@media print {
+  /* Set page to A4 size */
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+  
+  /* Hide unwanted elements when printing */
+  body * {
+    visibility: hidden;
+  }
+  
+  #cheatsheet-content,
+  #cheatsheet-content * {
+    visibility: visible;
+  }
+  
+  #cheatsheet-content {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+  
+  .print\\:hidden {
+    display: none !important;
+  }
+  
+  .print\\:break-inside-avoid {
+    break-inside: avoid;
+  }
+  
+  /* Make text smaller to fit more content */
+  #cheatsheet-content {
+    font-size: 10pt;
+  }
+  
+  #cheatsheet-content h1 {
+    font-size: 18pt;
+  }
+  
+  #cheatsheet-content h3 {
+    font-size: 14pt;
+  }
+  
+  /* Ensure proper grid layout in print */
+  .print\\:grid-cols-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10mm;
+  }
+}
