@@ -4,20 +4,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import CheatSheetGallery from "@/components/cheatsheets/CheatSheetGallery";
 import CheatSheetEditor from "@/components/cheatsheets/CheatSheetEditor";
 import { useAuth } from "@/hooks/useAuth";
-import { isAuthenticated } from "@/utils/authUtils";
 import { Separator } from "@/components/ui/separator";
 
 const CheatSheets = () => {
-  const [isAdmin, setIsAdmin] = React.useState(false);
-  
-  React.useEffect(() => {
-    const checkAdmin = async () => {
-      const auth = await isAuthenticated();
-      setIsAdmin(auth);
-    };
-    
-    checkAdmin();
-  }, []);
+  const { isLoggedIn } = useAuth();
 
   return (
     <div className="container py-6 md:py-10 max-w-7xl mx-auto">
@@ -34,14 +24,14 @@ const CheatSheets = () => {
         <Tabs defaultValue="browse" className="w-full">
           <TabsList className="mb-6">
             <TabsTrigger value="browse">Browse</TabsTrigger>
-            {isAdmin && <TabsTrigger value="create">Create & Edit</TabsTrigger>}
+            {isLoggedIn && <TabsTrigger value="create">Create & Edit</TabsTrigger>}
           </TabsList>
           
           <TabsContent value="browse" className="space-y-8">
-            <CheatSheetGallery isAdmin={isAdmin} />
+            <CheatSheetGallery isAdmin={isLoggedIn} />
           </TabsContent>
           
-          {isAdmin && (
+          {isLoggedIn && (
             <TabsContent value="create" className="space-y-8">
               <CheatSheetEditor />
             </TabsContent>

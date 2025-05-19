@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "./components/ThemeProvider";
+import { AuthProvider } from "./hooks/useAuth";
 import Layout from "./components/Layout";
 import Index from "./pages/Index";
 import About from "./pages/About";
@@ -35,29 +36,31 @@ const App = () => (
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="system">
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Layout />}>
-                <Route index element={<Index />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/experience" element={<Experience />} />
-                <Route path="/projects" element={<Projects />} />
-                <Route path="/certifications" element={<Certifications />} />
-                <Route path="/collections" element={<Collections />} />
-                <Route path="/blog" element={<Blog />} />
-                <Route path="/blog/:id" element={<BlogPost />} />
-                <Route path="/cheatsheets" element={<CheatSheets />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/admin/login" element={<AdminLogin />} />
-                <Route path="/admin" element={<Admin />} />
-                <Route path="*" element={<NotFound />} />
-              </Route>
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Layout />}>
+                  <Route index element={<Index />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/experience" element={<Experience />} />
+                  <Route path="/projects" element={<Projects />} />
+                  <Route path="/certifications" element={<Certifications />} />
+                  <Route path="/collections" element={<Collections />} />
+                  <Route path="/blog" element={<Blog />} />
+                  <Route path="/blog/:id" element={<BlogPost />} />
+                  <Route path="/cheatsheets" element={<CheatSheets />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/admin/login" element={<AdminLogin />} />
+                  <Route path="/admin" element={<Admin />} />
+                  <Route path="*" element={<NotFound />} />
+                </Route>
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
   </React.StrictMode>
