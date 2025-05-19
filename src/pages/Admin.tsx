@@ -15,7 +15,8 @@ import SkillsManager from "../components/admin/SkillsManager";
 import ExperienceManager from "../components/admin/ExperienceManager";
 import ExpertiseManager from "../components/admin/ExpertiseManager";
 import CollectionManager from "../components/admin/CollectionManager";
-import { LogOut, LayoutDashboard, Settings, FileText, Award, Briefcase, User, Home, Code, Star, Image } from "lucide-react";
+import CheatSheetManager from "../components/admin/CheatSheetManager";
+import { LogOut, LayoutDashboard, Settings, FileText, Award, Briefcase, User, Home, Code, Star, Image, FileCode } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
 const Admin = () => {
@@ -134,7 +135,7 @@ const Admin = () => {
         <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <div className="border-b border-border px-6 pt-4 overflow-x-auto">
-              <TabsList className="grid grid-cols-10 gap-2 bg-muted/50 p-1">
+              <TabsList className="grid grid-cols-11 gap-2 bg-muted/50 p-1">
                 <TabsTrigger value="home" className="flex items-center gap-2 data-[state=active]:bg-background">
                   <Home className="h-4 w-4" />
                   <span className="hidden sm:inline">Home Page</span>
@@ -169,6 +170,11 @@ const Admin = () => {
                   <Award className="h-4 w-4" />
                   <span className="hidden sm:inline">Certifications</span>
                   <span className="sm:hidden">Certs</span>
+                </TabsTrigger>
+                <TabsTrigger value="cheatsheets" className="flex items-center gap-2 data-[state=active]:bg-background">
+                  <FileCode className="h-4 w-4" />
+                  <span className="hidden sm:inline">Cheat Sheets</span>
+                  <span className="sm:hidden">Sheets</span>
                 </TabsTrigger>
                 <TabsTrigger value="skills" className="flex items-center gap-2 data-[state=active]:bg-background">
                   <Code className="h-4 w-4" />
@@ -218,6 +224,10 @@ const Admin = () => {
                 <CertificationManager />
               </TabsContent>
 
+              <TabsContent value="cheatsheets" className="mt-0 focus:outline-none">
+                <CheatSheetManager />
+              </TabsContent>
+              
               <TabsContent value="skills" className="mt-0 focus:outline-none">
                 <SkillsManager />
               </TabsContent>

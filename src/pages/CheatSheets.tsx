@@ -7,6 +7,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { Separator } from "@/components/ui/separator";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect } from "react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 const CheatSheets = () => {
   const { isLoggedIn, username } = useAuth();
@@ -17,6 +19,9 @@ const CheatSheets = () => {
   // Get the active tab from URL params or default to "browse"
   const searchParams = new URLSearchParams(location.search);
   const defaultTab = searchParams.get("tab") || "browse";
+
+  // Get the cheatsheet ID if provided for viewing specific cheatsheet
+  const cheatsheetId = searchParams.get("id");
 
   // Set URL parameter when tab changes
   const handleTabChange = (value: string) => {
@@ -54,13 +59,23 @@ const CheatSheets = () => {
           </TabsList>
           
           <TabsContent value="browse" className="space-y-8">
-            <CheatSheetGallery isAdmin={isAdmin} />
+            <CheatSheetGallery isAdmin={isAdmin} selectedSheetId={cheatsheetId} />
           </TabsContent>
           
           {isAdmin && (
             <TabsContent value="create" className="space-y-8">
               <CheatSheetEditor />
             </TabsContent>
+          )}
+          
+          {!isAdmin && defaultTab === "create" && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Access Denied</AlertTitle>
+              <AlertDescription>
+                Only administrators can create and edit cheat sheets.
+              </AlertDescription>
+            </Alert>
           )}
         </Tabs>
       </div>

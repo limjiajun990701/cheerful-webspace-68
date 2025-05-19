@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,12 +8,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import { Plus, X, Save, Trash2, MoveVertical } from "lucide-react";
+import { Plus, X, Save, Trash2, MoveVertical, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { v4 as uuidv4 } from "uuid";
 import { useAuth } from "@/hooks/useAuth";
+import { CheatSheet, CheatSheetGroup } from "@/types/cheatsheet";
 import CheatSheetPreview from "./CheatSheetPreview";
 
 interface CheatSheetEntry {
@@ -23,35 +24,92 @@ interface CheatSheetEntry {
   language?: string;
 }
 
-interface CheatSheetGroup {
-  id: string;
-  title: string;
-  entries: CheatSheetEntry[];
+interface CheatSheetEditorProps {
+  cheatsheetToEdit?: CheatSheet;
+  onSuccess?: () => void;
 }
 
-const CheatSheetEditor: React.FC = () => {
-  const [title, setTitle] = useState("New Cheat Sheet");
-  const [description, setDescription] = useState("");
-  const [language, setLanguage] = useState("javascript");
-  const [groups, setGroups] = useState<CheatSheetGroup[]>([
-    {
-      id: uuidv4(),
-      title: "Basic Commands",
-      entries: [
-        { id: uuidv4(), command: "npm install", description: "Install dependencies" },
-        { id: uuidv4(), command: "npm start", description: "Start development server" }
-      ]
-    }
-  ]);
+const CheatSheetEditor: React.FC<CheatSheetEditorProps> = ({ cheatsheetToEdit, onSuccess }) => {
+  const [title, setTitle] = useState(cheatsheetToEdit?.title || "New Cheat Sheet");
+  const [description, setDescription] = useState(cheatsheetToEdit?.description || "");
+  const [language, setLanguage] = useState(cheatsheetToEdit?.language || "javascript");
+  const [groups, setGroups] = useState<CheatSheetGroup[]>([]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { isLoggedIn } = useAuth();
   const [isSaving, setIsSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState("edit");
+  const isEditMode = !!cheatsheetToEdit;
+
+  // Fetch groups and entries if editing an existing cheatsheet
+  const { isLoading: isLoadingGroups } = useQuery({
+    queryKey: ['cheatsheet-editor-groups', cheatsheetToEdit?.id],
+    queryFn: async () => {
+      if (!cheatsheetToEdit) return null;
+      
+      const { data: groupsData, error: groupsError } = await supabase
+        .from('cheatsheet_groups')
+        .select('*')
+        .eq('cheatsheet_id', cheatsheetToEdit.id)
+        .order('display_order', { ascending: true });
+
+      if (groupsError) {
+        console.error("Error fetching cheat sheet groups:", groupsError);
+        throw new Error(groupsError.message);
+      }
+
+      // Fetch entries for each group
+      const groupsWithEntries = await Promise.all(
+        groupsData.map(async (group) => {
+          const { data: entriesData, error: entriesError } = await supabase
+            .from('cheatsheet_entries')
+            .select('*')
+            .eq('group_id', group.id)
+            .order('display_order', { ascending: true });
+
+          if (entriesError) {
+            console.error("Error fetching cheat sheet entries:", entriesError);
+            throw new Error(entriesError.message);
+          }
+
+          return {
+            ...group,
+            entries: entriesData.map(entry => ({
+              id: entry.id,
+              command: entry.command || "",
+              description: entry.description || ""
+            }))
+          };
+        })
+      );
+
+      setGroups(groupsWithEntries);
+      return groupsWithEntries;
+    },
+    enabled: !!cheatsheetToEdit,
+  });
+
+  useEffect(() => {
+    // Initialize with a default group if creating new cheat sheet
+    if (!cheatsheetToEdit && groups.length === 0) {
+      setGroups([{
+        id: uuidv4(),
+        cheatsheet_id: "",
+        title: "Basic Commands",
+        display_order: 0,
+        entries: [
+          { id: uuidv4(), command: "Example command", description: "Description of what this command does" }
+        ]
+      }]);
+    }
+  }, [cheatsheetToEdit]);
 
   const addGroup = () => {
     const newGroup: CheatSheetGroup = {
       id: uuidv4(),
+      cheatsheet_id: cheatsheetToEdit?.id || "",
       title: "New Group",
+      display_order: groups.length,
       entries: []
     };
     setGroups([...groups, newGroup]);
@@ -104,7 +162,8 @@ const CheatSheetEditor: React.FC = () => {
     ));
   };
 
-  const saveCheatSheetMutation = useMutation({
+  // Create or update cheatsheet mutation
+  const saveMutation = useMutation({
     mutationFn: async () => {
       // Get the current user
       const { data: userData } = await supabase.auth.getUser();
@@ -112,72 +171,149 @@ const CheatSheetEditor: React.FC = () => {
         throw new Error("User not authenticated");
       }
 
-      // Create the cheatsheet
-      const { data: cheatsheetData, error: cheatsheetError } = await supabase
-        .from('cheatsheets')
-        .insert({
-          title,
-          description,
-          language,
-          created_by: userData.user.id, // Add the user ID as created_by
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        })
-        .select()
-        .single();
-
-      if (cheatsheetError) throw new Error(cheatsheetError.message);
+      setIsSaving(true);
       
-      // Create groups with display order
-      const groupsWithOrder = groups.map((group, index) => ({
-        cheatsheet_id: cheatsheetData.id,
-        title: group.title,
-        display_order: index,
-        id: group.id
-      }));
-      
-      const { error: groupsError } = await supabase
-        .from('cheatsheet_groups')
-        .insert(groupsWithOrder);
-
-      if (groupsError) throw new Error(groupsError.message);
-      
-      // Create entries for each group with display order
-      const entriesData = groups.flatMap(group => 
-        group.entries.map((entry, index) => ({
-          group_id: group.id,
-          command: entry.command,
-          description: entry.description,
+      if (isEditMode) {
+        // Update existing cheatsheet
+        const { error: updateError } = await supabase
+          .from('cheatsheets')
+          .update({
+            title,
+            description,
+            language,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', cheatsheetToEdit.id);
+          
+        if (updateError) throw new Error(updateError.message);
+        
+        // Delete existing groups and entries to recreate them
+        // This is simpler than tracking what changed
+        const { error: deleteGroupsError } = await supabase
+          .from('cheatsheet_groups')
+          .delete()
+          .eq('cheatsheet_id', cheatsheetToEdit.id);
+          
+        if (deleteGroupsError) throw new Error(deleteGroupsError.message);
+        
+        // Create updated groups with display order
+        const groupsWithOrder = groups.map((group, index) => ({
+          id: group.id,
+          cheatsheet_id: cheatsheetToEdit.id,
+          title: group.title,
           display_order: index
-        }))
-      );
-      
-      if (entriesData.length > 0) {
-        const { error: entriesError } = await supabase
-          .from('cheatsheet_entries')
-          .insert(entriesData);
+        }));
+        
+        const { error: groupsError } = await supabase
+          .from('cheatsheet_groups')
+          .insert(groupsWithOrder);
 
-        if (entriesError) throw new Error(entriesError.message);
+        if (groupsError) throw new Error(groupsError.message);
+        
+        // Create entries for each group with display order
+        const entriesData = groups.flatMap(group => 
+          group.entries.map((entry, index) => ({
+            id: entry.id,
+            group_id: group.id,
+            command: entry.command,
+            description: entry.description,
+            display_order: index
+          }))
+        );
+        
+        if (entriesData.length > 0) {
+          const { error: entriesError } = await supabase
+            .from('cheatsheet_entries')
+            .insert(entriesData);
+
+          if (entriesError) throw new Error(entriesError.message);
+        }
+        
+        return cheatsheetToEdit;
+        
+      } else {
+        // Create new cheatsheet
+        const { data: cheatsheetData, error: cheatsheetError } = await supabase
+          .from('cheatsheets')
+          .insert({
+            title,
+            description,
+            language,
+            created_by: userData.user.id,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .select()
+          .single();
+
+        if (cheatsheetError) throw new Error(cheatsheetError.message);
+        
+        // Create groups with display order
+        const groupsWithOrder = groups.map((group, index) => ({
+          id: group.id,
+          cheatsheet_id: cheatsheetData.id,
+          title: group.title,
+          display_order: index
+        }));
+        
+        const { error: groupsError } = await supabase
+          .from('cheatsheet_groups')
+          .insert(groupsWithOrder);
+
+        if (groupsError) throw new Error(groupsError.message);
+        
+        // Create entries for each group with display order
+        const entriesData = groups.flatMap(group => 
+          group.entries.map((entry, index) => ({
+            id: entry.id,
+            group_id: group.id,
+            command: entry.command,
+            description: entry.description,
+            display_order: index
+          }))
+        );
+        
+        if (entriesData.length > 0) {
+          const { error: entriesError } = await supabase
+            .from('cheatsheet_entries')
+            .insert(entriesData);
+
+          if (entriesError) throw new Error(entriesError.message);
+        }
+        
+        return cheatsheetData;
       }
-      
-      return cheatsheetData;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cheatsheets'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-cheatsheets'] });
+      
+      if (isEditMode) {
+        queryClient.invalidateQueries({ queryKey: ['cheatsheet-editor-groups', cheatsheetToEdit.id] });
+      }
+      
       toast({
         title: "Success",
-        description: "Cheat sheet saved successfully",
+        description: `Cheat sheet ${isEditMode ? 'updated' : 'created'} successfully`,
       });
       
-      // Reset form
-      setTitle("New Cheat Sheet");
-      setDescription("");
-      setLanguage("javascript");
-      setGroups([{
-        id: uuidv4(),
-        title: "Group Title",
-        entries: []
-      }]);
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        // Reset form if no callback
+        if (!isEditMode) {
+          setTitle("New Cheat Sheet");
+          setDescription("");
+          setLanguage("javascript");
+          setGroups([{
+            id: uuidv4(),
+            cheatsheet_id: "",
+            title: "Group Title",
+            display_order: 0,
+            entries: []
+          }]);
+        }
+      }
     },
     onError: (error) => {
       console.error("Error saving cheat sheet:", error);
@@ -202,8 +338,7 @@ const CheatSheetEditor: React.FC = () => {
       return;
     }
     
-    setIsSaving(true);
-    saveCheatSheetMutation.mutate();
+    saveMutation.mutate();
   };
 
   const onDragEnd = (result: any) => {
@@ -254,9 +389,18 @@ const CheatSheetEditor: React.FC = () => {
     }
   };
 
+  if (isLoadingGroups) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="mt-4 text-muted-foreground">Loading cheat sheet data...</p>
+      </div>
+    );
+  }
+
   return (
     <div>
-      <Tabs defaultValue="edit">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-6">
           <TabsTrigger value="edit">Edit</TabsTrigger>
           <TabsTrigger value="preview">Preview</TabsTrigger>
@@ -467,7 +611,7 @@ const CheatSheetEditor: React.FC = () => {
               disabled={isSaving}
             >
               <Save className="h-4 w-4 mr-2" />
-              {isSaving ? "Saving..." : "Save"}
+              {isSaving ? "Saving..." : isEditMode ? "Update" : "Save"}
             </Button>
           </div>
         </TabsContent>

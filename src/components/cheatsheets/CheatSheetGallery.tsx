@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,13 +10,14 @@ import { useToast } from "@/hooks/use-toast";
 import CheatSheetViewer from "./CheatSheetViewer";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { CheatSheet } from "@/types/cheatsheet";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 interface CheatSheetGalleryProps {
   isAdmin: boolean;
+  selectedSheetId?: string | null;
 }
 
-const CheatSheetGallery: React.FC<CheatSheetGalleryProps> = ({ isAdmin }) => {
+const CheatSheetGallery: React.FC<CheatSheetGalleryProps> = ({ isAdmin, selectedSheetId }) => {
   const [filteredSheets, setFilteredSheets] = useState<CheatSheet[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [language, setLanguage] = useState("all");
@@ -23,6 +25,7 @@ const CheatSheetGallery: React.FC<CheatSheetGalleryProps> = ({ isAdmin }) => {
   const [selectedSheet, setSelectedSheet] = useState<CheatSheet | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   // Fetch cheatsheets from Supabase
   const { data: cheatSheets = [], isLoading } = useQuery({
@@ -40,6 +43,28 @@ const CheatSheetGallery: React.FC<CheatSheetGalleryProps> = ({ isAdmin }) => {
 
       return data as CheatSheet[];
     }
+  });
+
+  // Fetch specific cheatsheet if ID is provided
+  const { data: specificSheet, isLoading: isLoadingSpecificSheet } = useQuery({
+    queryKey: ['specific-cheatsheet', selectedSheetId],
+    queryFn: async () => {
+      if (!selectedSheetId) return null;
+      
+      const { data, error } = await supabase
+        .from('cheatsheets')
+        .select('*')
+        .eq('id', selectedSheetId)
+        .single();
+
+      if (error) {
+        console.error("Error fetching specific cheat sheet:", error);
+        throw new Error(error.message);
+      }
+
+      return data as CheatSheet;
+    },
+    enabled: !!selectedSheetId
   });
 
   // Delete cheatsheet mutation
@@ -61,10 +86,17 @@ const CheatSheetGallery: React.FC<CheatSheetGalleryProps> = ({ isAdmin }) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cheatsheets'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-cheatsheets'] });
+      
       toast({
         title: "Success",
         description: "Cheat sheet deleted successfully",
       });
+      
+      // Close the viewer if the deleted sheet was being viewed
+      if (selectedSheet) {
+        setSelectedSheet(null);
+      }
     },
     onError: (error) => {
       toast({
@@ -75,9 +107,17 @@ const CheatSheetGallery: React.FC<CheatSheetGalleryProps> = ({ isAdmin }) => {
     }
   });
 
+  // Set up filtering of cheatsheets
   useEffect(() => {
     filterCheatSheets();
   }, [searchQuery, language, cheatSheets]);
+
+  // Set selected sheet when a specific ID is provided
+  useEffect(() => {
+    if (specificSheet) {
+      setSelectedSheet(specificSheet);
+    }
+  }, [specificSheet]);
 
   const filterCheatSheets = () => {
     let filtered = [...cheatSheets];
@@ -109,7 +149,6 @@ const CheatSheetGallery: React.FC<CheatSheetGalleryProps> = ({ isAdmin }) => {
     }
     
     // Navigate to edit tab with the selected sheet ID
-    const navigate = useNavigate();
     navigate(`/cheatsheets?tab=create&id=${sheet.id}`);
   };
 
@@ -123,20 +162,42 @@ const CheatSheetGallery: React.FC<CheatSheetGalleryProps> = ({ isAdmin }) => {
       return;
     }
     
-    try {
-      await deleteMutation.mutateAsync(id);
-    } catch (error) {
-      console.error("Error in delete handler:", error);
+    if (confirm("Are you sure you want to delete this cheat sheet? This action cannot be undone.")) {
+      try {
+        await deleteMutation.mutateAsync(id);
+      } catch (error) {
+        console.error("Error in delete handler:", error);
+      }
     }
   };
 
   const openCheatSheet = (sheet: CheatSheet) => {
     setSelectedSheet(sheet);
+    
+    // Update URL to include sheet ID for direct linking
+    const searchParams = new URLSearchParams(window.location.search);
+    searchParams.set("id", sheet.id);
+    navigate(`${window.location.pathname}?${searchParams.toString()}`, { replace: true });
   };
 
   const closeCheatSheet = () => {
     setSelectedSheet(null);
+    
+    // Remove sheet ID from URL
+    const searchParams = new URLSearchParams(window.location.search);
+    searchParams.delete("id");
+    navigate(`${window.location.pathname}?${searchParams.toString()}`, { replace: true });
   };
+
+  // Show loading state while fetching specific sheet
+  if (selectedSheetId && isLoadingSpecificSheet) {
+    return (
+      <div className="text-center py-12">
+        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
+        <p className="mt-4 text-muted-foreground">Loading cheat sheet...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -175,6 +236,8 @@ const CheatSheetGallery: React.FC<CheatSheetGalleryProps> = ({ isAdmin }) => {
                   <SelectItem value="bash">Bash</SelectItem>
                   <SelectItem value="html">HTML</SelectItem>
                   <SelectItem value="css">CSS</SelectItem>
+                  <SelectItem value="sql">SQL</SelectItem>
+                  <SelectItem value="markdown">Markdown</SelectItem>
                 </SelectContent>
               </Select>
               
