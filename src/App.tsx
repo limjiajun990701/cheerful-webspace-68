@@ -19,6 +19,7 @@ import Admin from "./pages/Admin";
 import AdminLogin from "./pages/AdminLogin";
 import NotFound from "./pages/NotFound";
 import Contact from "./pages/Contact";
+import CheatSheets from "./pages/CheatSheets";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -48,6 +49,7 @@ const App = () => (
                 <Route path="/collections" element={<Collections />} />
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:id" element={<BlogPost />} />
+                <Route path="/cheatsheets" element={<CheatSheets />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/admin" element={<Admin />} />
