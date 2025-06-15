@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +10,7 @@ import { FormEvent } from "react";
 import { Loader2, Save, AlertCircle, Upload } from "lucide-react";
 import { updateSiteContent, uploadSiteImage, setupSiteImagesBucket } from "@/utils/contentUtils";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import AboutWhoAmIManager from "./AboutWhoAmIManager";
 
 interface AboutContent {
   id: string;
@@ -236,6 +236,7 @@ const AboutManager = () => {
 
   return (
     <div className="space-y-6">
+      <AboutWhoAmIManager />
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">About Page Management</h2>
       </div>

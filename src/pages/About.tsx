@@ -1,10 +1,11 @@
+
 import React, { useEffect, useState } from 'react';
 import DynamicHeroSection from '@/components/about/DynamicHeroSection';
 import ContactSection from '@/components/about/ContactSection';
 import TimelineSection from '@/components/about/TimelineSection';
 import { supabase } from "@/integrations/supabase/client";
 
-// Step 1: Define TimelineItem type
+// TimelineItem type
 type TimelineItem = {
   id: string;
   type: "work" | "education";
@@ -13,6 +14,15 @@ type TimelineItem = {
   location: string | null;
   date: string | null;
   description: string;
+};
+
+type AboutSection = {
+  id: string;
+  section_key: string;
+  title: string | null;
+  body: string | null;
+  tags: string[] | null;
+  updated_at: string;
 };
 
 const defaultTimelineItems: TimelineItem[] = [
@@ -54,9 +64,20 @@ const defaultTimelineItems: TimelineItem[] = [
   },
 ];
 
+const defaultAboutSection: AboutSection = {
+  id: "default",
+  section_key: "who_am_i",
+  title: "Who Am I?",
+  body: "Passionate full-stack developer and lifelong learner, focused on impactful results and delivering elegant solutions. I believe in teamwork, growth, and contribution to projects that matter. Outside of coding, I enjoy exploring new tech and creative pursuits.",
+  tags: ["Full-stack", "Web & Mobile", "Cloud Dev", "Problem Solver"],
+  updated_at: "",
+};
+
 const About = () => {
   const [timelineItems, setTimelineItems] = useState<TimelineItem[]>(defaultTimelineItems);
+  const [aboutSection, setAboutSection] = useState<AboutSection>(defaultAboutSection);
 
+  // Fetch timeline
   useEffect(() => {
     async function fetchExperiences() {
       const { data, error } = await supabase
@@ -64,41 +85,48 @@ const About = () => {
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error("Error fetching timeline items for About page:", error);
-        // Keep default items on error
-        return;
-      }
-      
-      if (data && data.length > 0) {
-        // Step 2: Ensure strong typing for each item
+      if (!error && data && data.length > 0) {
         const safeData: TimelineItem[] = data
           .filter((item: any) => item.type === "work" || item.type === "education")
           .map((item: any) => ({
             ...item,
-            type: item.type === "work" ? "work" : "education", // force type properly
+            type: item.type === "work" ? "work" : "education",
           }));
-
         setTimelineItems(safeData);
       }
     }
     fetchExperiences();
   }, []);
 
+  // Fetch about section
+  useEffect(() => {
+    async function fetchAboutSection() {
+      const { data, error } = await supabase
+        .from('about_sections')
+        .select('*')
+        .eq('section_key', 'who_am_i')
+        .maybeSingle();
+      if (data) {
+        setAboutSection(data);
+      }
+    }
+    fetchAboutSection();
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <DynamicHeroSection />
-      {/* Extra new content for About */}
+
+      {/* Editable Who Am I Section */}
       <section className="py-10 max-w-3xl mx-auto px-4">
-        <h2 className="text-2xl font-bold mb-4 text-primary">Who Am I?</h2>
+        <h2 className="text-2xl font-bold mb-4 text-primary">{aboutSection.title || "Who Am I?"}</h2>
         <p className="mb-6 text-lg text-foreground/90">
-          Passionate full-stack developer and lifelong learner, focused on impactful results and delivering elegant solutions. I believe in teamwork, growth, and contribution to projects that matter. Outside of coding, I enjoy exploring new tech and creative pursuits.
+          {aboutSection.body || defaultAboutSection.body}
         </p>
         <div className="flex flex-wrap gap-3">
-          <span className="bg-primary/10 text-primary px-4 py-1 rounded-full">Full-stack</span>
-          <span className="bg-secondary/40 text-secondary-foreground px-4 py-1 rounded-full">Web & Mobile</span>
-          <span className="bg-green-100 text-green-700 px-4 py-1 rounded-full">Cloud Dev</span>
-          <span className="bg-orange-200 text-orange-700 px-4 py-1 rounded-full">Problem Solver</span>
+          {(aboutSection.tags ?? defaultAboutSection.tags)?.map((tag: string) => (
+            <span key={tag} className="bg-primary/10 text-primary px-4 py-1 rounded-full">{tag}</span>
+          ))}
         </div>
       </section>
       {/* Timeline Section */}
