@@ -41,9 +41,10 @@ const HomeManager = () => {
       
       if (!status) {
         toast({
-          title: "Storage Setup Required",
-          description: "Storage setup is required for image uploads. Contact administrator.",
+          title: "Action Required: Storage Setup",
+          description: "The 'site-images' storage bucket is not set up. Please create it in your Supabase dashboard to enable image uploads.",
           variant: "destructive",
+          duration: 10000,
         });
       }
     };
@@ -118,7 +119,7 @@ const HomeManager = () => {
   const uploadImage = async (): Promise<string | null> => {
     if (!imageFile) return content?.image_url || null;
     if (!isBucketReady) {
-      setUploadError('Storage bucket is not set up. Contact administrator.');
+      setUploadError("Storage bucket 'site-images' is not set up. Please create it in your Supabase dashboard.");
       return null;
     }
     

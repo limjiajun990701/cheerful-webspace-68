@@ -136,26 +136,20 @@ export async function updateExpertiseContent(id: string | null, content: any) {
 // Home & About image/file upload helpers - now fully implemented
 export async function setupSiteImagesBucket(): Promise<boolean> {
   const { data, error } = await supabase.storage.getBucket('site-images');
-  if (error && error.message.includes('Bucket not found')) {
-    try {
-      const { data: bucketData, error: createError } = await supabase.storage.createBucket('site-images', {
-        public: true,
-        fileSizeLimit: '5MB',
-        allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml', 'image/bmp'],
-      });
-      if (createError) {
-        console.error("Error creating 'site-images' bucket:", createError);
-        return false;
-      }
-      return true;
-    } catch (e) {
-      console.error("Exception creating 'site-images' bucket:", e);
-      return false;
+
+  if (error) {
+    if (error.message.includes('Bucket not found')) {
+      // This is an expected case if the bucket isn't created yet.
+      // The UI will guide the user to create it.
+      console.warn("Storage bucket 'site-images' not found. Please create it in the Supabase dashboard.");
+    } else {
+      // Log other unexpected errors.
+      console.error("Error checking for 'site-images' bucket:", error);
     }
-  } else if (error) {
-    console.error("Error getting 'site-images' bucket:", error);
     return false;
   }
+  
+  // If no error, the bucket exists.
   return true;
 }
 
