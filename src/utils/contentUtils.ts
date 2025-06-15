@@ -70,7 +70,7 @@ export async function getExperienceItems() {
   // TODO: Implement actual logic as needed
   return [];
 }
-export async function createExperienceItem(item: any) {
+export async function createExperienceItem(type: string, item: any) {
   // TODO: Implement actual logic as needed
   return { success: true };
 }
@@ -85,12 +85,48 @@ export async function deleteExperienceItem(id: string) {
 
 // Expertise management stubs
 export async function getExpertiseContent() {
-  // TODO: Implement actual logic as needed
-  return [];
+  const { data, error } = await supabase
+    .from("site_content")
+    .select("*")
+    .eq("page_name", "expertise")
+    .eq("section_name", "main")
+    .maybeSingle();
+
+  if (error) {
+    console.error("Error fetching expertise content:", error);
+  }
+
+  return data || {
+    id: null,
+    title: 'My Expertise',
+    subtitle: 'Details about my expertise.',
+    description: JSON.stringify({ items: [], skills: [] })
+  };
 }
-export async function updateExpertiseContent(id: string, content: any) {
-  // TODO: Implement actual logic as needed
-  return { success: true };
+export async function updateExpertiseContent(id: string | null, content: any) {
+  const upsertData: any = {
+    ...content,
+    page_name: 'expertise',
+    section_name: 'main',
+    updated_by: 'admin',
+  };
+
+  if (id) {
+    upsertData.id = id;
+  }
+
+  const { data, error } = await supabase
+    .from('site_content')
+    .upsert(upsertData, { onConflict: 'page_name,section_name' })
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating expertise content', error);
+    return { success: false, error };
+  }
+  
+  return { success: true, data };
 }
 
 // Home & About image/file upload helpers - just stubs for now

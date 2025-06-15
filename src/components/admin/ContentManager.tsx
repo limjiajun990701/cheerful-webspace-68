@@ -216,10 +216,10 @@ const ContentManager = () => {
         updated_by: "admin",
       };
 
-      const result = await updateSiteContent(content.id, updatedContent);
+      const result = await updateSiteContent(updatedContent);
 
-      if (!result.success) {
-        throw new Error("Failed to update content");
+      if (result.error) {
+        throw new Error(result.error.message || "Failed to update content");
       }
 
       toast({
