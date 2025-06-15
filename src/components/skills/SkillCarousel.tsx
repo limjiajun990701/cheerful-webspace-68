@@ -71,6 +71,9 @@ const SkillCarousel = ({ skillId }: SkillCarouselProps) => {
 
   const isSingleItem = items.length === 1;
 
+  // Create duplicated items for seamless infinite scroll
+  const duplicatedItems = items.length > 1 ? [...items, ...items] : items;
+
   return (
     <div className="w-full py-6 bg-secondary/10 overflow-hidden">
       <div className="container mx-auto px-4">
@@ -117,52 +120,57 @@ const SkillCarousel = ({ skillId }: SkillCarouselProps) => {
               </div>
             </div>
           ) : (
-            <div
-              className="animate-scroll-rtl flex"
-              style={{ "--item-count": items.length } as React.CSSProperties}
-            >
-              {items.map((item, index) => (
-                <div
-                  key={`${item.id}-${index}`}
-                  className="flex-shrink-0 w-[200px] px-2"
-                >
-                  <HoverCard>
-                    <HoverCardTrigger asChild>
-                      <Card className="overflow-hidden border-none h-40 cursor-pointer">
-                        <CardContent className="p-0 h-full">
-                          <div
-                            className={cn(
-                              "w-full h-full transition-all duration-500",
-                              item.animation_type === 'scale' && "hover:scale-110",
-                              item.animation_type === 'move' && "hover:translate-y-[-10px]",
-                              item.animation_type === 'fade' && "hover:opacity-80",
-                              hasTransparentBackground(item.image_url) ? "bg-gradient-to-r from-secondary/30 to-background" : "bg-cover bg-center"
-                            )}
-                            style={hasTransparentBackground(item.image_url)
-                              ? {}
-                              : { backgroundImage: `url(${item.image_url})` }
-                            }
-                          >
-                            {hasTransparentBackground(item.image_url) && (
-                              <img
-                                src={item.image_url}
-                                alt={item.label}
-                                className="w-full h-full object-contain"
-                              />
-                            )}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </HoverCardTrigger>
-                    <HoverCardContent className="w-72 p-3">
-                      <div>
-                        <h4 className="font-semibold mb-1">{item.label}</h4>
-                        {item.description && <p className="text-sm text-muted-foreground">{item.description}</p>}
-                      </div>
-                    </HoverCardContent>
-                  </HoverCard>
-                </div>
-              ))}
+            <div className="overflow-hidden">
+              <div
+                className="flex animate-scroll-rtl"
+                style={{
+                  '--item-count': items.length,
+                  width: `${duplicatedItems.length * 216}px`,
+                } as React.CSSProperties}
+              >
+                {duplicatedItems.map((item, index) => (
+                  <div
+                    key={`${item.id}-${index}`}
+                    className="flex-shrink-0 w-[200px] px-2"
+                  >
+                    <HoverCard>
+                      <HoverCardTrigger asChild>
+                        <Card className="overflow-hidden border-none h-40 cursor-pointer">
+                          <CardContent className="p-0 h-full">
+                            <div
+                              className={cn(
+                                "w-full h-full transition-all duration-500",
+                                item.animation_type === 'scale' && "hover:scale-110",
+                                item.animation_type === 'move' && "hover:translate-y-[-10px]",
+                                item.animation_type === 'fade' && "hover:opacity-80",
+                                hasTransparentBackground(item.image_url) ? "bg-gradient-to-r from-secondary/30 to-background" : "bg-cover bg-center"
+                              )}
+                              style={hasTransparentBackground(item.image_url)
+                                ? {}
+                                : { backgroundImage: `url(${item.image_url})` }
+                              }
+                            >
+                              {hasTransparentBackground(item.image_url) && (
+                                <img
+                                  src={item.image_url}
+                                  alt={item.label}
+                                  className="w-full h-full object-contain"
+                                />
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </HoverCardTrigger>
+                      <HoverCardContent className="w-72 p-3">
+                        <div>
+                          <h4 className="font-semibold mb-1">{item.label}</h4>
+                          {item.description && <p className="text-sm text-muted-foreground">{item.description}</p>}
+                        </div>
+                      </HoverCardContent>
+                    </HoverCard>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>
