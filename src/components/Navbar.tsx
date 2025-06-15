@@ -1,11 +1,11 @@
+
 import React from "react";
 import { Link } from "react-router-dom";
 import { useTheme } from "@/components/ThemeProvider";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { ModeToggle } from "@/components/ui/mode-toggle";
-import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuContent, NavigationMenuTrigger, NavigationMenuLink } from "@/components/ui/navigation-menu"
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const Navbar = () => {
   const { theme } = useTheme();
@@ -54,7 +54,7 @@ const Navbar = () => {
           >
             Cheatsheets
           </Link>
-          <ModeToggle />
+          <ThemeToggle />
         </nav>
 
         <Sheet>
@@ -75,7 +75,7 @@ const Navbar = () => {
               <Link to="/collections" className="hover:bg-secondary rounded-md p-2">Collections</Link>
               <Link to="/cheatsheets" className="hover:bg-secondary rounded-md p-2">Cheatsheets</Link>
             </nav>
-            <ModeToggle />
+            <ThemeToggle />
           </SheetContent>
         </Sheet>
       </div>
