@@ -50,13 +50,26 @@ const About = () => {
     async function fetchExperiences() {
       const data = await getExperienceItems();
       if (data && data.length > 0) {
-        // Make sure the `type` key is exactly "work" or "education", not a generic string
+        // Make sure data type matches TimelineItem[]
         const safeData = data
-          .filter((item: any) => item.type === "work" || item.type === "education")
-          .map((item: any) => ({
-            ...item,
-            type: item.type as "work" | "education",
-          }));
+          .filter(
+            (item: any) => item.type === "work" || item.type === "education"
+          )
+          .map(
+            (item: any) =>
+              ({
+                ...item,
+                type: item.type as "work" | "education",
+              } as {
+                id: string;
+                type: "work" | "education";
+                title: string;
+                company: string;
+                location: string;
+                date: string;
+                description: string;
+              })
+          );
         setTimelineItems(safeData);
       }
     }
