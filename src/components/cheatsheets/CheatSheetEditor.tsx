@@ -13,17 +13,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { v4 as uuidv4 } from "uuid";
 import { useAuth } from "@/hooks/useAuth";
-import { CheatSheet, CheatSheetGroup } from "@/types/cheatsheet";
+import { CheatSheet, CheatSheetGroup, CheatSheetEntry } from "@/types/cheatsheet"; // Only use the imported types
 import CheatSheetPreview from "./CheatSheetPreview";
-
-interface CheatSheetEntry {
-  id: string;
-  command: string;
-  description: string;
-  language?: string;
-  group_id?: string;
-  display_order?: number;
-}
 
 interface CheatSheetEditorProps {
   cheatsheetToEdit?: CheatSheet;
@@ -47,45 +38,39 @@ const CheatSheetEditor: React.FC<CheatSheetEditorProps> = ({ cheatsheetToEdit, o
     queryKey: ['cheatsheet-editor-groups', cheatsheetToEdit?.id],
     queryFn: async () => {
       if (!cheatsheetToEdit) return null;
-
       const { data: groupsData, error: groupsError } = await supabase
         .from('cheatsheet_groups')
         .select('*')
         .eq('cheatsheet_id', cheatsheetToEdit.id)
         .order('display_order', { ascending: true });
-
       if (groupsError) {
         console.error("Error fetching cheat sheet groups:", groupsError);
         throw new Error(groupsError.message);
       }
-
       // Fetch entries for each group
-      const groupsWithEntries = await Promise.all(
-        groupsData.map(async (group) => {
+      const groupsWithEntries: CheatSheetGroup[] = await Promise.all(
+        groupsData.map(async (group: any) => {
           const { data: entriesData, error: entriesError } = await supabase
             .from('cheatsheet_entries')
             .select('*')
             .eq('group_id', group.id)
             .order('display_order', { ascending: true });
-
           if (entriesError) {
             console.error("Error fetching cheat sheet entries:", entriesError);
             throw new Error(entriesError.message);
           }
-
           return {
             ...group,
-            entries: entriesData.map(entry => ({
+            entries: (entriesData || []).map((entry: any): CheatSheetEntry => ({
               id: entry.id,
               command: entry.command || "",
               description: entry.description || "",
-              group_id: entry.group_id,
+              group_id: entry.group_id, // Ensure always present
               display_order: entry.display_order
             }))
           };
         })
       );
-
       setGroups(groupsWithEntries);
       return groupsWithEntries;
     },
@@ -105,7 +90,7 @@ const CheatSheetEditor: React.FC<CheatSheetEditorProps> = ({ cheatsheetToEdit, o
             id: uuidv4(),
             command: "Example command",
             description: "Description of what this command does",
-            group_id: "",
+            group_id: "", // Always set group_id
             display_order: 0
           }
         ]
