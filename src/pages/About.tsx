@@ -1,20 +1,20 @@
-
 import React, { useEffect, useState } from 'react';
 import DynamicHeroSection from '@/components/about/DynamicHeroSection';
 import ContactSection from '@/components/about/ContactSection';
 import TimelineSection from '@/components/about/TimelineSection';
 import { supabase } from "@/integrations/supabase/client";
+import { TimelineItem } from '@/types/TimelineItem';
 
 // TimelineItem type
-type TimelineItem = {
-  id: string;
-  type: "work" | "education";
-  title: string;
-  company: string;
-  location: string | null;
-  date: string | null;
-  description: string;
-};
+// type TimelineItem = {
+//   id: string;
+//   type: "work" | "education";
+//   title: string;
+//   company: string;
+//   location: string | null;
+//   date: string | null;
+//   description: string;
+// };
 
 type AboutSection = {
   id: string;
@@ -46,7 +46,7 @@ const defaultTimelineItems: TimelineItem[] = [
   },
   {
     id: "default-3",
-    type: "education",
+    type: "work",
     title: "Bachelor of Science (Information Technology)",
     company: "Universiti Utara Malaysia (UUM)",
     location: "Sintok, Kedah",
@@ -55,7 +55,7 @@ const defaultTimelineItems: TimelineItem[] = [
   },
   {
     id: "default-4",
-    type: "education",
+    type: "work",
     title: "STPM",
     company: "Kolej Tingkatan Enam Pontian",
     location: "Pontian, Johor",
@@ -87,9 +87,15 @@ const About = () => {
         .order('created_at', { ascending: false });
 
       if (!error && data && data.length > 0) {
+        // Explicitly cast as TimelineItem with type 'work'
         const safeData: TimelineItem[] = data.map((item: any) => ({
-          ...item,
+          id: item.id,
           type: "work",
+          title: item.title,
+          company: item.company,
+          location: item.location,
+          date: item.date,
+          description: item.description,
         }));
         setTimelineItems(safeData);
       } else {
