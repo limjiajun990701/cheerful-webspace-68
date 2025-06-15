@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link } from "react-router-dom";
 import { useTheme } from "@/components/ThemeProvider";
@@ -18,7 +19,19 @@ const Navbar = () => {
         </Link>
 
         <nav className="flex items-center gap-2">
-          {/* Removed Skills/MySkill links */}
+          {/* Home and About links added back */}
+          <Link
+            to="/"
+            className="px-3 py-2 rounded text-sm hover:bg-muted transition-colors"
+          >
+            Home
+          </Link>
+          <Link
+            to="/about"
+            className="px-3 py-2 rounded text-sm hover:bg-muted transition-colors"
+          >
+            About
+          </Link>
           <Link
             to="/projects"
             className="px-3 py-2 rounded text-sm hover:bg-muted transition-colors"
@@ -65,7 +78,9 @@ const Navbar = () => {
               My Portfolio
             </Link>
             <nav className="grid gap-6 text-foreground">
-              {/* Removed Skills/MySkill links */}
+              {/* Home and About links added back for mobile */}
+              <Link to="/" className="hover:bg-secondary rounded-md p-2">Home</Link>
+              <Link to="/about" className="hover:bg-secondary rounded-md p-2">About</Link>
               <Link to="/projects" className="hover:bg-secondary rounded-md p-2">Projects</Link>
               <Link to="/certifications" className="hover:bg-secondary rounded-md p-2">Certifications</Link>
               <Link to="/blogs" className="hover:bg-secondary rounded-md p-2">Blogs</Link>
@@ -85,3 +100,4 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
