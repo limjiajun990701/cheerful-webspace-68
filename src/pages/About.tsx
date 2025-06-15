@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import DynamicHeroSection from '@/components/about/DynamicHeroSection';
 import ContactSection from '@/components/about/ContactSection';
@@ -51,7 +50,14 @@ const About = () => {
     async function fetchExperiences() {
       const data = await getExperienceItems();
       if (data && data.length > 0) {
-        setTimelineItems(data);
+        // Make sure the `type` key is exactly "work" or "education", not a generic string
+        const safeData = data
+          .filter((item: any) => item.type === "work" || item.type === "education")
+          .map((item: any) => ({
+            ...item,
+            type: item.type as "work" | "education",
+          }));
+        setTimelineItems(safeData);
       }
     }
     fetchExperiences();
