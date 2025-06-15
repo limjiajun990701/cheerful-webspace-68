@@ -16,7 +16,17 @@ export default defineConfig(({ mode }) => ({
         "**/dist/**",
         "**/supabase/**",
       ],
+      usePolling: true, // fallback, try polling (less efficient)
+      interval: 150, // optional, in ms, reduce polling frequency
     },
+  },
+  fs: {
+    strict: true, // Fails requests outside of allowed dirs
+    allow: [
+      "./src",
+      "./vite.config.ts"
+    ],
+    followSymlinks: false,
   },
   plugins: [
     react(),
