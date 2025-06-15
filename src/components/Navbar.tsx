@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import { useTheme } from "@/components/ThemeProvider";
@@ -19,12 +18,7 @@ const Navbar = () => {
         </Link>
 
         <nav className="flex items-center gap-2">
-          <a
-            href="/skills"
-            className="px-3 py-2 rounded text-sm hover:bg-muted transition-colors"
-          >
-            Skills
-          </a>
+          {/* Removed Skills/MySkill links */}
           <Link
             to="/projects"
             className="px-3 py-2 rounded text-sm hover:bg-muted transition-colors"
@@ -71,7 +65,7 @@ const Navbar = () => {
               My Portfolio
             </Link>
             <nav className="grid gap-6 text-foreground">
-              <Link to="/skills" className="hover:bg-secondary rounded-md p-2">Skills</Link>
+              {/* Removed Skills/MySkill links */}
               <Link to="/projects" className="hover:bg-secondary rounded-md p-2">Projects</Link>
               <Link to="/certifications" className="hover:bg-secondary rounded-md p-2">Certifications</Link>
               <Link to="/blogs" className="hover:bg-secondary rounded-md p-2">Blogs</Link>
@@ -91,4 +85,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-
