@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FormEvent } from "react";
 import { Loader2, Save, Upload, AlertCircle } from "lucide-react";
-import { uploadSiteImage, updateSiteContent, setupSiteImagesBucket } from "@/utils/contentUtils";
+import { uploadSiteImage, updateSiteContent } from "@/utils/contentUtils";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface SiteContent {
@@ -38,26 +37,10 @@ const ContentManager = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const [isBucketReady, setIsBucketReady] = useState<boolean>(false);
 
   const pages = ["home", "about", "experience"];
 
   useEffect(() => {
-    const checkBucketStatus = async () => {
-      const status = await setupSiteImagesBucket();
-      setIsBucketReady(status);
-      
-      if (!status) {
-        toast({
-          title: "Storage Setup Required",
-          description: "Storage setup is required for image uploads. Contact administrator.",
-          variant: "destructive",
-        });
-      }
-    };
-    
-    checkBucketStatus();
-    
     if (selectedPage) {
       fetchSections(selectedPage);
     }
@@ -165,10 +148,6 @@ const ContentManager = () => {
 
   const uploadImage = async (): Promise<string | null> => {
     if (!imageFile) return content?.image_url || null;
-    if (!isBucketReady) {
-      setUploadError('Storage bucket is not set up. Contact administrator.');
-      return null;
-    }
     
     setIsUploading(true);
     try {

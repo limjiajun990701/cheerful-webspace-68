@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { FormEvent } from "react";
 import { Loader2, Save, AlertCircle, Image as ImageIcon } from "lucide-react";
-import { uploadSiteImage, updateSiteContent, setupSiteImagesBucket } from "@/utils/contentUtils";
+import { uploadSiteImage, updateSiteContent } from "@/utils/contentUtils";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface HomeContent {
@@ -32,24 +31,8 @@ const HomeManager = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const [isBucketReady, setIsBucketReady] = useState<boolean>(false);
 
   useEffect(() => {
-    const checkBucketStatus = async () => {
-      const status = await setupSiteImagesBucket();
-      setIsBucketReady(status);
-      
-      if (!status) {
-        toast({
-          title: "Action Required: Storage Setup",
-          description: "The 'site-images' storage bucket is not set up. Please create it in your Supabase dashboard to enable image uploads.",
-          variant: "destructive",
-          duration: 10000,
-        });
-      }
-    };
-    
-    checkBucketStatus();
     fetchContent();
   }, []);
 
@@ -118,10 +101,6 @@ const HomeManager = () => {
 
   const uploadImage = async (): Promise<string | null> => {
     if (!imageFile) return content?.image_url || null;
-    if (!isBucketReady) {
-      setUploadError("Storage bucket 'site-images' is not set up. Please create it in your Supabase dashboard.");
-      return null;
-    }
     
     setIsUploading(true);
     try {
