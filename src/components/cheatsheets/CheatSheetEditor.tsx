@@ -119,7 +119,7 @@ const CheatSheetEditor: React.FC<CheatSheetEditorProps> = ({ cheatsheetToEdit, o
   const addGroup = () => {
     const newGroup: CheatSheetGroup = {
       id: uuidv4(),
-      cheatsheet_id: cheatsheetToEdit?.id || "",
+      cheatsheet_id: "",
       title: "New Group",
       display_order: groups.length,
       entries: []
@@ -179,14 +179,8 @@ const CheatSheetEditor: React.FC<CheatSheetEditorProps> = ({ cheatsheetToEdit, o
   // Create or update cheatsheet mutation
   const saveMutation = useMutation({
     mutationFn: async () => {
-      // Get the current user
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData?.user?.id) {
-        throw new Error("User not authenticated");
-      }
-
       setIsSaving(true);
-      
+      // Only validate our custom auth
       if (isEditMode) {
         // Update existing cheatsheet
         const { error: updateError } = await supabase
@@ -198,7 +192,7 @@ const CheatSheetEditor: React.FC<CheatSheetEditorProps> = ({ cheatsheetToEdit, o
             updated_at: new Date().toISOString()
           })
           .eq('id', cheatsheetToEdit.id);
-          
+        
         if (updateError) throw new Error(updateError.message);
         
         // Delete existing groups and entries to recreate them
@@ -207,7 +201,7 @@ const CheatSheetEditor: React.FC<CheatSheetEditorProps> = ({ cheatsheetToEdit, o
           .from('cheatsheet_groups')
           .delete()
           .eq('cheatsheet_id', cheatsheetToEdit.id);
-          
+        
         if (deleteGroupsError) throw new Error(deleteGroupsError.message);
         
         // Create updated groups with display order
@@ -221,7 +215,7 @@ const CheatSheetEditor: React.FC<CheatSheetEditorProps> = ({ cheatsheetToEdit, o
         const { error: groupsError } = await supabase
           .from('cheatsheet_groups')
           .insert(groupsWithOrder);
-
+        
         if (groupsError) throw new Error(groupsError.message);
         
         // Create entries for each group with display order
@@ -239,7 +233,7 @@ const CheatSheetEditor: React.FC<CheatSheetEditorProps> = ({ cheatsheetToEdit, o
           const { error: entriesError } = await supabase
             .from('cheatsheet_entries')
             .insert(entriesData);
-
+          
           if (entriesError) throw new Error(entriesError.message);
         }
         
@@ -260,7 +254,7 @@ const CheatSheetEditor: React.FC<CheatSheetEditorProps> = ({ cheatsheetToEdit, o
           })
           .select()
           .single();
-
+        
         if (cheatsheetError) throw new Error(cheatsheetError.message);
         
         // Create groups with display order
@@ -274,7 +268,7 @@ const CheatSheetEditor: React.FC<CheatSheetEditorProps> = ({ cheatsheetToEdit, o
         const { error: groupsError } = await supabase
           .from('cheatsheet_groups')
           .insert(groupsWithOrder);
-
+        
         if (groupsError) throw new Error(groupsError.message);
         
         // Create entries for each group with display order
@@ -292,7 +286,7 @@ const CheatSheetEditor: React.FC<CheatSheetEditorProps> = ({ cheatsheetToEdit, o
           const { error: entriesError } = await supabase
             .from('cheatsheet_entries')
             .insert(entriesData);
-
+          
           if (entriesError) throw new Error(entriesError.message);
         }
         
