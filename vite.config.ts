@@ -10,7 +10,12 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
     watch: {
-      ignored: ["**/supabase/**"],
+      ignored: [
+        "**/.git/**",
+        "**/node_modules/**",
+        "**/dist/**",
+        "**/supabase/**",
+      ],
     },
   },
   plugins: [
