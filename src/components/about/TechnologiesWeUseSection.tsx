@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,9 +8,29 @@ import {
   CarouselNext,
   type CarouselApi,
 } from "@/components/ui/carousel";
-import { Html5, React as ReactIcon, Vuejs, Nodejs, Docker, Git, Aws } from "lucide-react";
 
 // ——— Placeholder SVG Components For techs: ———
+const SVG_Html5 = (
+  <svg viewBox="0 0 48 48" className="w-10 h-10"><rect width="48" height="48" rx="10" fill="#E44D26"/><text x="24" y="30" fontSize="13" fill="#fff" fontWeight="bold" textAnchor="middle" fontFamily="Inter,Arial,sans-serif">HTML5</text></svg>
+);
+const SVG_React = (
+  <svg viewBox="0 0 48 48" className="w-10 h-10"><circle cx="24" cy="24" r="21" fill="#21232c"/><ellipse cx="24" cy="24" rx="11" ry="18" fill="none" stroke="#61DAFB" strokeWidth="2.5"/><ellipse cx="24" cy="24" rx="18" ry="11" fill="none" stroke="#61DAFB" strokeWidth="2.5"/><ellipse cx="24" cy="24" rx="18" ry="11" fill="none" stroke="#61DAFB" strokeWidth="2.5" transform="rotate(60 24 24)"/><ellipse cx="24" cy="24" rx="18" ry="11" fill="none" stroke="#61DAFB" strokeWidth="2.5" transform="rotate(120 24 24)"/><circle cx="24" cy="24" r="4" fill="#61DAFB"/></svg>
+);
+const SVG_Vuejs = (
+  <svg viewBox="0 0 48 48" className="w-10 h-10"><rect width="48" height="48" rx="10" fill="#33475b"/><polygon points="24 8 40 40 24 32 8 40 24 8" fill="#41B883"/><polygon points="24 14 35 36 24 30 13 36 24 14" fill="#34495E"/><polygon points="24 18 32 34 24 30 16 34 24 18" fill="#42B883"/></svg>
+);
+const SVG_Nodejs = (
+  <svg viewBox="0 0 48 48" className="w-10 h-10"><circle cx="24" cy="24" r="21" fill="#21232c"/><path d="M24 9l13 7.5v15L24 39l-13-7.5v-15z" fill="#8CC84B"/><text x="24" y="31" fontSize="13" fill="#222" fontWeight="bold" textAnchor="middle" fontFamily="Inter,Arial,sans-serif">Node</text></svg>
+);
+const SVG_Docker = (
+  <svg viewBox="0 0 48 48" className="w-10 h-10"><rect width="48" height="48" rx="10" fill="#2496ED"/><rect x="11" y="23" width="5" height="5" fill="#fff"/><rect x="18" y="23" width="5" height="5" fill="#fff"/><rect x="25" y="23" width="5" height="5" fill="#fff"/><rect x="32" y="23" width="5" height="5" fill="#fff"/><rect x="14" y="18" width="5" height="5" fill="#fff"/><rect x="21" y="18" width="5" height="5" fill="#fff"/><rect x="28" y="18" width="5" height="5" fill="#fff"/><ellipse cx="36" cy="32" rx="7" ry="3" fill="#90dffe"/><circle cx="15" cy="33" r="2" fill="#90dffe"/></svg>
+);
+const SVG_Git = (
+  <svg viewBox="0 0 48 48" className="w-10 h-10"><rect width="48" height="48" rx="10" fill="#F05133"/><circle cx="24" cy="24" r="14" fill="#fff"/><text x="24" y="28" fontSize="13" fill="#F05133" fontWeight="bold" textAnchor="middle" fontFamily="Inter,Arial,sans-serif">Git</text></svg>
+);
+const SVG_Aws = (
+  <svg viewBox="0 0 48 48" className="w-10 h-10"><rect width="48" height="48" rx="10" fill="#FF9900"/><text x="24" y="30" fontSize="15" fill="#222" fontWeight="bold" textAnchor="middle" fontFamily="Inter,Arial,sans-serif">AWS</text></svg>
+);
 const SVG_Python = (
   <svg viewBox="0 0 48 48" className="w-10 h-10" fill="none"><rect width="48" height="48" rx="10" fill="#FFD845"/><path d="M32.724 15.306c-3.217-1.238-9.225-1.303-12.098.03-2.782 1.293-2.025 4.003-2.025 4.003h9.835v2.516h-13.15s-5.324-.656-5.324 5.519c0 6.174 6.014 5.862 6.014 5.862h3.464v-3.44s.125-2.674 4.552-2.674h8.5c4.426 0 4.485 2.472 4.485 2.472v8.039h2.01c1.313 0 2.38-.762 2.38-2.193V21.057c0-1.953-1.25-3.249-2.443-3.7ZM18.48 13.815a1.653 1.653 0 1 1 .009-3.306 1.653 1.653 0 0 1-.01 3.306Zm2.982 21.307c3.217 1.238 9.225 1.303 12.098-.03 2.782-1.293 2.025-4.003 2.025-4.003h-9.835v-2.516h13.15s5.324.656 5.324-5.519c0-6.174-6.014-5.862-6.014-5.862h-3.464v3.44s-.125 2.674-4.552 2.674h-8.5c-4.426 0-4.485-2.472-4.485-2.472v-8.039h-2.01c-1.313 0-2.38.762-2.38 2.193v9.222c0 1.953 1.25 3.248 2.443 3.7Zm14.405 1.491a1.653 1.653 0 1 0-.01 3.306 1.653 1.653 0 0 0 .01-3.306Z" fill="#356A99"/></svg>
 );
@@ -59,10 +78,10 @@ const SVG_Jenkins = (
 const topLogos = [
   { name: "Python", svg: SVG_Python },
   { name: "PHP", svg: SVG_PHP },
-  { name: "HTML5", svg: <Html5 size={40} color="#E44D26" /> },
-  { name: "React", svg: <ReactIcon size={40} color="#61DAFB" /> },
-  { name: "Vue.js", svg: <Vuejs size={40} color="#42B883" /> },
-  { name: "Node.js", svg: <Nodejs size={40} color="#8CC84B" /> },
+  { name: "HTML5", svg: SVG_Html5 },
+  { name: "React", svg: SVG_React },
+  { name: "Vue.js", svg: SVG_Vuejs },
+  { name: "Node.js", svg: SVG_Nodejs },
   { name: "Spring Boot", svg: SVG_SpringBoot },
   { name: "Laravel", svg: SVG_Laravel },
   { name: "MySQL", svg: SVG_MySQL },
@@ -76,10 +95,10 @@ const bottomLogos = [
   { name: "PyTorch", svg: SVG_PyTorch },
   { name: "Postman", svg: SVG_Postman },
   { name: "Redis", svg: SVG_Redis },
-  { name: "Docker", svg: <Docker size={40} color="#2496ED" /> },
+  { name: "Docker", svg: SVG_Docker },
   { name: "Jenkins", svg: SVG_Jenkins },
-  { name: "Git", svg: <Git size={40} color="#F05032" /> },
-  { name: "AWS", svg: <Aws size={40} color="#FF9900" /> },
+  { name: "Git", svg: SVG_Git },
+  { name: "AWS", svg: SVG_Aws },
 ];
 
 // ——— Logo Carousel: Animated w/ arrows, auto-scroll, responsive ———
