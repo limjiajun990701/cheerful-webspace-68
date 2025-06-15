@@ -50,7 +50,7 @@ const About = () => {
     async function fetchExperiences() {
       const data = await getExperienceItems();
       if (data && data.length > 0) {
-        // Make sure data type matches TimelineItem[]
+        // Filter for allowed types
         const safeData = data
           .filter(
             (item: any) => item.type === "work" || item.type === "education"
@@ -59,8 +59,9 @@ const About = () => {
             (item: any) =>
               ({
                 ...item,
-                type: item.type as "work" | "education",
-              } as {
+                // This ensures the type field is exactly the allowed union type
+                type: item.type === "work" ? "work" : "education",
+              }) as {
                 id: string;
                 type: "work" | "education";
                 title: string;
@@ -68,9 +69,19 @@ const About = () => {
                 location: string;
                 date: string;
                 description: string;
-              })
+              }
           );
-        setTimelineItems(safeData);
+
+        // Tell TypeScript that this is TimelineItem[]
+        setTimelineItems(safeData as {
+          id: string;
+          type: "work" | "education";
+          title: string;
+          company: string;
+          location: string;
+          date: string;
+          description: string;
+        }[]);
       }
     }
     fetchExperiences();
