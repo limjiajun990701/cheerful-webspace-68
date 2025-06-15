@@ -9,6 +9,7 @@ import {
   CarouselNext,
   type CarouselApi,
 } from "@/components/ui/carousel";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 
 /**
  * Props for the SkillsCarouselSection reusable component
@@ -18,8 +19,11 @@ export interface SkillsCarouselSectionProps {
   description?: string;
   skills: {
     category: string;
-    iconUrl?: string; // Could be used in the future for a SVG, or keep null
-    items: string[];
+    iconUrl?: string;
+    items: {
+      name: string;
+      iconUrl?: string;
+    }[];
   }[];
   joinButton?: {
     label: string;
@@ -36,9 +40,7 @@ export interface SkillsCarouselSectionProps {
 const SkillsCarouselSection: React.FC<SkillsCarouselSectionProps> = ({
   sectionTitle = (
     <span className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight">
-      <span className="text-primary drop-shadow font-sans">
-        My
-      </span>{" "}
+      <span className="text-primary drop-shadow font-sans">My</span>{" "}
       <span className="text-gray-100">Skills</span>
     </span>
   ),
@@ -49,14 +51,6 @@ const SkillsCarouselSection: React.FC<SkillsCarouselSectionProps> = ({
   carouselInterval = 3200,
   skillsBgClassName = "bg-gradient-to-br from-[#171A1F] via-[#21242B] to-[#2D293E]",
 }) => {
-  // Flatten skill items for logo carousel (category as label, with sub-skills as overlay/tooltip if wanted)
-  const logos = skills.map((group) => ({
-    name: group.category,
-    // show first skill as img alt, no SVG for now
-    details: group.items.join(", "),
-    // iconUrl: group.iconUrl, // for future use if SVG or image available
-  }));
-
   return (
     <section
       className={`${skillsBgClassName} relative py-16 md:py-24 w-full min-h-[420px] flex items-center justify-center`}
@@ -106,11 +100,7 @@ const SkillsCarouselSection: React.FC<SkillsCarouselSectionProps> = ({
 };
 
 interface SkillsLogoCarouselProps {
-  skills: {
-    category: string;
-    iconUrl?: string;
-    items: string[];
-  }[];
+  skills: SkillsCarouselSectionProps["skills"];
   interval?: number;
 }
 
@@ -142,26 +132,39 @@ function SkillsLogoCarousel({ skills, interval = 2600 }: SkillsLogoCarouselProps
             className="basis-1/2 md:basis-1/3 lg:basis-1/4 flex justify-center"
           >
             <div
-              className="w-[210px] h-[140px] md:w-[220px] md:h-[150px] border border-primary/30 rounded-2xl bg-black/30 flex flex-col items-center justify-center group transition-transform hover:scale-105 hover:shadow-lg hover:border-primary/70 duration-150"
+              className="w-[210px] h-[150px] md:w-[220px] md:h-[170px] border border-cyan-400/40 rounded-xl bg-black/30 flex flex-col items-center justify-center group transition-transform hover:scale-105 hover:shadow-lg hover:border-cyan-400 duration-200"
               title={group.category}
             >
-              <div className="font-semibold text-primary text-base mb-2">{group.category}</div>
-              <div className="flex flex-wrap gap-2 justify-center items-center">
+              <div className="font-semibold text-cyan-400 text-base mb-2">{group.category}</div>
+              <div className="flex flex-wrap items-center justify-center gap-2">
                 {group.items.map((item) => (
-                  <span
-                    key={item}
-                    className="bg-secondary text-sm font-medium text-secondary-foreground px-2.5 py-1 rounded shadow transition-colors hover:bg-secondary/80"
+                  <div
+                    key={item.name}
+                    className="flex flex-col items-center gap-1 group/icon"
                   >
-                    {item}
-                  </span>
+                    {item.iconUrl ? (
+                      <ImageWithFallback
+                        src={item.iconUrl}
+                        alt={item.name}
+                        className="w-8 h-8 object-cover rounded hover:scale-110 transition-transform border border-cyan-400/60 bg-black/20"
+                        showSkeleton
+                        aspectRatio="square"
+                      />
+                    ) : (
+                      <span className="w-8 h-8 rounded bg-muted flex items-center justify-center text-xs text-muted-foreground border border-border">
+                        ?
+                      </span>
+                    )}
+                    <span className="text-[12px] text-gray-200 text-center max-w-[58px] truncate">{item.name}</span>
+                  </div>
                 ))}
               </div>
             </div>
           </CarouselItem>
         ))}
       </CarouselContent>
-      <CarouselPrevious className="left-0 md:-left-10 bg-black/60 border-primary/50 text-primary hover:bg-primary/70" />
-      <CarouselNext className="right-0 md:-right-10 bg-black/60 border-primary/50 text-primary hover:bg-primary/70" />
+      <CarouselPrevious className="left-0 md:-left-10 bg-black/60 border-cyan-400/50 text-cyan-200 hover:bg-cyan-700/80" />
+      <CarouselNext className="right-0 md:-right-10 bg-black/60 border-cyan-400/50 text-cyan-200 hover:bg-cyan-700/80" />
     </Carousel>
   );
 }

@@ -1,22 +1,23 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useToast } from "@/hooks/use-toast";
-import { 
-  getSkillGroups, 
-  createSkillGroup, 
-  updateSkillGroup, 
-  deleteSkillGroup 
+import {
+  getSkillGroups,
+  createSkillGroup,
+  updateSkillGroup,
+  deleteSkillGroup,
+  uploadSiteImage,
 } from "@/utils/contentUtils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
-import { 
-  Table, 
-  TableHeader, 
-  TableRow, 
-  TableHead, 
-  TableBody, 
-  TableCell 
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell
 } from "@/components/ui/table";
 import {
   Dialog,
@@ -27,12 +28,17 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Code, Plus, Edit, Trash2, Save, X, Briefcase } from "lucide-react";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
+import { Code, Plus, Edit, Trash2, Save, X, Upload, Image as ImageIcon, Briefcase } from "lucide-react";
 
+interface SkillItem {
+  name: string;
+  iconUrl?: string;
+}
 interface SkillGroup {
   id: string;
   category: string;
-  items: string[];
+  items: SkillItem[];
 }
 
 const SkillsManager = () => {
@@ -41,8 +47,9 @@ const SkillsManager = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [editSkill, setEditSkill] = useState<SkillGroup | null>(null);
   const [newCategory, setNewCategory] = useState('');
-  const [newSkillItem, setNewSkillItem] = useState('');
+  const [newSkillItem, setNewSkillItem] = useState<{ name: string, iconUrl?: string }>({ name: '', iconUrl: '' });
   const [isOpen, setIsOpen] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     fetchSkills();
@@ -84,13 +91,18 @@ const SkillsManager = () => {
   };
 
   const handleEditSkill = (skill: SkillGroup) => {
-    setEditSkill({...skill});
+    setEditSkill({
+      ...skill,
+      items: skill.items.map((item: any) =>
+        typeof item === 'string' ? { name: item, iconUrl: "" } : { ...item }
+      ),
+    });
     setIsOpen(true);
   };
 
   const handleUpdateSkill = async () => {
     if (!editSkill) return;
-    
+
     if (!editSkill.category.trim()) {
       toast({
         title: "Error",
@@ -101,9 +113,9 @@ const SkillsManager = () => {
     }
 
     const result = await updateSkillGroup(
-      editSkill.id, 
-      editSkill.category.trim(), 
-      editSkill.items.filter(item => item.trim() !== '')
+      editSkill.id,
+      editSkill.category.trim(),
+      editSkill.items
     );
 
     if (result.success) {
@@ -143,12 +155,18 @@ const SkillsManager = () => {
   };
 
   const addSkillItem = () => {
-    if (editSkill && newSkillItem.trim()) {
+    if (editSkill && newSkillItem.name.trim()) {
       setEditSkill({
         ...editSkill,
-        items: [...editSkill.items, newSkillItem.trim()]
+        items: [
+          ...editSkill.items,
+          {
+            name: newSkillItem.name.trim(),
+            iconUrl: newSkillItem.iconUrl ? newSkillItem.iconUrl : "",
+          },
+        ],
       });
-      setNewSkillItem('');
+      setNewSkillItem({ name: '', iconUrl: '' });
     }
   };
 
@@ -163,6 +181,39 @@ const SkillsManager = () => {
     }
   };
 
+  // Upload handler for icon
+  const handleSkillIconUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    cb: (url: string) => void
+  ) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      const fileExt = file.name.split('.').pop();
+      const uploadPath = `skills-icons/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const uploadResult = await uploadSiteImage(file, uploadPath);
+      if (uploadResult?.publicUrl || uploadResult?.url) {
+        cb(uploadResult.publicUrl || uploadResult.url);
+        toast({
+          title: "Icon Uploaded",
+          description: "Icon uploaded successfully.",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to upload icon.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const openUpload = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+      fileInputRef.current.click();
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -174,13 +225,12 @@ const SkillsManager = () => {
               Add Skill Category
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[525px]">
+          <DialogContent className="sm:max-w-[545px]">
             <DialogHeader>
               <DialogTitle>
                 {editSkill ? 'Edit Skill Category' : 'Add New Skill Category'}
               </DialogTitle>
             </DialogHeader>
-            
             <div className="grid gap-4 py-4">
               <div className="space-y-2">
                 <label htmlFor="category" className="text-sm font-medium">
@@ -189,28 +239,37 @@ const SkillsManager = () => {
                 <Input
                   id="category"
                   value={editSkill ? editSkill.category : newCategory}
-                  onChange={(e) => 
-                    editSkill 
-                      ? setEditSkill({...editSkill, category: e.target.value})
+                  onChange={(e) =>
+                    editSkill
+                      ? setEditSkill({ ...editSkill, category: e.target.value })
                       : setNewCategory(e.target.value)
                   }
                   placeholder="e.g., Programming Languages"
                 />
               </div>
-              
               {editSkill && (
                 <div className="space-y-4">
                   <label className="text-sm font-medium">Skills</label>
+                  {/* SKILL ICON TABLE */}
                   <div className="flex flex-wrap gap-2 p-2 border rounded-md min-h-[100px]">
                     {editSkill.items.map((item, index) => (
-                      <Badge 
-                        key={index} 
+                      <Badge
+                        key={index}
                         variant="outline"
-                        className="px-2 py-1 flex items-center gap-1"
+                        className="px-2 py-1 flex items-center gap-2"
                       >
-                        {item}
-                        <button 
-                          type="button" 
+                        {item.iconUrl ? (
+                          <ImageWithFallback
+                            src={item.iconUrl}
+                            alt={item.name}
+                            className="w-5 h-5 rounded object-cover border bg-muted"
+                          />
+                        ) : (
+                          <ImageIcon className="w-5 h-5 text-muted" />
+                        )}
+                        {item.name}
+                        <button
+                          type="button"
                           className="ml-1 hover:bg-destructive/10 rounded-full p-0.5"
                           onClick={() => removeSkillItem(index)}
                         >
@@ -219,12 +278,17 @@ const SkillsManager = () => {
                       </Badge>
                     ))}
                   </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <Input 
-                      value={newSkillItem}
-                      onChange={(e) => setNewSkillItem(e.target.value)}
-                      placeholder="Add new skill"
+                  <div className="flex flex-col md:flex-row gap-2 items-center">
+                    <Input
+                      value={newSkillItem.name}
+                      onChange={(e) =>
+                        setNewSkillItem((curr) => ({
+                          ...curr,
+                          name: e.target.value,
+                        }))
+                      }
+                      placeholder="Skill name"
+                      className="w-full md:w-auto"
                       onKeyPress={(e) => {
                         if (e.key === 'Enter') {
                           e.preventDefault();
@@ -232,10 +296,46 @@ const SkillsManager = () => {
                         }
                       }}
                     />
-                    <Button 
-                      type="button" 
-                      size="sm" 
+                    <Input
+                      value={newSkillItem.iconUrl || ""}
+                      onChange={(e) =>
+                        setNewSkillItem((curr) => ({
+                          ...curr,
+                          iconUrl: e.target.value,
+                        }))
+                      }
+                      placeholder="Image URL (optional)"
+                      className="w-full md:w-[220px]"
+                    />
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) =>
+                        handleSkillIconUpload(e, (url: string) =>
+                          setNewSkillItem((curr) => ({
+                            ...curr,
+                            iconUrl: url,
+                          }))
+                        )
+                      }
+                    />
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="secondary"
+                      className="flex gap-2"
+                      onClick={openUpload}
+                    >
+                      <Upload className="w-4 h-4" />
+                      Upload Icon
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
                       onClick={addSkillItem}
+                      className="md:ml-2"
                     >
                       Add
                     </Button>
@@ -243,19 +343,19 @@ const SkillsManager = () => {
                 </div>
               )}
             </div>
-
             <DialogFooter>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => {
                   setIsOpen(false);
                   setEditSkill(null);
                   setNewCategory('');
+                  setNewSkillItem({ name: '', iconUrl: '' });
                 }}
               >
                 Cancel
               </Button>
-              <Button 
+              <Button
                 type="button"
                 onClick={editSkill ? handleUpdateSkill : handleSaveNewSkill}
               >
@@ -265,7 +365,6 @@ const SkillsManager = () => {
           </DialogContent>
         </Dialog>
       </div>
-
       <Card>
         <CardHeader>
           <CardTitle>Skill Categories</CardTitle>
@@ -287,12 +386,23 @@ const SkillsManager = () => {
               <TableBody>
                 {skills.map((skill) => (
                   <TableRow key={skill.id}>
-                    <TableCell className="font-medium">{skill.category}</TableCell>
+                    <TableCell className="font-medium">
+                      {skill.category}
+                    </TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
                         {skill.items.slice(0, 5).map((item, i) => (
-                          <Badge key={i} variant="secondary" className="bg-secondary/50">
-                            {item}
+                          <Badge key={i} variant="secondary" className="bg-secondary/50 flex gap-1 items-center">
+                            {item.iconUrl ? (
+                              <ImageWithFallback
+                                src={item.iconUrl}
+                                alt={item.name}
+                                className="w-4 h-4 rounded object-cover border bg-muted"
+                              />
+                            ) : (
+                              <ImageIcon className="w-4 h-4 text-muted" />
+                            )}
+                            {item.name}
                           </Badge>
                         ))}
                         {skill.items.length > 5 && (
@@ -302,15 +412,15 @@ const SkillsManager = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={() => handleEditSkill(skill)}
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button 
-                          variant="ghost" 
+                        <Button
+                          variant="ghost"
                           size="sm"
                           onClick={() => handleDeleteSkill(skill.id)}
                         >
