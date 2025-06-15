@@ -28,7 +28,9 @@ const CheatSheetEditor: React.FC<CheatSheetEditorProps> = ({ cheatsheetToEdit, o
   const [groups, setGroups] = useState<CheatSheetGroup[]>([]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, username } = useAuth();
+  const [adminUserId, setAdminUserId] = useState<string | null>(null);
+  const [isUuidLoading, setIsUuidLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState("edit");
   const isEditMode = !!cheatsheetToEdit;
@@ -97,6 +99,22 @@ const CheatSheetEditor: React.FC<CheatSheetEditorProps> = ({ cheatsheetToEdit, o
       }]);
     }
   }, [cheatsheetToEdit]);
+
+  // Fetch the admin user's UUID on mount for new cheat sheet creation
+  useEffect(() => {
+    if (!cheatsheetToEdit && isLoggedIn && username) {
+      setIsUuidLoading(true);
+      supabase
+        .from('admin_users')
+        .select('id')
+        .eq('username', username)
+        .maybeSingle()
+        .then(({ data, error }) => {
+          setAdminUserId(data?.id ?? null);
+          setIsUuidLoading(false);
+        });
+    }
+  }, [cheatsheetToEdit, isLoggedIn, username]);
 
   const addGroup = () => {
     const newGroup: CheatSheetGroup = {
@@ -229,13 +247,14 @@ const CheatSheetEditor: React.FC<CheatSheetEditorProps> = ({ cheatsheetToEdit, o
         
       } else {
         // Create new cheatsheet
+        if (!adminUserId) throw new Error("Admin user ID could not be resolved. Please try again.");
         const { data: cheatsheetData, error: cheatsheetError } = await supabase
           .from('cheatsheets')
           .insert({
             title,
             description,
             language,
-            created_by: "admin-uuid-or-null", // Example fallback, replace with actual logic
+            created_by: adminUserId,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           })
@@ -333,7 +352,14 @@ const CheatSheetEditor: React.FC<CheatSheetEditorProps> = ({ cheatsheetToEdit, o
       });
       return;
     }
-    
+    if (!isEditMode && !adminUserId) {
+      toast({
+        title: "Admin User Error",
+        description: "Admin user ID not found. Please reload and try again.",
+        variant: "destructive"
+      });
+      return;
+    }
     saveMutation.mutate();
   };
 
@@ -385,11 +411,13 @@ const CheatSheetEditor: React.FC<CheatSheetEditorProps> = ({ cheatsheetToEdit, o
     }
   };
 
-  if (isLoadingGroups) {
+  if (isLoadingGroups || (isUuidLoading && !isEditMode)) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="mt-4 text-muted-foreground">Loading cheat sheet data...</p>
+        <p className="mt-4 text-muted-foreground">
+          {isUuidLoading ? "Preparing admin account..." : "Loading cheat sheet data..."}
+        </p>
       </div>
     );
   }
