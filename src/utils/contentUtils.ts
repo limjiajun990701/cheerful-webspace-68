@@ -204,3 +204,178 @@ export async function getSkillGroups() {
     };
   });
 }
+
+/**
+ * EXPERIENCE SECTION
+ * 
+ * Work and Education Experiences are stored in site_content
+ * with section_name = "experience" and a description field with
+ * experience items in JSON array:
+ * [
+ *   { id, type, title, company, location, date, description }
+ * ]
+ * 
+ * To keep data simple, we store all experiences in one row,
+ * page_name = 'about', section_name = 'experience'.
+ */
+
+interface ExperienceItem {
+  id: string;
+  type: 'work' | 'education';
+  title: string;
+  company: string;
+  location: string;
+  date: string;
+  description: string;
+}
+
+export async function getExperienceItems(): Promise<ExperienceItem[]> {
+  const { data, error } = await supabase
+    .from('site_content')
+    .select('*')
+    .eq('page_name', 'about')
+    .eq('section_name', 'experience')
+    .maybeSingle();
+
+  if (error) {
+    console.error('Error fetching experience content:', error);
+    return [];
+  }
+  if (!data || !data.description) return [];
+
+  try {
+    const parsed = typeof data.description === "string"
+      ? JSON.parse(data.description)
+      : data.description;
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (err) {
+    return [];
+  }
+}
+
+// Adds a new experience item. "type" is 'work'|'education'
+export async function createExperienceItem(
+  type: 'work' | 'education',
+  item: Omit<ExperienceItem, 'id'|'type'> & { type?: 'work'|'education' }
+): Promise<{ success: boolean }> {
+  // Get existing
+  const items = await getExperienceItems();
+  const newItem: ExperienceItem = {
+    id: uuidv4(),
+    type,
+    title: item.title,
+    company: item.company,
+    location: item.location,
+    date: item.date,
+    description: item.description,
+  };
+  const newItems = [newItem, ...items];
+
+  // Upsert entire array
+  const { error } = await supabase
+    .from('site_content')
+    .upsert([{
+      page_name: 'about',
+      section_name: 'experience',
+      description: JSON.stringify(newItems),
+      updated_at: new Date().toISOString(),
+    }], { onConflict: ['page_name', 'section_name'] });
+
+  if (error) {
+    console.error('Error creating experience item:', error);
+    return { success: false };
+  }
+  return { success: true };
+}
+
+export async function updateExperienceItem(id: string, updates: Partial<ExperienceItem>): Promise<{ success: boolean }> {
+  // Get existing
+  const items = await getExperienceItems();
+  const updatedItems = items.map(item =>
+    item.id === id ? { ...item, ...updates } : item
+  );
+  const { error } = await supabase
+    .from('site_content')
+    .upsert([{
+      page_name: 'about',
+      section_name: 'experience',
+      description: JSON.stringify(updatedItems),
+      updated_at: new Date().toISOString(),
+    }], { onConflict: ['page_name', 'section_name'] });
+
+  if (error) {
+    console.error('Error updating experience item:', error);
+    return { success: false };
+  }
+  return { success: true };
+}
+
+export async function deleteExperienceItem(id: string): Promise<{ success: boolean }> {
+  const items = await getExperienceItems();
+  const updatedItems = items.filter(item => item.id !== id);
+  const { error } = await supabase
+    .from('site_content')
+    .upsert([{
+      page_name: 'about',
+      section_name: 'experience',
+      description: JSON.stringify(updatedItems),
+      updated_at: new Date().toISOString(),
+    }], { onConflict: ['page_name', 'section_name'] });
+
+  if (error) {
+    console.error('Error deleting experience item:', error);
+    return { success: false };
+  }
+  return { success: true };
+}
+
+/**
+ * SKILLS SECTION
+ * Each skill group is a row in site_content with section_name = "skills-group"
+ * description = { items: string[] }
+ */
+
+export async function createSkillGroup(category: string) {
+  const { error } = await supabase
+    .from('site_content')
+    .insert([{
+      page_name: 'about',
+      section_name: 'skills-group',
+      title: category,
+      description: JSON.stringify({ items: [] }),
+      updated_at: new Date().toISOString(),
+    }]);
+  if (error) {
+    console.error('Error creating skill group:', error);
+    return { success: false };
+  }
+  return { success: true };
+}
+
+export async function updateSkillGroup(id: string, category: string, items: string[]) {
+  const { error } = await supabase
+    .from('site_content')
+    .update({
+      title: category,
+      description: JSON.stringify({ items }),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', id);
+  if (error) {
+    console.error('Error updating skill group:', error);
+    return { success: false };
+  }
+  return { success: true };
+}
+
+export async function deleteSkillGroup(id: string) {
+  const { error } = await supabase
+    .from('site_content')
+    .delete()
+    .eq('id', id);
+  if (error) {
+    console.error('Error deleting skill group:', error);
+    return { success: false };
+  }
+  return { success: true };
+}
