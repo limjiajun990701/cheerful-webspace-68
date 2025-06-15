@@ -56,3 +56,23 @@ export interface Profile {
   created_at: string;
   updated_at: string;
 }
+
+export interface Skill {
+  id: string;
+  name: string;
+  description: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface SkillItem {
+  id: string;
+  skill_id: string;
+  image_url: string;
+  label: string;
+  description: string | null;
+  animation_type: string | null;
+  display_order: number | null;
+  created_at?: string;
+  updated_at?: string;
+}
