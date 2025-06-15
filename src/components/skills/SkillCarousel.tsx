@@ -46,6 +46,33 @@ const SkillCarousel = ({ skillId }: SkillCarouselProps) => {
     return url.startsWith('blob:') || url.startsWith('data:image/png;base64,');
   };
 
+  // --- STYLES ----
+  // We'll inject a custom keyframes on the page for moving the carousel (no duplication) right-to-left.
+  // Total width = items.length * 216 (item width + padding)
+  const getCarouselWidth = () => `${items.length * 216}px`;
+
+  useEffect(() => {
+    // Add keyframes for @keyframes scroll-rtl-once
+    const styleId = "skill-carousel-once-keyframes";
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement('style');
+      style.id = styleId;
+      style.innerHTML = `
+        @keyframes scroll-rtl-once {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .animate-skill-rtl-once {
+          animation: scroll-rtl-once 15s linear infinite;
+        }
+        .pause-on-hover:hover {
+          animation-play-state: paused;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  }, []);
+
   if (isLoading) {
     return (
       <div className="w-full py-6">
@@ -70,9 +97,6 @@ const SkillCarousel = ({ skillId }: SkillCarouselProps) => {
   }
 
   const isSingleItem = items.length === 1;
-
-  // Create duplicated items for seamless infinite scroll
-  const duplicatedItems = items.length > 1 ? [...items, ...items] : items;
 
   return (
     <div className="w-full py-6 bg-secondary/10 overflow-hidden">
@@ -122,15 +146,16 @@ const SkillCarousel = ({ skillId }: SkillCarouselProps) => {
           ) : (
             <div className="overflow-hidden">
               <div
-                className="flex animate-scroll-rtl"
+                className={cn("flex pause-on-hover animate-skill-rtl-once")}
                 style={{
-                  '--item-count': items.length,
-                  width: `${duplicatedItems.length * 216}px`,
-                } as React.CSSProperties}
+                  width: getCarouselWidth(),
+                  minWidth: getCarouselWidth(),
+                  gap: "0.5rem",
+                }}
               >
-                {duplicatedItems.map((item, index) => (
+                {items.map((item, index) => (
                   <div
-                    key={`${item.id}-${index}`}
+                    key={item.id}
                     className="flex-shrink-0 w-[200px] px-2"
                   >
                     <HoverCard>
