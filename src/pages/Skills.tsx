@@ -1,12 +1,12 @@
 
 import React, { useState, useEffect } from "react";
-import { Tabs, TabsList, TabsContent, TabsTrigger } from "@/components/ui/tabs";
+import { getSkillGroups } from "@/utils/contentUtils";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
-import { getSkillGroups } from "@/utils/contentUtils";
 import { Image as ImageIcon } from "lucide-react";
 
 interface SkillItem {
@@ -16,6 +16,7 @@ interface SkillItem {
 interface SkillGroup {
   id: string;
   category: string;
+  description?: string | null;
   items: SkillItem[];
 }
 
@@ -37,7 +38,7 @@ const Skills = () => {
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-16">
-        <h1 className="text-4xl font-bold mb-12 text-center">Skills</h1>
+        <h1 className="text-4xl font-bold mb-12 text-center">My Skill</h1>
         <div className="max-w-md mx-auto">
           <Skeleton className="h-10 w-full mb-8" />
           <Skeleton className="h-64 w-full rounded-lg mb-8" />
@@ -50,24 +51,24 @@ const Skills = () => {
   if (groups.length === 0) {
     return (
       <div className="container mx-auto px-4 py-16">
-        <h1 className="text-4xl font-bold mb-12 text-center">Skills</h1>
-        <p className="text-center text-muted-foreground">No skills data available.</p>
+        <h1 className="text-4xl font-bold mb-12 text-center">My Skill</h1>
+        <p className="text-center text-muted-foreground">No skill groups found.</p>
       </div>
     );
   }
 
   return (
     <div className="container mx-auto px-4 py-16">
-      <h1 className="text-4xl font-bold mb-12 text-center">Skills</h1>
-      <Tabs
-        value={selectedGroup || ""}
+      <h1 className="text-4xl font-bold mb-12 text-center">My Skill</h1>
+      <Tabs 
+        value={selectedGroup || ""} 
         onValueChange={setSelectedGroup}
         className="max-w-5xl mx-auto"
       >
         <TabsList className="mb-8 w-full flex justify-center flex-wrap gap-2 bg-transparent">
           {groups.map(group => (
-            <TabsTrigger
-              key={group.id}
+            <TabsTrigger 
+              key={group.id} 
               value={group.id}
               className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
             >
@@ -75,8 +76,14 @@ const Skills = () => {
             </TabsTrigger>
           ))}
         </TabsList>
+
         {groups.map(group => (
           <TabsContent key={group.id} value={group.id}>
+            {group.description && (
+              <p className="text-center text-muted-foreground mb-8">
+                {group.description}
+              </p>
+            )}
             {group.items?.length > 0 ? (
               <div className="w-full py-6 bg-secondary/10 overflow-x-auto rounded-xl">
                 <div className="flex gap-4 px-4 min-w-max">

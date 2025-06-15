@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "../components/ui/button";
@@ -16,6 +15,7 @@ import ExperienceManager from "../components/admin/ExperienceManager";
 import ExpertiseManager from "../components/admin/ExpertiseManager";
 import CollectionManager from "../components/admin/CollectionManager";
 import CheatSheetManager from "../components/admin/CheatSheetManager";
+import SkillCategoryManager from "../components/admin/SkillCategoryManager";
 import { LogOut, LayoutDashboard, Settings, FileText, Award, Briefcase, User, Home, Code, Star, Image, FileCode } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
@@ -178,8 +178,8 @@ const Admin = () => {
                 </TabsTrigger>
                 <TabsTrigger value="skills" className="flex items-center gap-2 data-[state=active]:bg-background">
                   <Code className="h-4 w-4" />
-                  <span className="hidden sm:inline">Skills</span>
-                  <span className="sm:hidden">Skills</span>
+                  <span className="hidden sm:inline">MySkill</span>
+                  <span className="sm:hidden">MySkill</span>
                 </TabsTrigger>
                 <TabsTrigger value="experiences" className="flex items-center gap-2 data-[state=active]:bg-background">
                   <Briefcase className="h-4 w-4" />
@@ -229,7 +229,7 @@ const Admin = () => {
               </TabsContent>
               
               <TabsContent value="skills" className="mt-0 focus:outline-none">
-                <SkillsManager />
+                <SkillCategoryManager />
               </TabsContent>
 
               <TabsContent value="experiences" className="mt-0 focus:outline-none">
