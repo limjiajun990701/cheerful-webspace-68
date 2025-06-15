@@ -181,12 +181,11 @@ const CheatSheetEditor: React.FC<CheatSheetEditorProps> = ({ cheatsheetToEdit, o
     mutationFn: async () => {
       setIsSaving(true);
 
-      // ---- Remove any supabase.auth.getUser() checks! ----
-      // Use only isLoggedIn and local adminUserId for admin feature gating
-
+      // Debug: log before all DB calls
       // Only validate our custom admin logic for edit mode
       if (isEditMode) {
         // Update existing cheatsheet
+        console.log("Updating cheatsheet", cheatsheetToEdit.id);
         const { error: updateError } = await supabase
           .from('cheatsheets')
           .update({
@@ -198,16 +197,16 @@ const CheatSheetEditor: React.FC<CheatSheetEditorProps> = ({ cheatsheetToEdit, o
           .eq('id', cheatsheetToEdit.id);
         
         if (updateError) throw new Error(updateError.message);
-        
-        // Delete existing groups and entries to recreate them
-        // This is simpler than tracking what changed
+
+        // Delete existing groups and entries to recreate them (simpler than diffing modifications)
+        console.log("Deleting old groups for cheatsheet", cheatsheetToEdit.id);
         const { error: deleteGroupsError } = await supabase
           .from('cheatsheet_groups')
           .delete()
           .eq('cheatsheet_id', cheatsheetToEdit.id);
         
         if (deleteGroupsError) throw new Error(deleteGroupsError.message);
-        
+
         // Create updated groups with display order
         const groupsWithOrder = groups.map((group, index) => ({
           id: group.id,
@@ -215,15 +214,18 @@ const CheatSheetEditor: React.FC<CheatSheetEditorProps> = ({ cheatsheetToEdit, o
           title: group.title,
           display_order: index
         }));
-        
-        const { error: groupsError } = await supabase
-          .from('cheatsheet_groups')
-          .insert(groupsWithOrder);
-        
-        if (groupsError) throw new Error(groupsError.message);
-        
-        // Create entries for each group with display order
-        const entriesData = groups.flatMap(group => 
+
+        if (groupsWithOrder.length > 0) {
+          console.log("Inserting new groups", groupsWithOrder);
+          const { error: groupsError } = await supabase
+            .from('cheatsheet_groups')
+            .insert(groupsWithOrder);
+          
+          if (groupsError) throw new Error(groupsError.message);
+        }
+
+        // Create entries for each group, with display order
+        const entriesData = groups.flatMap(group =>
           group.entries.map((entry, index) => ({
             id: entry.id,
             group_id: group.id,
@@ -232,36 +234,30 @@ const CheatSheetEditor: React.FC<CheatSheetEditorProps> = ({ cheatsheetToEdit, o
             display_order: index
           }))
         );
-        
+
         if (entriesData.length > 0) {
+          console.log("Inserting new entries", entriesData);
           const { error: entriesError } = await supabase
             .from('cheatsheet_entries')
             .insert(entriesData);
           
           if (entriesError) throw new Error(entriesError.message);
         }
-        
+
         return cheatsheetToEdit;
-        
+
       } else {
-        // Create new cheatsheet
-        // Do NOT check or fetch supabase.auth.getUser()
-        // Only use local adminUserId if required, otherwise create as "anonymous"/public allowed
+        // Create new cheatsheet (public or admin)
+        // No supabase.auth.getUser and no users table
+        console.log("Creating new cheatsheet. adminUserId:", adminUserId);
 
-        // Remove these lines if present:
-        // const { data: user, error: userError } = await supabase.auth.getUser();
-        // if (!user) throw new Error("User not authenticated");
-
-        // If you want to allow non-admin creation, you may skip adminUserId entirely OR set created_by to null/empty for public users
-
-        // This will accept both admin and public users:
         const { data: cheatsheetData, error: cheatsheetError } = await supabase
           .from('cheatsheets')
           .insert({
             title,
             description,
             language,
-            created_by: adminUserId || null, // If no adminUserId, set to null (public user)
+            created_by: adminUserId || null,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           })
@@ -278,14 +274,16 @@ const CheatSheetEditor: React.FC<CheatSheetEditorProps> = ({ cheatsheetToEdit, o
           display_order: index
         }));
         
-        const { error: groupsError } = await supabase
-          .from('cheatsheet_groups')
-          .insert(groupsWithOrder);
-        
-        if (groupsError) throw new Error(groupsError.message);
-        
-        // Create entries for each group with display order
-        const entriesData = groups.flatMap(group => 
+        if (groupsWithOrder.length > 0) {
+          console.log("Inserting groups for new cheatsheet", groupsWithOrder);
+          const { error: groupsError } = await supabase
+            .from('cheatsheet_groups')
+            .insert(groupsWithOrder);
+
+          if (groupsError) throw new Error(groupsError.message);
+        }
+
+        const entriesData = groups.flatMap(group =>
           group.entries.map((entry, index) => ({
             id: entry.id,
             group_id: group.id,
@@ -294,15 +292,16 @@ const CheatSheetEditor: React.FC<CheatSheetEditorProps> = ({ cheatsheetToEdit, o
             display_order: index
           }))
         );
-        
+
         if (entriesData.length > 0) {
+          console.log("Inserting entries for new cheatsheet", entriesData);
           const { error: entriesError } = await supabase
             .from('cheatsheet_entries')
             .insert(entriesData);
-          
+
           if (entriesError) throw new Error(entriesError.message);
         }
-        
+
         return cheatsheetData;
       }
     },
