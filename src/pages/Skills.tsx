@@ -27,8 +27,8 @@ const Skills = () => {
         
         if (itemsError) throw itemsError;
         
-        setSkills((skillsData as Skill[]) || []);
-        setItems((itemsData as SkillItem[]) || []);
+        setSkills((skillsData as unknown as Skill[]) || []);
+        setItems((itemsData as unknown as SkillItem[]) || []);
       } catch (error) {
         console.error('Error fetching skills:', error);
         // If there's an error (like tables don't exist), fall back to empty arrays

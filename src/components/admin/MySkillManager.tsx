@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -35,7 +36,7 @@ const MySkillManager = () => {
       const { data, error } = await supabase.from('skills' as any).select('*').order('name');
       if (error) throw error;
       
-      setSkills((data as Skill[]) || []);
+      setSkills((data as unknown as Skill[]) || []);
       if (data && data.length > 0 && !selectedSkill) {
         setSelectedSkill(data[0].id);
         fetchSkillItems(data[0].id);
@@ -62,7 +63,7 @@ const MySkillManager = () => {
         .order('display_order');
       if (error) throw error;
       
-      setSkillItems((data as SkillItem[]) || []);
+      setSkillItems((data as unknown as SkillItem[]) || []);
       setIsLoading(false);
     } catch (error) {
       console.error('Error fetching skill items:', error);
