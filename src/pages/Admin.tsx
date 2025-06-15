@@ -10,12 +10,12 @@ import CertificationManager from "../components/admin/CertificationManager";
 import ResumeManager from "../components/admin/ResumeManager";
 import HomeManager from "../components/admin/HomeManager";
 import AboutManager from "../components/admin/AboutManager";
-import SkillsManager from "../components/admin/SkillsManager";
 import ExperienceManager from "../components/admin/ExperienceManager";
 import ExpertiseManager from "../components/admin/ExpertiseManager";
 import CollectionManager from "../components/admin/CollectionManager";
 import CheatSheetManager from "../components/admin/CheatSheetManager";
-import SkillCategoryManager from "../components/admin/SkillCategoryManager";
+// Removed: import SkillCategoryManager from "../components/admin/SkillCategoryManager";
+// Removed: import SkillsManager from "../components/admin/SkillsManager";
 import { LogOut, LayoutDashboard, Settings, FileText, Award, Briefcase, User, Home, Code, Star, Image, FileCode } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
@@ -176,11 +176,7 @@ const Admin = () => {
                   <span className="hidden sm:inline">Cheat Sheets</span>
                   <span className="sm:hidden">Sheets</span>
                 </TabsTrigger>
-                <TabsTrigger value="skills" className="flex items-center gap-2 data-[state=active]:bg-background">
-                  <Code className="h-4 w-4" />
-                  <span className="hidden sm:inline">MySkill</span>
-                  <span className="sm:hidden">MySkill</span>
-                </TabsTrigger>
+                {/* Removed: Skills/MySkill TabTrigger */}
                 <TabsTrigger value="experiences" className="flex items-center gap-2 data-[state=active]:bg-background">
                   <Briefcase className="h-4 w-4" />
                   <span className="hidden sm:inline">Experiences</span>
@@ -228,10 +224,7 @@ const Admin = () => {
                 <CheatSheetManager />
               </TabsContent>
               
-              <TabsContent value="skills" className="mt-0 focus:outline-none">
-                <SkillCategoryManager />
-              </TabsContent>
-
+              {/* Removed: skills tab */}
               <TabsContent value="experiences" className="mt-0 focus:outline-none">
                 <ExperienceManager />
               </TabsContent>
