@@ -31,15 +31,13 @@ export const getAllContent = async (pageName: string) => {
   return data;
 };
 
-export async function upsertSiteContent(contentArray: any) {
-  if (Array.isArray(contentArray)) {
-    return supabase
-      .from('site_content')
-      .upsert(contentArray, { onConflict: "page_name,section_name" });
-  }
-  return supabase
+export async function upsertSiteContent(content: any | any[]) {
+  const { data, error } = await supabase
     .from('site_content')
-    .upsert(contentArray);
+    .upsert(content, { onConflict: "page_name,section_name" })
+    .select();
+
+  return { data, error };
 }
 
 // Fix: Aliases for missing imports and simple stubs for admin functionality

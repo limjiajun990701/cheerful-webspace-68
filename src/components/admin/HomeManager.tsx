@@ -144,27 +144,28 @@ const HomeManager = () => {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    
     if (!content) return;
     
     setIsSaving(true);
     setUploadError(null);
     
     try {
-      // Upload image if there's a new one
-      let imageUrl = content.image_url;
-      if (imageFile) {
-        imageUrl = await uploadImage();
-        if (!imageUrl && imageFile) {
-          // If upload failed but we had a file, show error but continue with other updates
-          setUploadError("Image upload failed, but other content was updated");
-        }
+      const newImageUrl = await uploadImage();
+
+      // If a file was selected but the upload failed (returned null)
+      if (imageFile && !newImageUrl) {
+        toast({
+          title: "Image Upload Failed",
+          description: uploadError || "The content was not saved because the image failed to upload.",
+          variant: "destructive"
+        });
+        setIsSaving(false);
+        return; // Abort the save
       }
 
-      // Use updateSiteContent helper, now also with import_url
       const updatedContent = {
         ...content,
-        image_url: imageUrl,
+        image_url: newImageUrl,
         import_url: content.import_url || null,
         updated_by: "admin",
       };
@@ -177,21 +178,20 @@ const HomeManager = () => {
 
       toast({
         title: "Success",
-        description: uploadError 
-          ? "Content updated but image upload failed" 
-          : "Home page content updated successfully",
+        description: "Home page content updated successfully.",
       });
 
       // Refresh content from database
-      fetchContent();
+      await fetchContent();
       
-      // Clear the file input
+      // Clear the file input state
       setImageFile(null);
     } catch (error) {
       console.error("Error updating content:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to update content";
       toast({
         title: "Error",
-        description: "Failed to update content",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
