@@ -16,11 +16,7 @@ interface ExpertiseItem {
 }
 
 const funFacts = [
-  "🥇 Winner of UUM 2024 hackathon (Cloud category)",
   "✈️ Love building apps that make life easier!",
-  "🧑‍💻 3.34 CGPA in Software Engineering",
-  "🌏 Based in Malaysia, open to global opportunities",
-  "🤝 Let's build something amazing together!"
 ];
 
 const Index = () => {
