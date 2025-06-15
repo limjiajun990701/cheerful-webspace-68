@@ -137,7 +137,7 @@ export type Database = {
         Insert: {
           command?: string | null
           description?: string | null
-          display_order?: number
+          display_order: number
           group_id: string
           id?: string
         }
@@ -167,7 +167,7 @@ export type Database = {
         }
         Insert: {
           cheatsheet_id: string
-          display_order?: number
+          display_order: number
           id?: string
           title: string
         }
@@ -190,7 +190,7 @@ export type Database = {
       cheatsheets: {
         Row: {
           created_at: string
-          created_by: string
+          created_by: string | null
           description: string | null
           id: string
           language: string
@@ -199,7 +199,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          created_by: string
+          created_by?: string | null
           description?: string | null
           id?: string
           language: string
@@ -208,7 +208,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          created_by?: string
+          created_by?: string | null
           description?: string | null
           id?: string
           language?: string
@@ -387,6 +387,74 @@ export type Database = {
           title?: string | null
           updated_at?: string
           updated_by?: string | null
+        }
+        Relationships: []
+      }
+      skill_items: {
+        Row: {
+          animation_type: string | null
+          created_at: string
+          description: string | null
+          display_order: number | null
+          id: string
+          image_url: string
+          label: string
+          skill_id: string
+          updated_at: string
+        }
+        Insert: {
+          animation_type?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          image_url: string
+          label: string
+          skill_id: string
+          updated_at?: string
+        }
+        Update: {
+          animation_type?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          image_url?: string
+          label?: string
+          skill_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "skill_items_skill_id_fkey"
+            columns: ["skill_id"]
+            isOneToOne: false
+            referencedRelation: "skills"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      skills: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
         }
         Relationships: []
       }
