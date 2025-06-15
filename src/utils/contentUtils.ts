@@ -135,14 +135,55 @@ export async function updateExpertiseContent(id: string | null, content: any) {
   return { success: true, data };
 }
 
-// Home & About image/file upload helpers - just stubs for now
-export async function uploadSiteImage(file: File, uploadPath: string) {
-  // TODO: Implement actual logic as needed
-  return null;
-}
-export async function setupSiteImagesBucket() {
-  // TODO: Implement actual logic as needed
+// Home & About image/file upload helpers - now fully implemented
+export async function setupSiteImagesBucket(): Promise<boolean> {
+  const { data, error } = await supabase.storage.getBucket('site-images');
+  if (error && error.message.includes('Bucket not found')) {
+    try {
+      const { data: bucketData, error: createError } = await supabase.storage.createBucket('site-images', {
+        public: true,
+        fileSizeLimit: '5MB',
+        allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml', 'image/bmp'],
+      });
+      if (createError) {
+        console.error("Error creating 'site-images' bucket:", createError);
+        return false;
+      }
+      return true;
+    } catch (e) {
+      console.error("Exception creating 'site-images' bucket:", e);
+      return false;
+    }
+  } else if (error) {
+    console.error("Error getting 'site-images' bucket:", error);
+    return false;
+  }
   return true;
+}
+
+export async function uploadSiteImage(file: File, uploadPath: string): Promise<string | null> {
+  try {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Date.now()}.${fileExt}`;
+    const filePath = `${uploadPath}/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('site-images')
+      .upload(filePath, file);
+
+    if (uploadError) {
+      throw uploadError;
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('site-images')
+      .getPublicUrl(filePath);
+      
+    return publicUrl;
+  } catch (error) {
+    console.error('Error uploading image:', error);
+    return null;
+  }
 }
 
 // Alias for compatibility

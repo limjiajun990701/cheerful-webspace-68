@@ -20,6 +20,7 @@ interface HeroContent {
   title: string;
   subtitle: string;
   description: string;
+  image_url: string | null;
 }
 
 const funFacts = [
@@ -67,24 +68,28 @@ const Index = () => {
   // New state for hero content
   const [heroContent, setHeroContent] = useState<HeroContent | null>(null);
   const [isHeroLoading, setIsHeroLoading] = useState(true);
+  const [heroImageError, setHeroImageError] = useState(false);
 
   // Fetch Hero Content
   useEffect(() => {
     const fetchHeroContent = async () => {
       setIsHeroLoading(true);
+      setHeroImageError(false);
       try {
         const data = await getSiteContent('home', 'hero');
         const defaultContent = {
           title: 'LIM JIA <span class="text-primary animate-pulse">JUN</span>',
           subtitle: 'Full-Stack Developer',
-          description: 'Fresh graduate specializing in <span class="text-primary">full-stack development</span> with expertise in Flutter, Vue.js, and Java.'
+          description: 'Fresh graduate specializing in <span class="text-primary">full-stack development</span> with expertise in Flutter, Vue.js, and Java.',
+          image_url: null,
         };
         
         if (data) {
           setHeroContent({
             title: data.title || defaultContent.title,
             subtitle: data.subtitle || defaultContent.subtitle,
-            description: data.description || defaultContent.description
+            description: data.description || defaultContent.description,
+            image_url: data.image_url || null,
           });
         } else {
           setHeroContent(defaultContent);
@@ -95,7 +100,8 @@ const Index = () => {
         setHeroContent({
           title: 'LIM JIA <span class="text-primary animate-pulse">JUN</span>',
           subtitle: 'Full-Stack Developer',
-          description: 'Fresh graduate specializing in <span class="text-primary">full-stack development</span> with expertise in Flutter, Vue.js, and Java.'
+          description: 'Fresh graduate specializing in <span class="text-primary">full-stack development</span> with expertise in Flutter, Vue.js, and Java.',
+          image_url: null,
         });
       } finally {
         setIsHeroLoading(false);
@@ -185,6 +191,18 @@ const Index = () => {
     <div className="flex flex-col min-h-screen">
       {/* Hero Section - Modern and Clean Design */}
       <section className="relative min-h-[90vh] flex items-center">
+        {/* Background Image */}
+        {!isHeroLoading && heroContent?.image_url && !heroImageError && (
+          <div className="absolute inset-0 -z-20">
+            <img 
+              src={heroContent.image_url} 
+              alt="Hero background" 
+              className="w-full h-full object-cover opacity-20"
+              onError={() => setHeroImageError(true)}
+            />
+          </div>
+        )}
+
         {/* Background with animated diagonal lines */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-secondary/10 to-background -z-10" />
         <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(120deg,rgba(0,0,0,.02)25%,transparent_25%,transparent_75%,rgba(0,0,0,.02)75%)]" />
