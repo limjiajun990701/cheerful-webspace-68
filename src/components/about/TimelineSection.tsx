@@ -1,8 +1,9 @@
+
 import React from 'react';
 
 interface TimelineItem {
   id: string;
-  type: 'work' | 'education';
+  type: 'work';
   title: string;
   company: string;
   location: string | null;
@@ -24,13 +25,15 @@ const TimelineSection = ({ items }: TimelineSectionProps) => {
       <div className="relative max-w-3xl mx-auto">
         {/* Vertical center line */}
         <div className="absolute top-0 left-1/2 w-1 h-full bg-border z-0" style={{ transform: "translateX(-50%)" }} />
-        {/* Timeline items */}
+        {/* Timeline items (work experiences only) */}
         <div className="relative flex flex-col gap-12">
+          {items.length === 0 && (
+            <div className="text-center text-muted-foreground py-8">No work experiences found.</div>
+          )}
           {items.map((item, idx) => {
             const left = isEven(idx);
             return (
               <div key={item.id} className="relative flex items-center justify-between group">
-                {/* Content */}
                 <div className={`w-full md:w-1/2 px-6 ${left ? "order-1 text-left" : "order-3 text-right"}`}>
                   <div className="bg-card shadow-md rounded-lg p-6 border border-primary/10 relative z-10">
                     <div className="font-semibold text-lg">{item.title}</div>
@@ -43,7 +46,7 @@ const TimelineSection = ({ items }: TimelineSectionProps) => {
                 <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
                   <span className="w-5 h-5 bg-primary border-4 border-background rounded-full block" />
                 </div>
-                {/* Spacer to keep timeline aligned */}
+                {/* Spacer for timeline alignment */}
                 <div className={`hidden md:block w-1/2 ${left ? "order-3" : "order-1"}`} />
               </div>
             );

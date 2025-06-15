@@ -74,31 +74,32 @@ const defaultAboutSection: AboutSection = {
 };
 
 const About = () => {
-  const [timelineItems, setTimelineItems] = useState<TimelineItem[]>(defaultTimelineItems);
-  const [aboutSection, setAboutSection] = useState<AboutSection>(defaultAboutSection);
+  const [timelineItems, setTimelineItems] = useState<TimelineItem[]>([]);
+  const [aboutSection, setAboutSection] = useState<AboutSection | null>(null);
 
-  // Fetch timeline
+  // Fetch only "work" experiences for timeline
   useEffect(() => {
     async function fetchExperiences() {
       const { data, error } = await supabase
         .from('experiences')
         .select('*')
+        .eq('type', 'work')
         .order('created_at', { ascending: false });
 
       if (!error && data && data.length > 0) {
-        const safeData: TimelineItem[] = data
-          .filter((item: any) => item.type === "work" || item.type === "education")
-          .map((item: any) => ({
-            ...item,
-            type: item.type === "work" ? "work" : "education",
-          }));
+        const safeData: TimelineItem[] = data.map((item: any) => ({
+          ...item,
+          type: "work",
+        }));
         setTimelineItems(safeData);
+      } else {
+        setTimelineItems([]);
       }
     }
     fetchExperiences();
   }, []);
 
-  // Fetch about section
+  // Fetch about section, do not fallback to hardcoded on null
   useEffect(() => {
     async function fetchAboutSection() {
       const { data, error } = await supabase
@@ -108,6 +109,8 @@ const About = () => {
         .maybeSingle();
       if (data) {
         setAboutSection(data);
+      } else {
+        setAboutSection(null); // do NOT fallback to hardcode
       }
     }
     fetchAboutSection();
@@ -117,19 +120,23 @@ const About = () => {
     <div className="min-h-screen bg-background">
       <DynamicHeroSection />
 
-      {/* Editable Who Am I Section */}
+      {/* Editable Who Am I Section (never hardcoded) */}
       <section className="py-10 max-w-3xl mx-auto px-4">
-        <h2 className="text-2xl font-bold mb-4 text-primary">{aboutSection.title || "Who Am I?"}</h2>
+        <h2 className="text-2xl font-bold mb-4 text-primary">
+          {aboutSection?.title ?? ""}
+        </h2>
         <p className="mb-6 text-lg text-foreground/90">
-          {aboutSection.body || defaultAboutSection.body}
+          {aboutSection?.body ?? ""}
         </p>
         <div className="flex flex-wrap gap-3">
-          {(aboutSection.tags ?? defaultAboutSection.tags)?.map((tag: string) => (
-            <span key={tag} className="bg-primary/10 text-primary px-4 py-1 rounded-full">{tag}</span>
+          {(aboutSection?.tags ?? []).map((tag: string) => (
+            <span key={tag} className="bg-primary/10 text-primary px-4 py-1 rounded-full">
+              {tag}
+            </span>
           ))}
         </div>
       </section>
-      {/* Timeline Section */}
+      {/* Timeline Section - Only Work Experiences */}
       <TimelineSection items={timelineItems} />
       <ContactSection />
     </div>
