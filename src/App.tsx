@@ -21,6 +21,8 @@ import NotFound from "./pages/NotFound";
 import Contact from "./pages/Contact";
 import CheatSheets from "./pages/CheatSheets";
 import TechnologiesTest from "./pages/TechnologiesTest";
+import MySkill from "./pages/MySkill";
+import AdminMySkill from "./pages/AdminMySkill";
 
 // Import styles
 import "./styles/cheatsheet-print.css";
@@ -48,6 +50,7 @@ const App = () => (
                 <Route path="/" element={<Layout />}>
                   <Route index element={<Index />} />
                   <Route path="/about" element={<About />} />
+                  <Route path="/myskill" element={<MySkill />} />
                   <Route path="/experience" element={<Experience />} />
                   <Route path="/projects" element={<Projects />} />
                   <Route path="/certifications" element={<Certifications />} />
@@ -58,6 +61,7 @@ const App = () => (
                   <Route path="/contact" element={<Contact />} />
                   <Route path="/admin/login" element={<AdminLogin />} />
                   <Route path="/admin" element={<Admin />} />
+                  <Route path="/admin/myskill" element={<AdminMySkill />} />
                   <Route path="/technologies-test" element={<TechnologiesTest />} />
                   <Route path="*" element={<NotFound />} />
                 </Route>
