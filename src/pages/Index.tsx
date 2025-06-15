@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { ArrowRight, ExternalLink, Award, Smartphone, Code, Layout, Database, Server, Globe } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -15,6 +14,14 @@ interface ExpertiseItem {
   description: string;
   icon: string;
 }
+
+const funFacts = [
+  "🥇 Winner of UUM 2024 hackathon (Cloud category)",
+  "✈️ Love building apps that make life easier!",
+  "🧑‍💻 3.34 CGPA in Software Engineering",
+  "🌏 Based in Malaysia, open to global opportunities",
+  "🤝 Let's build something amazing together!"
+];
 
 const Index = () => {
   const [expertise, setExpertise] = useState({
@@ -52,6 +59,7 @@ const Index = () => {
     ]
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [factIndex, setFactIndex] = useState(0);
 
   useEffect(() => {
     const fetchExpertiseContent = async () => {
@@ -110,6 +118,12 @@ const Index = () => {
     fetchExpertiseContent();
   }, []);
 
+  // Fun fact ticker
+  useEffect(() => {
+    const t = setInterval(() => setFactIndex(i => (i + 1) % funFacts.length), 3500);
+    return () => clearInterval(t);
+  }, []);
+
   // Function to render the appropriate icon
   const renderIcon = (iconName: string) => {
     switch(iconName) {
@@ -127,26 +141,32 @@ const Index = () => {
     <div className="flex flex-col min-h-screen">
       {/* Hero Section - Modern and Clean Design */}
       <section className="relative min-h-[90vh] flex items-center">
-        {/* Background with gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-secondary/30 -z-10"></div>
-        
-        {/* Hero content */}
+        {/* Background with animated diagonal lines */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-secondary/10 to-background -z-10" />
+        <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(120deg,rgba(0,0,0,.02)25%,transparent_25%,transparent_75%,rgba(0,0,0,.02)75%)]" />
+
+        {/* Animated Hero content */}
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-3xl mx-auto md:mx-0">
             <div className="space-y-8">
               <div className="space-y-2">
-                <Badge variant="outline" className="border-primary/30 text-primary bg-primary/5 px-4 py-1.5 text-sm">
+                <Badge variant="outline" className="border-primary/30 text-primary bg-primary/5 px-4 py-1.5 text-sm animate-fade-in">
                   Full-Stack Developer
                 </Badge>
-                <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight">
-                  LIM JIA <span className="text-primary">JUN</span>
+                <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight animate-fade-in">
+                  LIM JIA <span className="text-primary animate-pulse">JUN</span>
                 </h1>
-                <p className="text-xl md:text-2xl text-muted-foreground mt-4 leading-relaxed">
+                <p className="text-xl md:text-2xl text-muted-foreground mt-4 leading-relaxed animate-fade-in">
                   Fresh graduate specializing in <span className="text-primary">full-stack development</span> with 
                   expertise in Flutter, Vue.js, and Java.
                 </p>
               </div>
-              
+              {/* Fun facts carousel */}
+              <div className="my-6 text-lg/relaxed font-medium text-center md:text-left">
+                <span className="inline-flex items-center gap-2 text-primary">
+                  <span className="animate-fade-in">{funFacts[factIndex]}</span>
+                </span>
+              </div>
               <div className="flex flex-wrap gap-4 pt-4">
                 <Button asChild size="lg" className="group gap-2">
                   <Link to="/projects">
