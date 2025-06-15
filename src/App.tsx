@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -22,6 +21,7 @@ import NotFound from "./pages/NotFound";
 import Contact from "./pages/Contact";
 import CheatSheets from "./pages/CheatSheets";
 import TechnologiesTest from "./pages/TechnologiesTest";
+import Skills from "./pages/Skills";
 
 // Import styles
 import "./styles/cheatsheet-print.css";
@@ -49,6 +49,7 @@ const App = () => (
                 <Route path="/" element={<Layout />}>
                   <Route index element={<Index />} />
                   <Route path="/about" element={<About />} />
+                  <Route path="/skills" element={<Skills />} />
                   <Route path="/experience" element={<Experience />} />
                   <Route path="/projects" element={<Projects />} />
                   <Route path="/certifications" element={<Certifications />} />

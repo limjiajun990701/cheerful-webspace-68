@@ -14,8 +14,7 @@ import ExperienceManager from "../components/admin/ExperienceManager";
 import ExpertiseManager from "../components/admin/ExpertiseManager";
 import CollectionManager from "../components/admin/CollectionManager";
 import CheatSheetManager from "../components/admin/CheatSheetManager";
-// Removed: import SkillCategoryManager from "../components/admin/SkillCategoryManager";
-// Removed: import SkillsManager from "../components/admin/SkillsManager";
+import MySkillManager from "../components/admin/MySkillManager";
 import { LogOut, LayoutDashboard, Settings, FileText, Award, Briefcase, User, Home, Code, Star, Image, FileCode } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
@@ -135,11 +134,17 @@ const Admin = () => {
         <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <div className="border-b border-border px-6 pt-4 overflow-x-auto">
-              <TabsList className="grid grid-cols-11 gap-2 bg-muted/50 p-1">
+              <TabsList className="grid grid-cols-12 gap-2 bg-muted/50 p-1">
                 <TabsTrigger value="home" className="flex items-center gap-2 data-[state=active]:bg-background">
                   <Home className="h-4 w-4" />
                   <span className="hidden sm:inline">Home Page</span>
                   <span className="sm:hidden">Home</span>
+                </TabsTrigger>
+                {/* MySkill Tab */}
+                <TabsTrigger value="myskill" className="flex items-center gap-2 data-[state=active]:bg-background">
+                  <Star className="h-4 w-4" />
+                  <span className="hidden sm:inline">My Skill</span>
+                  <span className="sm:hidden">Skill</span>
                 </TabsTrigger>
                 <TabsTrigger value="expertise" className="flex items-center gap-2 data-[state=active]:bg-background">
                   <Star className="h-4 w-4" />
@@ -176,7 +181,6 @@ const Admin = () => {
                   <span className="hidden sm:inline">Cheat Sheets</span>
                   <span className="sm:hidden">Sheets</span>
                 </TabsTrigger>
-                {/* Removed: Skills/MySkill TabTrigger */}
                 <TabsTrigger value="experiences" className="flex items-center gap-2 data-[state=active]:bg-background">
                   <Briefcase className="h-4 w-4" />
                   <span className="hidden sm:inline">Experiences</span>
@@ -195,15 +199,16 @@ const Admin = () => {
               <TabsContent value="home" className="mt-0 focus:outline-none">
                 <HomeManager />
               </TabsContent>
-              
+              {/* MySkill content */}
+              <TabsContent value="myskill" className="mt-0 focus:outline-none">
+                <MySkillManager />
+              </TabsContent>
               <TabsContent value="expertise" className="mt-0 focus:outline-none">
                 <ExpertiseManager />
               </TabsContent>
-              
               <TabsContent value="collections" className="mt-0 focus:outline-none">
                 <CollectionManager />
               </TabsContent>
-              
               <TabsContent value="about" className="mt-0 focus:outline-none">
                 <AboutManager />
               </TabsContent>
@@ -224,7 +229,6 @@ const Admin = () => {
                 <CheatSheetManager />
               </TabsContent>
               
-              {/* Removed: skills tab */}
               <TabsContent value="experiences" className="mt-0 focus:outline-none">
                 <ExperienceManager />
               </TabsContent>
