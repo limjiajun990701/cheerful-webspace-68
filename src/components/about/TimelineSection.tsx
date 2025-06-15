@@ -6,8 +6,8 @@ interface TimelineItem {
   type: 'work' | 'education';
   title: string;
   company: string;
-  location: string;
-  date: string;
+  location: string | null;
+  date: string | null;
   description: string;
 }
 
@@ -33,8 +33,8 @@ const TimelineSection = ({ items }: TimelineSectionProps) => {
                 <span className="absolute -left-3 top-3 w-4 h-4 bg-primary rounded-full border-2 border-background"></span>
                 <div>
                   <h4 className="font-semibold text-lg">{item.title}</h4>
-                  <div className="text-muted-foreground text-sm mb-1">{item.company} &middot; {item.date}</div>
-                  <div className="text-xs text-foreground/60 mb-2">{item.location}</div>
+                  <div className="text-muted-foreground text-sm mb-1">{item.company}{item.date && ` · ${item.date}`}</div>
+                  {item.location && <div className="text-xs text-foreground/60 mb-2">{item.location}</div>}
                   <p className="text-foreground/80 leading-relaxed">{item.description}</p>
                 </div>
               </div>
@@ -50,8 +50,8 @@ const TimelineSection = ({ items }: TimelineSectionProps) => {
                 <span className="absolute -right-3 top-3 w-4 h-4 bg-primary rounded-full border-2 border-background"></span>
                 <div>
                   <h4 className="font-semibold text-lg">{item.title}</h4>
-                  <div className="text-muted-foreground text-sm mb-1">{item.company} &middot; {item.date}</div>
-                  <div className="text-xs text-foreground/60 mb-2">{item.location}</div>
+                  <div className="text-muted-foreground text-sm mb-1">{item.company}{item.date && ` · ${item.date}`}</div>
+                  {item.location && <div className="text-xs text-foreground/60 mb-2">{item.location}</div>}
                   <p className="text-foreground/80 leading-relaxed">{item.description}</p>
                 </div>
               </div>

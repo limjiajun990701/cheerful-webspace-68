@@ -7,8 +7,8 @@ import TimelineIndicator from "./experience/TimelineIndicator";
 interface ExperienceCardProps {
   title: string;
   company: string;
-  location: string;
-  date: string;
+  location: string | null;
+  date: string | null;
   description: string;
   type: "work" | "education";
 }
@@ -30,18 +30,22 @@ const ExperienceCard = ({
       <div className="absolute left-0 top-0 w-6 h-6 -translate-x-1/2 rounded-full border-4 border-background bg-primary" />
       
       <div className="bg-background rounded-xl p-6 shadow-sm border border-border">
-        <div className="flex flex-wrap items-center gap-1 text-muted-foreground text-sm mb-3">
-          <div className="flex items-center gap-1.5">
-            <Calendar size={14} />
-            <span>{date}</span>
-          </div>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-muted-foreground text-sm mb-3">
+          {date && (
+            <div className="flex items-center gap-1.5">
+              <Calendar size={14} />
+              <span>{date}</span>
+            </div>
+          )}
           
-          <span className="mx-2">•</span>
+          {date && location && <span className="hidden sm:inline">•</span>}
           
-          <div className="flex items-center gap-1.5">
-            <Building size={14} />
-            <span>{location}</span>
-          </div>
+          {location && (
+            <div className="flex items-center gap-1.5">
+              <Building size={14} />
+              <span>{location}</span>
+            </div>
+          )}
         </div>
         
         <div className="flex items-center gap-2 mb-2">

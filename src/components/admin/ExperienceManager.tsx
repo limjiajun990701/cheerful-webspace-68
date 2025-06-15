@@ -1,11 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { 
-  getExperienceItems, 
-  createExperienceItem, 
-  updateExperienceItem, 
-  deleteExperienceItem 
-} from "@/utils/contentUtils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -48,8 +43,8 @@ const formSchema = z.object({
   type: z.enum(['work', 'education']),
   title: z.string().min(1, { message: "Title is required" }),
   company: z.string().min(1, { message: "Company/Institution is required" }),
-  location: z.string(),
-  date: z.string(),
+  location: z.string().optional(),
+  date: z.string().optional(),
   description: z.string().min(1, { message: "Description is required" })
 });
 
@@ -60,8 +55,8 @@ interface ExperienceItem {
   type: 'work' | 'education';
   title: string;
   company: string;
-  location: string;
-  date: string;
+  location: string | null;
+  date: string | null;
   description: string;
 }
 
@@ -90,8 +85,17 @@ const ExperienceManager = () => {
 
   const fetchExperiences = async () => {
     setIsLoading(true);
-    const data = await getExperienceItems();
-    setExperiences(data);
+    const { data, error } = await supabase
+      .from('experiences')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      toast({ title: "Error fetching experiences", description: error.message, variant: "destructive" });
+      setExperiences([]);
+    } else {
+      setExperiences(data as ExperienceItem[]);
+    }
     setIsLoading(false);
   };
 
@@ -102,8 +106,8 @@ const ExperienceManager = () => {
       type: experience.type,
       title: experience.title,
       company: experience.company,
-      location: experience.location,
-      date: experience.date,
+      location: experience.location || '',
+      date: experience.date || '',
       description: experience.description
     });
     setIsOpen(true);
@@ -111,65 +115,55 @@ const ExperienceManager = () => {
 
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this experience?")) {
-      const result = await deleteExperienceItem(id);
-      if (result.success) {
+      const { error } = await supabase.from('experiences').delete().eq('id', id);
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to delete experience: " + error.message,
+          variant: "destructive",
+        });
+      } else {
         toast({
           title: "Success",
           description: "Experience deleted successfully",
         });
         fetchExperiences();
-      } else {
-        toast({
-          title: "Error",
-          description: "Failed to delete experience",
-          variant: "destructive",
-        });
       }
     }
   };
 
   const onSubmit = async (values: FormValues) => {
     try {
-      let result;
+      const { id, ...dataToUpsert } = values;
 
-      // Prepare required fields (date, title, company, location, description)
-      const reqValues = {
-        title: values.title,
-        company: values.company,
-        location: values.location,
-        date: values.date,
-        description: values.description
+      const payload = {
+          ...dataToUpsert,
+          location: dataToUpsert.location || null,
+          date: dataToUpsert.date || null
       };
 
-      if (values.id) {
-        result = await updateExperienceItem(values.id, {
-          ...reqValues,
-          type: values.type,
-        });
+      if (id) {
+        // Update
+        const { error } = await supabase.from('experiences').update(payload).eq('id', id);
+        if (error) throw error;
       } else {
-        result = await createExperienceItem(values.type, reqValues);
+        // Create
+        const { error } = await supabase.from('experiences').insert(payload);
+        if (error) throw error;
       }
       
-      if (result.success) {
-        toast({
-          title: "Success",
-          description: `Experience ${values.id ? 'updated' : 'created'} successfully`,
-        });
-        setIsOpen(false);
-        form.reset();
-        fetchExperiences();
-      } else {
-        toast({
-          title: "Error",
-          description: `Failed to ${values.id ? 'update' : 'create'} experience`,
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
+      toast({
+        title: "Success",
+        description: `Experience ${id ? 'updated' : 'created'} successfully`,
+      });
+      setIsOpen(false);
+      form.reset({ type: activeTab, title: '', company: '', location: '', date: '', description: '' });
+      fetchExperiences();
+    } catch (error: any) {
       console.error("Error submitting form:", error);
       toast({
         title: "Error",
-        description: "An unexpected error occurred",
+        description: error.message || `Failed to ${values.id ? 'update' : 'create'} experience`,
         variant: "destructive",
       });
     }
@@ -365,10 +359,10 @@ const ExperienceManager = () => {
                             {exp.title}
                           </h3>
                           <p className="text-muted-foreground">{exp.company}</p>
-                          <div className="flex gap-3 text-sm mt-1">
-                            <span>{exp.location}</span>
-                            {exp.date && <span>•</span>}
-                            <span>{exp.date}</span>
+                          <div className="flex gap-3 text-sm mt-1 text-muted-foreground">
+                            {exp.location && <span>{exp.location}</span>}
+                            {exp.location && exp.date && <span>•</span>}
+                            {exp.date && <span>{exp.date}</span>}
                           </div>
                         </div>
                         <div className="flex items-start gap-2">
@@ -389,7 +383,7 @@ const ExperienceManager = () => {
                         </div>
                       </div>
                       <p className="mt-3 text-muted-foreground">
-                        {exp.description.length > 150 
+                        {exp.description && exp.description.length > 150 
                           ? `${exp.description.substring(0, 150)}...` 
                           : exp.description
                         }
@@ -430,10 +424,10 @@ const ExperienceManager = () => {
                             {exp.title}
                           </h3>
                           <p className="text-muted-foreground">{exp.company}</p>
-                          <div className="flex gap-3 text-sm mt-1">
-                            <span>{exp.location}</span>
-                            {exp.date && <span>•</span>}
-                            <span>{exp.date}</span>
+                          <div className="flex gap-3 text-sm mt-1 text-muted-foreground">
+                            {exp.location && <span>{exp.location}</span>}
+                            {exp.location && exp.date && <span>•</span>}
+                            {exp.date && <span>{exp.date}</span>}
                           </div>
                         </div>
                         <div className="flex items-start gap-2">
@@ -454,7 +448,7 @@ const ExperienceManager = () => {
                         </div>
                       </div>
                       <p className="mt-3 text-muted-foreground">
-                        {exp.description.length > 150 
+                        {exp.description && exp.description.length > 150 
                           ? `${exp.description.substring(0, 150)}...` 
                           : exp.description
                         }

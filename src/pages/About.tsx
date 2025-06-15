@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import DynamicHeroSection from '@/components/about/DynamicHeroSection';
 import ContactSection from '@/components/about/ContactSection';
 import TimelineSection from '@/components/about/TimelineSection';
-import { getExperienceItems } from "@/utils/contentUtils";
+import { supabase } from "@/integrations/supabase/client";
 
 // Step 1: Define TimelineItem type
 type TimelineItem = {
@@ -10,8 +10,8 @@ type TimelineItem = {
   type: "work" | "education";
   title: string;
   company: string;
-  location: string;
-  date: string;
+  location: string | null;
+  date: string | null;
   description: string;
 };
 
@@ -59,8 +59,17 @@ const About = () => {
 
   useEffect(() => {
     async function fetchExperiences() {
-      const data = await getExperienceItems();
+      const { data, error } = await supabase
+        .from('experiences')
+        .select('*')
+        .order('created_at', { ascending: false });
 
+      if (error) {
+        console.error("Error fetching timeline items for About page:", error);
+        // Keep default items on error
+        return;
+      }
+      
       if (data && data.length > 0) {
         // Step 2: Ensure strong typing for each item
         const safeData: TimelineItem[] = data

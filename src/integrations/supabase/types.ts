@@ -285,6 +285,42 @@ export type Database = {
         }
         Relationships: []
       }
+      experiences: {
+        Row: {
+          company: string
+          created_at: string
+          date: string | null
+          description: string
+          id: string
+          location: string | null
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          company: string
+          created_at?: string
+          date?: string | null
+          description: string
+          id?: string
+          location?: string | null
+          title: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          company?: string
+          created_at?: string
+          date?: string | null
+          description?: string
+          id?: string
+          location?: string | null
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       projects: {
         Row: {
           date: string | null

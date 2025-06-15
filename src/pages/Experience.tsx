@@ -1,17 +1,16 @@
-
 import React, { useState, useEffect } from 'react';
 import { BriefcaseIcon, GraduationCap } from "lucide-react";
 import ExperienceCard from "../components/ExperienceCard";
 import DynamicHeader from "../components/experience/DynamicHeader";
-import { getExperienceItems } from "@/utils/contentUtils";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ExperienceItem {
   id: string;
   type: 'work' | 'education';
   title: string;
   company: string;
-  location: string;
-  date: string;
+  location: string | null;
+  date: string | null;
   description: string;
 }
 
@@ -19,23 +18,8 @@ const Experience = () => {
   const [experienceData, setExperienceData] = useState<ExperienceItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
-  useEffect(() => {
-    const fetchExperiences = async () => {
-      const data = await getExperienceItems();
-      if (data && data.length > 0) {
-        setExperienceData(data);
-      } else {
-        // Fallback to default experiences if no data in database
-        setExperienceData(defaultExperienceData);
-      }
-      setIsLoading(false);
-    };
-    
-    fetchExperiences();
-  }, []);
-
   // Default data as fallback with simplified properties
-  const defaultExperienceData = [
+  const defaultExperienceData: ExperienceItem[] = [
     {
       id: "default-1",
       title: "Flutter Developer",
@@ -44,7 +28,7 @@ const Experience = () => {
       date: "July 2024 - December 2024",
       description: 
         "Collaborated on the development and enhancement of the Linksay social chat app, focusing on multimedia sharing and user experience improvements. Contributed to UI enhancements, bug fixes, and integration of Web3 wallet and blockchain token functionality. Led the implementation of key features that improved user retention metrics and app performance on low-end devices.",
-      type: "work" as const,
+      type: "work",
     },
     {
       id: "default-2",
@@ -54,7 +38,7 @@ const Experience = () => {
       date: "October 2023 - April 2024",
       description: 
         "Designed and developed microservices APIs, enhanced reporting systems by improving template functionality, and built full-stack solutions leveraging modern frameworks and database technologies. Projects included microservices API development, PHPJasper report development, and a fullstack hostel report system using Vue.js, TypeScript, Quarkus, and MariaDB. Worked closely with cross-functional teams to ensure all deliverables met business requirements while maintaining high code quality standards.",
-      type: "work" as const,
+      type: "work",
     },
     {
       id: "default-3",
@@ -64,7 +48,7 @@ const Experience = () => {
       date: "October 2020 - September 2024",
       description: 
         "Specialized in Software Engineering with a CGPA of 3.34/4.00. Developed strong foundations in software development principles, programming languages, and system design methodologies. Participated in multiple hackathons and coding competitions, securing top positions. Completed capstone project on cloud-based solutions for small businesses.",
-      type: "education" as const,
+      type: "education",
     },
     {
       id: "default-4",
@@ -74,9 +58,31 @@ const Experience = () => {
       date: "January 2018 - December 2019",
       description: 
         "Completed pre-university education, establishing strong academic foundations before pursuing higher education in Information Technology. Focused on science and mathematics subjects with additional coursework in computer literacy.",
-      type: "education" as const,
+      type: "education",
     },
   ];
+
+  useEffect(() => {
+    const fetchExperiences = async () => {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('experiences')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error("Error fetching experiences:", error);
+        setExperienceData(defaultExperienceData);
+      } else if (data && data.length > 0) {
+        setExperienceData(data);
+      } else {
+        setExperienceData(defaultExperienceData);
+      }
+      setIsLoading(false);
+    };
+    
+    fetchExperiences();
+  }, []);
 
   // Separate work and education experiences
   const workExperience = experienceData.filter(exp => exp.type === "work");
