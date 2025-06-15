@@ -9,22 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Trash, Plus, Pencil, Save, X, Loader2, AlertTriangle } from "lucide-react";
-
-interface Skill {
-  id: string;
-  name: string;
-  description: string | null;
-}
-
-interface SkillItem {
-  id: string;
-  skill_id: string;
-  image_url: string;
-  label: string;
-  description: string | null;
-  animation_type: string | null;
-  display_order: number | null;
-}
+import { Skill, SkillItem } from "@/types/database";
 
 const MySkillManager = () => {
   const { toast } = useToast();
@@ -44,74 +29,44 @@ const MySkillManager = () => {
   });
   const [editingItem, setEditingItem] = useState<string | null>(null);
 
-  // For now, we'll use mock data since the skills tables don't exist in the database
-  // This prevents TypeScript errors while maintaining the UI functionality
-  const mockSkills: Skill[] = [
-    { id: "1", name: "Frontend Development", description: "Modern web technologies" },
-    { id: "2", name: "Backend Development", description: "Server-side technologies" },
-    { id: "3", name: "DevOps", description: "Deployment and infrastructure" }
-  ];
-
-  const mockSkillItems: SkillItem[] = [
-    {
-      id: "1",
-      skill_id: "1",
-      image_url: "https://via.placeholder.com/100",
-      label: "React",
-      description: "JavaScript library for building user interfaces",
-      animation_type: "scale",
-      display_order: 1
-    },
-    {
-      id: "2",
-      skill_id: "1",
-      image_url: "https://via.placeholder.com/100",
-      label: "TypeScript",
-      description: "Typed superset of JavaScript",
-      animation_type: "fade",
-      display_order: 2
-    }
-  ];
-
-  // Fetch all skills - using mock data for now
+  // Fetch all skills from database
   const fetchSkills = async () => {
     try {
       setIsLoading(true);
-      // TODO: Replace with actual Supabase call once tables are created
-      // const { data, error } = await supabase.from('skills').select('*').order('name');
-      // if (error) throw error;
+      const { data, error } = await supabase.from('skills').select('*').order('name');
+      if (error) throw error;
       
-      setSkills(mockSkills);
-      if (mockSkills.length && !selectedSkill) {
-        setSelectedSkill(mockSkills[0].id);
-        fetchSkillItems(mockSkills[0].id);
+      setSkills(data || []);
+      if (data && data.length > 0 && !selectedSkill) {
+        setSelectedSkill(data[0].id);
+        fetchSkillItems(data[0].id);
       } else if (selectedSkill) {
         fetchSkillItems(selectedSkill);
       } else {
         setIsLoading(false);
       }
     } catch (error) {
+      console.error('Error fetching skills:', error);
       toast({ title: "Error", description: "Failed to fetch skills", variant: "destructive" });
       setIsLoading(false);
     }
   };
 
-  // Fetch items for a specific skill - using mock data for now
+  // Fetch items for a specific skill from database
   const fetchSkillItems = async (skillId: string) => {
     try {
       setIsLoading(true);
-      // TODO: Replace with actual Supabase call once tables are created
-      // const { data, error } = await supabase
-      //   .from('skill_items')
-      //   .select('*')
-      //   .eq('skill_id', skillId)
-      //   .order('display_order');
-      // if (error) throw error;
+      const { data, error } = await supabase
+        .from('skill_items')
+        .select('*')
+        .eq('skill_id', skillId)
+        .order('display_order');
+      if (error) throw error;
       
-      const filteredItems = mockSkillItems.filter(item => item.skill_id === skillId);
-      setSkillItems(filteredItems);
+      setSkillItems(data || []);
       setIsLoading(false);
     } catch (error) {
+      console.error('Error fetching skill items:', error);
       toast({ title: "Error", description: "Failed to fetch skill items", variant: "destructive" });
       setIsLoading(false);
     }
@@ -122,58 +77,52 @@ const MySkillManager = () => {
     fetchSkills();
   }, []);
 
-  // Add new skill - mock implementation
+  // Add new skill to database
   const handleAddSkill = async () => {
     if (!newSkill.name.trim()) {
       toast({ title: "Error", description: "Skill name is required", variant: "destructive" });
       return;
     }
     try {
-      // TODO: Replace with actual Supabase call once tables are created
-      // const { error } = await supabase
-      //   .from('skills')
-      //   .insert([{
-      //     name: newSkill.name,
-      //     description: newSkill.description || null
-      //   }]);
-      // if (error) throw error;
+      const { error } = await supabase
+        .from('skills')
+        .insert([{
+          name: newSkill.name,
+          description: newSkill.description || null
+        }]);
+      if (error) throw error;
       
-      const newSkillObj: Skill = {
-        id: Date.now().toString(),
-        name: newSkill.name,
-        description: newSkill.description || null
-      };
-      setSkills(prev => [...prev, newSkillObj]);
-      
-      toast({ title: "Success", description: "Skill created successfully (mock)" });
+      toast({ title: "Success", description: "Skill created successfully" });
       setNewSkill({ name: "", description: "" });
       setIsAddingSkill(false);
+      fetchSkills(); // Refresh the list
     } catch (error) {
+      console.error('Error creating skill:', error);
       toast({ title: "Error", description: "Failed to create skill", variant: "destructive" });
     }
   };
 
-  // Delete a skill - mock implementation
+  // Delete a skill from database
   const handleDeleteSkill = async (id: string) => {
     if (!window.confirm("Are you sure you want to delete this skill and all its items?")) return;
     try {
-      // TODO: Replace with actual Supabase call once tables are created
-      // const { error } = await supabase.from('skills').delete().eq('id', id);
-      // if (error) throw error;
+      const { error } = await supabase.from('skills').delete().eq('id', id);
+      if (error) throw error;
       
-      setSkills(prev => prev.filter(skill => skill.id !== id));
       if (selectedSkill === id) {
         setSelectedSkill(null);
         setSkillItems([]);
       }
       
-      toast({ title: "Success", description: "Skill deleted successfully (mock)" });
+      toast({ title: "Success", description: "Skill deleted successfully" });
+      fetchSkills(); // Refresh the list
     } catch (error) {
+      console.error('Error deleting skill:', error);
       toast({ title: "Error", description: "Failed to delete skill", variant: "destructive" });
     }
   };
 
-  // Add new item to a skill - mock implementation
+  // Add new item to a skill in database
   const handleAddItem = async () => {
     if (!selectedSkill) {
       toast({ title: "Error", description: "Please select a skill first", variant: "destructive" });
@@ -184,46 +133,63 @@ const MySkillManager = () => {
       return;
     }
     try {
-      // TODO: Replace with actual Supabase call once tables are created
-      const newItemObj: SkillItem = {
-        id: Date.now().toString(),
-        skill_id: selectedSkill,
-        image_url: newItem.image_url,
-        label: newItem.label,
-        description: newItem.description || null,
-        animation_type: newItem.animation_type,
-        display_order: skillItems.length + 1
-      };
+      const { error } = await supabase
+        .from('skill_items')
+        .insert([{
+          skill_id: selectedSkill,
+          image_url: newItem.image_url,
+          label: newItem.label,
+          description: newItem.description || null,
+          animation_type: newItem.animation_type,
+          display_order: skillItems.length + 1
+        }]);
+      if (error) throw error;
       
-      setSkillItems(prev => [...prev, newItemObj]);
-      toast({ title: "Success", description: "Item added successfully (mock)" });
+      toast({ title: "Success", description: "Item added successfully" });
       setNewItem({ image_url: "", label: "", description: "", animation_type: "scale", display_order: 0 });
       setIsAddingItem(false);
+      fetchSkillItems(selectedSkill); // Refresh the items
     } catch (error) {
+      console.error('Error adding item:', error);
       toast({ title: "Error", description: "Failed to add item", variant: "destructive" });
     }
   };
 
-  // Update an item - mock implementation
+  // Update an item in database
   const handleUpdateItem = async (item: SkillItem) => {
     try {
-      // TODO: Replace with actual Supabase call once tables are created
-      setSkillItems(prev => prev.map(i => i.id === item.id ? item : i));
-      toast({ title: "Success", description: "Item updated successfully (mock)" });
+      const { error } = await supabase
+        .from('skill_items')
+        .update({
+          image_url: item.image_url,
+          label: item.label,
+          description: item.description,
+          animation_type: item.animation_type,
+          display_order: item.display_order
+        })
+        .eq('id', item.id);
+      if (error) throw error;
+      
+      toast({ title: "Success", description: "Item updated successfully" });
       setEditingItem(null);
+      fetchSkillItems(selectedSkill!); // Refresh the items
     } catch (error) {
+      console.error('Error updating item:', error);
       toast({ title: "Error", description: "Failed to update item", variant: "destructive" });
     }
   };
 
-  // Delete an item - mock implementation
+  // Delete an item from database
   const handleDeleteItem = async (id: string) => {
     if (!window.confirm("Are you sure you want to delete this item?")) return;
     try {
-      // TODO: Replace with actual Supabase call once tables are created
-      setSkillItems(prev => prev.filter(item => item.id !== id));
-      toast({ title: "Success", description: "Item deleted successfully (mock)" });
+      const { error } = await supabase.from('skill_items').delete().eq('id', id);
+      if (error) throw error;
+      
+      toast({ title: "Success", description: "Item deleted successfully" });
+      fetchSkillItems(selectedSkill!); // Refresh the items
     } catch (error) {
+      console.error('Error deleting item:', error);
       toast({ title: "Error", description: "Failed to delete item", variant: "destructive" });
     }
   };
@@ -240,7 +206,7 @@ const MySkillManager = () => {
         <div>
           <h2 className="text-2xl font-bold">My Skill Manager</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Note: This is currently using mock data. Database tables need to be created.
+            Manage your skills and skill items with real database integration.
           </p>
         </div>
         <Button onClick={() => setIsAddingSkill(!isAddingSkill)} variant="outline">
