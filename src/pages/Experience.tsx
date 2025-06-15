@@ -74,7 +74,13 @@ const Experience = () => {
         console.error("Error fetching experiences:", error);
         setExperienceData(defaultExperienceData);
       } else if (data && data.length > 0) {
-        setExperienceData(data);
+        const safeData: ExperienceItem[] = data
+          .map(item => ({
+            ...item,
+            type: item.type as "work" | "education",
+          }))
+          .filter(item => item.type === "work" || item.type === "education");
+        setExperienceData(safeData);
       } else {
         setExperienceData(defaultExperienceData);
       }

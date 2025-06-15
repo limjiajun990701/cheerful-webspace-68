@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -94,7 +95,13 @@ const ExperienceManager = () => {
       toast({ title: "Error fetching experiences", description: error.message, variant: "destructive" });
       setExperiences([]);
     } else {
-      setExperiences(data as ExperienceItem[]);
+      const experienceItems: ExperienceItem[] = (data || [])
+        .map(item => ({
+          ...item,
+          type: item.type as 'work' | 'education',
+        }))
+        .filter(item => item.type === 'work' || item.type === 'education');
+      setExperiences(experienceItems);
     }
     setIsLoading(false);
   };
@@ -137,7 +144,10 @@ const ExperienceManager = () => {
       const { id, ...dataToUpsert } = values;
 
       const payload = {
-          ...dataToUpsert,
+          type: dataToUpsert.type,
+          title: dataToUpsert.title,
+          company: dataToUpsert.company,
+          description: dataToUpsert.description,
           location: dataToUpsert.location || null,
           date: dataToUpsert.date || null
       };
@@ -148,7 +158,7 @@ const ExperienceManager = () => {
         if (error) throw error;
       } else {
         // Create
-        const { error } = await supabase.from('experiences').insert(payload);
+        const { error } = await supabase.from('experiences').insert([payload]);
         if (error) throw error;
       }
       
