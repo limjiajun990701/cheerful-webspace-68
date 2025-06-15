@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -33,10 +32,10 @@ const MySkillManager = () => {
   const fetchSkills = async () => {
     try {
       setIsLoading(true);
-      const { data, error } = await supabase.from('skills').select('*').order('name');
+      const { data, error } = await supabase.from('skills' as any).select('*').order('name');
       if (error) throw error;
       
-      setSkills(data || []);
+      setSkills((data as Skill[]) || []);
       if (data && data.length > 0 && !selectedSkill) {
         setSelectedSkill(data[0].id);
         fetchSkillItems(data[0].id);
@@ -57,13 +56,13 @@ const MySkillManager = () => {
     try {
       setIsLoading(true);
       const { data, error } = await supabase
-        .from('skill_items')
+        .from('skill_items' as any)
         .select('*')
         .eq('skill_id', skillId)
         .order('display_order');
       if (error) throw error;
       
-      setSkillItems(data || []);
+      setSkillItems((data as SkillItem[]) || []);
       setIsLoading(false);
     } catch (error) {
       console.error('Error fetching skill items:', error);
@@ -85,7 +84,7 @@ const MySkillManager = () => {
     }
     try {
       const { error } = await supabase
-        .from('skills')
+        .from('skills' as any)
         .insert([{
           name: newSkill.name,
           description: newSkill.description || null
@@ -106,7 +105,7 @@ const MySkillManager = () => {
   const handleDeleteSkill = async (id: string) => {
     if (!window.confirm("Are you sure you want to delete this skill and all its items?")) return;
     try {
-      const { error } = await supabase.from('skills').delete().eq('id', id);
+      const { error } = await supabase.from('skills' as any).delete().eq('id', id);
       if (error) throw error;
       
       if (selectedSkill === id) {
@@ -134,7 +133,7 @@ const MySkillManager = () => {
     }
     try {
       const { error } = await supabase
-        .from('skill_items')
+        .from('skill_items' as any)
         .insert([{
           skill_id: selectedSkill,
           image_url: newItem.image_url,
@@ -159,7 +158,7 @@ const MySkillManager = () => {
   const handleUpdateItem = async (item: SkillItem) => {
     try {
       const { error } = await supabase
-        .from('skill_items')
+        .from('skill_items' as any)
         .update({
           image_url: item.image_url,
           label: item.label,
@@ -183,7 +182,7 @@ const MySkillManager = () => {
   const handleDeleteItem = async (id: string) => {
     if (!window.confirm("Are you sure you want to delete this item?")) return;
     try {
-      const { error } = await supabase.from('skill_items').delete().eq('id', id);
+      const { error } = await supabase.from('skill_items' as any).delete().eq('id', id);
       if (error) throw error;
       
       toast({ title: "Success", description: "Item deleted successfully" });

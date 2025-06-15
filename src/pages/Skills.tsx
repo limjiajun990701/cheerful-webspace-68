@@ -14,21 +14,21 @@ const Skills = () => {
       setLoading(true);
       try {
         const { data: skillsData, error: skillsError } = await supabase
-          .from("skills")
+          .from("skills" as any)
           .select("*")
           .order("name");
         
         if (skillsError) throw skillsError;
         
         const { data: itemsData, error: itemsError } = await supabase
-          .from("skill_items")
+          .from("skill_items" as any)
           .select("*")
           .order("display_order");
         
         if (itemsError) throw itemsError;
         
-        setSkills(skillsData || []);
-        setItems(itemsData || []);
+        setSkills((skillsData as Skill[]) || []);
+        setItems((itemsData as SkillItem[]) || []);
       } catch (error) {
         console.error('Error fetching skills:', error);
         // If there's an error (like tables don't exist), fall back to empty arrays
