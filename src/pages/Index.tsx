@@ -1,7 +1,8 @@
+
 import React, { useEffect, useState } from "react";
 import { ArrowRight, ExternalLink, Award, Smartphone, Code, Layout, Database, Server, Globe } from "lucide-react";
 import { Link } from "react-router-dom";
-import { getExpertiseContent } from "@/utils/contentUtils";
+import { getExpertiseContent, getSiteContent } from "@/utils/contentUtils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,6 +14,12 @@ interface ExpertiseItem {
   title: string;
   description: string;
   icon: string;
+}
+
+interface HeroContent {
+  title: string;
+  subtitle: string;
+  description: string;
 }
 
 const funFacts = [
@@ -56,6 +63,47 @@ const Index = () => {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [factIndex, setFactIndex] = useState(0);
+
+  // New state for hero content
+  const [heroContent, setHeroContent] = useState<HeroContent | null>(null);
+  const [isHeroLoading, setIsHeroLoading] = useState(true);
+
+  // Fetch Hero Content
+  useEffect(() => {
+    const fetchHeroContent = async () => {
+      setIsHeroLoading(true);
+      try {
+        const data = await getSiteContent('home', 'hero');
+        const defaultContent = {
+          title: 'LIM JIA <span class="text-primary animate-pulse">JUN</span>',
+          subtitle: 'Full-Stack Developer',
+          description: 'Fresh graduate specializing in <span class="text-primary">full-stack development</span> with expertise in Flutter, Vue.js, and Java.'
+        };
+        
+        if (data) {
+          setHeroContent({
+            title: data.title || defaultContent.title,
+            subtitle: data.subtitle || defaultContent.subtitle,
+            description: data.description || defaultContent.description
+          });
+        } else {
+          setHeroContent(defaultContent);
+        }
+      } catch (error) {
+        console.error('Error fetching hero content:', error);
+        // Set default content on error
+        setHeroContent({
+          title: 'LIM JIA <span class="text-primary animate-pulse">JUN</span>',
+          subtitle: 'Full-Stack Developer',
+          description: 'Fresh graduate specializing in <span class="text-primary">full-stack development</span> with expertise in Flutter, Vue.js, and Java.'
+        });
+      } finally {
+        setIsHeroLoading(false);
+      }
+    };
+    
+    fetchHeroContent();
+  }, []);
 
   useEffect(() => {
     const fetchExpertiseContent = async () => {
@@ -146,16 +194,27 @@ const Index = () => {
           <div className="max-w-3xl mx-auto md:mx-0">
             <div className="space-y-8">
               <div className="space-y-2">
-                <Badge variant="outline" className="border-primary/30 text-primary bg-primary/5 px-4 py-1.5 text-sm animate-fade-in">
-                  Full-Stack Developer
-                </Badge>
-                <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight animate-fade-in">
-                  LIM JIA <span className="text-primary animate-pulse">JUN</span>
-                </h1>
-                <p className="text-xl md:text-2xl text-muted-foreground mt-4 leading-relaxed animate-fade-in">
-                  Fresh graduate specializing in <span className="text-primary">full-stack development</span> with 
-                  expertise in Flutter, Vue.js, and Java.
-                </p>
+                {isHeroLoading ? (
+                  <>
+                    <Skeleton className="h-7 w-48 mb-2" />
+                    <Skeleton className="h-20 w-96" />
+                    <Skeleton className="h-16 w-full mt-4" />
+                  </>
+                ) : heroContent ? (
+                  <>
+                    <Badge variant="outline" className="border-primary/30 text-primary bg-primary/5 px-4 py-1.5 text-sm animate-fade-in">
+                      {heroContent.subtitle}
+                    </Badge>
+                    <h1
+                      className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight animate-fade-in"
+                      dangerouslySetInnerHTML={{ __html: heroContent.title }}
+                    />
+                    <p
+                      className="text-xl md:text-2xl text-muted-foreground mt-4 leading-relaxed animate-fade-in"
+                      dangerouslySetInnerHTML={{ __html: heroContent.description }}
+                    />
+                  </>
+                ) : null}
               </div>
               {/* Fun facts carousel */}
               <div className="my-6 text-lg/relaxed font-medium text-center md:text-left">
