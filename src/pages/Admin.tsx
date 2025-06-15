@@ -17,6 +17,26 @@ import CheatSheetManager from "../components/admin/CheatSheetManager";
 import MySkillManager from "../components/admin/MySkillManager";
 import { LogOut, LayoutDashboard, Settings, FileText, Award, Briefcase, User, Home, Code, Star, Image, FileCode } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "../components/ui/dropdown-menu";
+
+const ADMIN_SECTIONS = [
+  { value: "home", label: "Home Page" },
+  { value: "experiences", label: "Experiences" },
+  { value: "myskill", label: "My Skill" },
+  { value: "expertise", label: "Expertise" },
+  { value: "collections", label: "Collections" },
+  { value: "about", label: "About Page" },
+  { value: "posts", label: "Blog Posts" },
+  { value: "projects", label: "Projects" },
+  { value: "certifications", label: "Certifications" },
+  { value: "cheatsheets", label: "Cheat Sheets" },
+  { value: "resume", label: "Resume" },
+];
 
 const Admin = () => {
   const [searchParams] = useSearchParams();
@@ -94,6 +114,10 @@ const Admin = () => {
     navigate("/admin/login");
   };
 
+  // find label of current activeTab for Dropdown
+  const activeTabLabel =
+    ADMIN_SECTIONS.find((s) => s.value === activeTab)?.label || "Select Section";
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -132,73 +156,47 @@ const Admin = () => {
 
       <main className="container mx-auto px-4 py-8">
         <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <div className="border-b border-border px-6 pt-4 overflow-x-auto">
-              <TabsList className="grid grid-cols-13 gap-2 bg-muted/50 p-1">
-                <TabsTrigger value="home" className="flex items-center gap-2 data-[state=active]:bg-background">
-                  <Home className="h-4 w-4" />
-                  <span className="hidden sm:inline">Home Page</span>
-                  <span className="sm:hidden">Home</span>
-                </TabsTrigger>
-                {/* Experiences Tab - NEW, before MySkill */}
-                <TabsTrigger value="experiences" className="flex items-center gap-2 data-[state=active]:bg-background">
-                  <Briefcase className="h-4 w-4" />
-                  <span className="hidden sm:inline">Experiences</span>
-                  <span className="sm:hidden">Exp</span>
-                </TabsTrigger>
-                {/* MySkill Tab */}
-                <TabsTrigger value="myskill" className="flex items-center gap-2 data-[state=active]:bg-background">
-                  <Star className="h-4 w-4" />
-                  <span className="hidden sm:inline">My Skill</span>
-                  <span className="sm:hidden">Skill</span>
-                </TabsTrigger>
-                <TabsTrigger value="expertise" className="flex items-center gap-2 data-[state=active]:bg-background">
-                  <Star className="h-4 w-4" />
-                  <span className="hidden sm:inline">Expertise</span>
-                  <span className="sm:hidden">Expert</span>
-                </TabsTrigger>
-                <TabsTrigger value="collections" className="flex items-center gap-2 data-[state=active]:bg-background">
-                  <Image className="h-4 w-4" />
-                  <span className="hidden sm:inline">Collections</span>
-                  <span className="sm:hidden">Coll</span>
-                </TabsTrigger>
-                <TabsTrigger value="about" className="flex items-center gap-2 data-[state=active]:bg-background">
-                  <User className="h-4 w-4" />
-                  <span className="hidden sm:inline">About Page</span>
-                  <span className="sm:hidden">About</span>
-                </TabsTrigger>
-                <TabsTrigger value="posts" className="flex items-center gap-2 data-[state=active]:bg-background">
-                  <FileText className="h-4 w-4" />
-                  <span className="hidden sm:inline">Blog Posts</span>
-                  <span className="sm:hidden">Blog</span>
-                </TabsTrigger>
-                <TabsTrigger value="projects" className="flex items-center gap-2 data-[state=active]:bg-background">
-                  <Briefcase className="h-4 w-4" />
-                  <span className="hidden sm:inline">Projects</span>
-                  <span className="sm:hidden">Projects</span>
-                </TabsTrigger>
-                <TabsTrigger value="certifications" className="flex items-center gap-2 data-[state=active]:bg-background">
-                  <Award className="h-4 w-4" />
-                  <span className="hidden sm:inline">Certifications</span>
-                  <span className="sm:hidden">Certs</span>
-                </TabsTrigger>
-                <TabsTrigger value="cheatsheets" className="flex items-center gap-2 data-[state=active]:bg-background">
-                  <FileCode className="h-4 w-4" />
-                  <span className="hidden sm:inline">Cheat Sheets</span>
-                  <span className="sm:hidden">Sheets</span>
-                </TabsTrigger>
-                <TabsTrigger value="resume" className="flex items-center gap-2 data-[state=active]:bg-background">
-                  <Settings className="h-4 w-4" />
-                  <span className="hidden sm:inline">Resume</span>
-                  <span className="sm:hidden">Resume</span>
-                </TabsTrigger>
-              </TabsList>
-            </div>
-            <div className="p-6">
+          {/* DROPDOWN NAVIGATION instead of TABS LIST */}
+          <div className="border-b border-border px-6 pt-4 pb-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  className="w-full max-w-xs flex justify-between items-center shadow-sm"
+                  variant="outline"
+                >
+                  <span>{activeTabLabel}</span>
+                  <svg
+                    className="w-4 h-4 ml-2 inline-block"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path d="M6 9l6 6 6-6" />
+                  </svg>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-full max-w-xs">
+                {ADMIN_SECTIONS.map((section) => (
+                  <DropdownMenuItem
+                    key={section.value}
+                    onSelect={() => setActiveTab(section.value)}
+                    className={activeTab === section.value
+                      ? "bg-muted/90 text-primary font-semibold"
+                      : ""}
+                  >
+                    {section.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+          <div className="p-6">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+              {/* No more TabsList here */}
               <TabsContent value="home" className="mt-0 focus:outline-none">
                 <HomeManager />
               </TabsContent>
-              {/* Experiences Content Tab BEFORE MySkill */}
               <TabsContent value="experiences" className="mt-0 focus:outline-none">
                 <ExperienceManager />
               </TabsContent>
@@ -214,28 +212,23 @@ const Admin = () => {
               <TabsContent value="about" className="mt-0 focus:outline-none">
                 <AboutManager />
               </TabsContent>
-
               <TabsContent value="posts" className="mt-0 focus:outline-none">
                 <BlogPostManager />
               </TabsContent>
-
               <TabsContent value="projects" className="mt-0 focus:outline-none">
                 <ProjectManager />
               </TabsContent>
-              
               <TabsContent value="certifications" className="mt-0 focus:outline-none">
                 <CertificationManager />
               </TabsContent>
-
               <TabsContent value="cheatsheets" className="mt-0 focus:outline-none">
                 <CheatSheetManager />
               </TabsContent>
-              
               <TabsContent value="resume" className="mt-0 focus:outline-none">
                 <ResumeManager />
               </TabsContent>
-            </div>
-          </Tabs>
+            </Tabs>
+          </div>
         </div>
       </main>
     </div>
