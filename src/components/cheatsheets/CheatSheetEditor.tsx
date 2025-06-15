@@ -250,7 +250,7 @@ const CheatSheetEditor: React.FC<CheatSheetEditorProps> = ({ cheatsheetToEdit, o
             title,
             description,
             language,
-            created_by: userData.user.id,
+            created_by: "admin-uuid-or-null", // Example fallback, replace with actual logic
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           })

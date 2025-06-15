@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,6 +19,7 @@ interface HomeContent {
   image_url: string | null;
   updated_at: string;
   updated_by: string | null;
+  import_url: string | null;
 }
 
 const HomeManager = () => {
@@ -160,10 +160,11 @@ const HomeManager = () => {
         }
       }
 
-      // Use updateSiteContent helper
+      // Use updateSiteContent helper, now also with import_url
       const updatedContent = {
         ...content,
         image_url: imageUrl,
+        import_url: content.import_url || null,
         updated_by: "admin",
       };
 
@@ -240,7 +241,9 @@ const HomeManager = () => {
                     <Input
                       id="title"
                       value={content.title || ""}
-                      onChange={(e) => handleInputChange("title", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("title", e.target.value)
+                      }
                       placeholder="Enter title"
                     />
                   </div>
@@ -250,7 +253,9 @@ const HomeManager = () => {
                     <Input
                       id="subtitle"
                       value={content.subtitle || ""}
-                      onChange={(e) => handleInputChange("subtitle", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("subtitle", e.target.value)
+                      }
                       placeholder="Enter subtitle"
                     />
                   </div>
@@ -260,11 +265,28 @@ const HomeManager = () => {
                     <Textarea
                       id="description"
                       value={content.description || ""}
-                      onChange={(e) => handleInputChange("description", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("description", e.target.value)
+                      }
                       placeholder="Enter description"
                       rows={5}
                       className="resize-none"
                     />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="import_url">Import URL</Label>
+                    <Input
+                      id="import_url"
+                      type="url"
+                      value={content.import_url || ""}
+                      onChange={(e) =>
+                        handleInputChange("import_url", e.target.value)
+                      }
+                      placeholder="Enter import URL (optional)"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Set an optional URL to import additional content/data for the home page.
+                    </p>
                   </div>
                 </div>
                 

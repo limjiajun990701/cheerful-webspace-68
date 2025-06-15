@@ -356,6 +356,7 @@ export type Database = {
           description: string | null
           id: string
           image_url: string | null
+          import_url: string | null
           page_name: string
           section_name: string
           subtitle: string | null
@@ -367,6 +368,7 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          import_url?: string | null
           page_name: string
           section_name: string
           subtitle?: string | null
@@ -378,6 +380,7 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          import_url?: string | null
           page_name?: string
           section_name?: string
           subtitle?: string | null
