@@ -39,7 +39,7 @@ const SkillsRowsSection: React.FC = () => {
     <section
       className="relative py-16 md:py-24 w-full min-h-[520px] flex items-center justify-center
         bg-gradient-to-br from-[#13161C] via-[#191B23] to-[#27243a] overflow-hidden"
-      aria-label="Technologies/Skills Section"
+      aria-label="Skills Section"
     >
       {/* Decorative background */}
       <div
@@ -53,13 +53,13 @@ const SkillsRowsSection: React.FC = () => {
       <div className="relative z-10 max-w-5xl w-full mx-auto px-3 sm:px-6 flex flex-col items-center">
         {/* Title */}
         <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-center tracking-tight mb-5 font-sans">
-          <span className="text-[#2FFF6F] drop-shadow-lg">Technologies</span>{" "}
-          <span className="text-gray-100">We Use</span>
+          <span className="text-[#2FFF6F] drop-shadow-lg">My Skill</span>{" "}
+          <span className="text-gray-100"></span>
         </h2>
         <p className="text-center text-gray-300 mb-8 max-w-2xl mx-auto text-lg">
           We are still learning more knowledge, welcome to join us and make progress together with us
         </p>
-        {/* CTA Buttons */}
+        {/* CTA Buttons (optional, you can remove or adjust text) */}
         <div className="flex gap-5 mb-12 justify-center w-full flex-wrap">
           <Button
             className="bg-[#21C764] hover:bg-[#14b85e] text-white text-base font-semibold px-8 py-3 rounded-lg shadow-md transition-transform duration-150 hover:scale-105"
