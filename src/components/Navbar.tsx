@@ -1,121 +1,85 @@
-
-import React, { useState, useEffect } from "react";
-import { NavLink, useLocation } from "react-router-dom";
-import { Book } from "lucide-react";
-import { useMediaQuery } from "@/hooks/use-media-query";
-import NavLinks from "./navbar/NavLinks";
-import MobileMenu from "./navbar/MobileMenu";
-import BlogNavOptions from "./navbar/BlogNavOptions";
-import SearchBar from "./navbar/SearchBar";
-import ResumeButton from "./navbar/ResumeButton";
-import { ThemeToggle } from "./ThemeToggle";
-
-const navItems = [
-  { name: "Home", path: "/" },
-  { name: "About", path: "/about" },
-  { name: "My Skill", path: "/myskill" },
-  { name: "Experience", path: "/experience" },
-  { name: "Projects", path: "/projects" },
-  { name: "Collections", path: "/collections" },
-  { name: "Certifications & Badges", path: "/certifications" },
-  { name: "Cheat Sheets", path: "/cheatsheets" },
-  { name: "Blog", path: "/blog" },
-  { name: "Contact", path: "/contact" },
-];
+import React from "react";
+import { Link } from "react-router-dom";
+import { useTheme } from "@/components/ThemeProvider";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { ModeToggle } from "@/components/ui/mode-toggle";
+import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuContent, NavigationMenuTrigger, NavigationMenuLink } from "@/components/ui/navigation-menu"
+import { Button } from "@/components/ui/button";
+import { Menu } from "lucide-react";
 
 const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const [showSearch, setShowSearch] = useState(false);
-  const location = useLocation();
-  const isMobile = useMediaQuery("(max-width: 768px)");
-  const isBlogPage = location.pathname.includes("/blog");
-
-  const toggleMenu = () => setIsOpen(!isOpen);
-  const closeMenu = () => setIsOpen(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 20) {
-        setScrolled(true);
-      } else {
-        setScrolled(false);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  useEffect(() => {
-    closeMenu();
-    setShowSearch(false);
-  }, [location.pathname]);
+  const { theme } = useTheme();
 
   return (
-    <header
-      className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        scrolled 
-          ? "bg-background/90 backdrop-blur-md border-b border-border shadow-sm" 
-          : isBlogPage ? "bg-background/70 backdrop-blur-sm" : "bg-transparent"
-      }`}
-    >
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex-shrink-0">
-            <NavLink 
-              to="/" 
-              className="text-xl font-semibold flex items-center gap-2"
-              onClick={closeMenu}
-            >
-              {isBlogPage && <Book className="h-5 w-5 text-primary" />}
-              <span className="text-primary">Portfolio</span>
-            </NavLink>
-          </div>
-          
-          <nav className="hidden md:flex items-center space-x-4">
-            {!isBlogPage ? (
-              <>
-                <NavLinks navItems={navItems} />
-                <ThemeToggle />
-                <ResumeButton />
-              </>
-            ) : (
-              <div className="flex items-center space-x-4">
-                <NavLinks navItems={[]} isBlogPage={true} />
-                <ThemeToggle />
-                <ResumeButton />
-                <BlogNavOptions 
-                  setShowSearch={setShowSearch} 
-                  showSearch={showSearch}
-                  isMobile={false}
-                />
-              </div>
-            )}
-          </nav>
-          
-          <div className="md:hidden flex items-center">
-            <ThemeToggle />
-            <ResumeButton />
-            {isBlogPage && (
-              <BlogNavOptions 
-                setShowSearch={setShowSearch} 
-                showSearch={showSearch}
-                isMobile={true}
-              />
-            )}
-            <MobileMenu 
-              navItems={navItems}
-              isOpen={isOpen}
-              toggleMenu={toggleMenu}
-              closeMenu={closeMenu}
-            />
-          </div>
-        </div>
+    <div className="bg-background sticky top-0 z-50 border-b">
+      <div className="container flex items-center justify-between py-4">
+        <Link to="/" className="font-bold text-xl">
+          My Portfolio
+        </Link>
+
+        <nav className="flex items-center gap-2">
+          <a
+            href="/skills"
+            className="px-3 py-2 rounded text-sm hover:bg-muted transition-colors"
+          >
+            Skills
+          </a>
+          <Link
+            to="/projects"
+            className="px-3 py-2 rounded text-sm hover:bg-muted transition-colors"
+          >
+            Projects
+          </Link>
+          <Link
+            to="/certifications"
+            className="px-3 py-2 rounded text-sm hover:bg-muted transition-colors"
+          >
+            Certifications
+          </Link>
+          <Link
+            to="/blogs"
+            className="px-3 py-2 rounded text-sm hover:bg-muted transition-colors"
+          >
+            Blogs
+          </Link>
+          <Link
+            to="/collections"
+            className="px-3 py-2 rounded text-sm hover:bg-muted transition-colors"
+          >
+            Collections
+          </Link>
+          <Link
+            to="/cheatsheets"
+            className="px-3 py-2 rounded text-sm hover:bg-muted transition-colors"
+          >
+            Cheatsheets
+          </Link>
+          <ModeToggle />
+        </nav>
+
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="sm" className="md:hidden">
+              <Menu className="h-5 w-5" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="pr-0">
+            <Link to="/" className="font-bold text-3xl mb-8 block">
+              My Portfolio
+            </Link>
+            <nav className="grid gap-6 text-foreground">
+              <Link to="/skills" className="hover:bg-secondary rounded-md p-2">Skills</Link>
+              <Link to="/projects" className="hover:bg-secondary rounded-md p-2">Projects</Link>
+              <Link to="/certifications" className="hover:bg-secondary rounded-md p-2">Certifications</Link>
+              <Link to="/blogs" className="hover:bg-secondary rounded-md p-2">Blogs</Link>
+              <Link to="/collections" className="hover:bg-secondary rounded-md p-2">Collections</Link>
+              <Link to="/cheatsheets" className="hover:bg-secondary rounded-md p-2">Cheatsheets</Link>
+            </nav>
+            <ModeToggle />
+          </SheetContent>
+        </Sheet>
       </div>
-      
-      <SearchBar showSearch={showSearch} />
-    </header>
+    </div>
   );
 };
 
