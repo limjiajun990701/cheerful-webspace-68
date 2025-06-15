@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -142,7 +141,7 @@ export default function AboutWhoAmIManager() {
                 <FormItem>
                   <FormLabel>Body</FormLabel>
                   <FormControl>
-                    <Textarea placeholder={DEFAULT_BODY} minRows={3} {...field} />
+                    <Textarea placeholder={DEFAULT_BODY} rows={3} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
