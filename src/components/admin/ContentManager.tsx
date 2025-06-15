@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -34,9 +35,11 @@ const ContentManager = () => {
   const [sections, setSections] = useState<string[]>([]);
   const [content, setContent] = useState<SiteContent | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageUrl, setImageUrl] = useState<string>("");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [imageMode, setImageMode] = useState<"upload" | "url">("upload");
 
   const pages = ["home", "about", "experience"];
 
@@ -102,8 +105,10 @@ const ContentManager = () => {
       setContent(data);
       if (data.image_url) {
         setImagePreview(data.image_url);
+        setImageUrl(data.image_url);
       } else {
         setImagePreview(null);
+        setImageUrl("");
       }
       setUploadError(null);
     } catch (error) {
@@ -146,7 +151,32 @@ const ContentManager = () => {
     reader.readAsDataURL(file);
   };
 
+  const handleImageUrlChange = (url: string) => {
+    setImageUrl(url);
+    if (url) {
+      setImagePreview(url);
+    } else {
+      setImagePreview(null);
+    }
+    setUploadError(null);
+  };
+
+  const handleImageModeChange = (mode: "upload" | "url") => {
+    setImageMode(mode);
+    // Clear the other mode's data
+    if (mode === "upload") {
+      setImageUrl("");
+    } else {
+      setImageFile(null);
+    }
+    setUploadError(null);
+  };
+
   const uploadImage = async (): Promise<string | null> => {
+    if (imageMode === "url") {
+      return imageUrl || content?.image_url || null;
+    }
+    
     if (!imageFile) return content?.image_url || null;
     
     setIsUploading(true);
@@ -180,12 +210,14 @@ const ContentManager = () => {
     try {
       // Upload image if there's a new one
       let imageUrl = content.image_url;
-      if (imageFile) {
+      if (imageMode === "upload" && imageFile) {
         imageUrl = await uploadImage();
         if (!imageUrl && imageFile) {
           // If upload failed but we had a file, show error but continue with other updates
           setUploadError("Image upload failed, but other content was updated");
         }
+      } else if (imageMode === "url") {
+        imageUrl = await uploadImage(); // This will return the URL
       }
 
       // Use updateSiteContent helper
@@ -339,22 +371,43 @@ const ContentManager = () => {
                 
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="image">Image</Label>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        id="image"
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageChange}
-                        className="w-full"
-                      />
-                      {isUploading && (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Supports: JPG, PNG, GIF, WEBP (Max: 5MB)
-                    </p>
+                    <Label>Image</Label>
+                    
+                    <Tabs value={imageMode} onValueChange={(value) => handleImageModeChange(value as "upload" | "url")}>
+                      <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="upload">Upload File</TabsTrigger>
+                        <TabsTrigger value="url">Image URL</TabsTrigger>
+                      </TabsList>
+                      
+                      <TabsContent value="upload" className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageChange}
+                            className="w-full"
+                          />
+                          {isUploading && (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Supports: JPG, PNG, GIF, WEBP (Max: 5MB)
+                        </p>
+                      </TabsContent>
+                      
+                      <TabsContent value="url" className="space-y-2">
+                        <Input
+                          type="url"
+                          value={imageUrl}
+                          onChange={(e) => handleImageUrlChange(e.target.value)}
+                          placeholder="Enter image URL"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Enter a direct URL to an image hosted elsewhere
+                        </p>
+                      </TabsContent>
+                    </Tabs>
                   </div>
                   
                   {imagePreview && (

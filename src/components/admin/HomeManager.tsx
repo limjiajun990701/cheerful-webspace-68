@@ -10,6 +10,7 @@ import { FormEvent } from "react";
 import { Loader2, Save, AlertCircle, Image as ImageIcon } from "lucide-react";
 import { uploadSiteImage, updateSiteContent } from "@/utils/contentUtils";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface HomeContent {
   id: string;
@@ -28,9 +29,11 @@ const HomeManager = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [content, setContent] = useState<HomeContent | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageUrl, setImageUrl] = useState<string>("");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [imageMode, setImageMode] = useState<"upload" | "url">("upload");
 
   useEffect(() => {
     fetchContent();
@@ -53,8 +56,10 @@ const HomeManager = () => {
       setContent(data);
       if (data.image_url) {
         setImagePreview(data.image_url);
+        setImageUrl(data.image_url);
       } else {
         setImagePreview(null);
+        setImageUrl("");
       }
       setUploadError(null);
     } catch (error) {
@@ -99,7 +104,32 @@ const HomeManager = () => {
     reader.readAsDataURL(file);
   };
 
+  const handleImageUrlChange = (url: string) => {
+    setImageUrl(url);
+    if (url) {
+      setImagePreview(url);
+    } else {
+      setImagePreview(null);
+    }
+    setUploadError(null);
+  };
+
+  const handleImageModeChange = (mode: "upload" | "url") => {
+    setImageMode(mode);
+    // Clear the other mode's data
+    if (mode === "upload") {
+      setImageUrl("");
+    } else {
+      setImageFile(null);
+    }
+    setUploadError(null);
+  };
+
   const uploadImage = async (): Promise<string | null> => {
+    if (imageMode === "url") {
+      return imageUrl || content?.image_url || null;
+    }
+    
     if (!imageFile) return content?.image_url || null;
     
     setIsUploading(true);
@@ -133,7 +163,7 @@ const HomeManager = () => {
       const newImageUrl = await uploadImage();
 
       // If a file was selected but the upload failed (returned null)
-      if (imageFile && !newImageUrl) {
+      if (imageMode === "upload" && imageFile && !newImageUrl) {
         toast({
           title: "Image Upload Failed",
           description: uploadError || "The content was not saved because the image failed to upload.",
@@ -273,27 +303,48 @@ const HomeManager = () => {
                 
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="image">
+                    <Label>
                       Hero Background Image
                       <span className="text-xs text-muted-foreground ml-2">
                         (Will be displayed with overlay on homepage)
                       </span>
                     </Label>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        id="image"
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageChange}
-                        className="w-full"
-                      />
-                      {isUploading && (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Supports: JPG, PNG, GIF, WEBP, SVG, BMP (Max: 5MB)
-                    </p>
+                    
+                    <Tabs value={imageMode} onValueChange={(value) => handleImageModeChange(value as "upload" | "url")}>
+                      <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="upload">Upload File</TabsTrigger>
+                        <TabsTrigger value="url">Image URL</TabsTrigger>
+                      </TabsList>
+                      
+                      <TabsContent value="upload" className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageChange}
+                            className="w-full"
+                          />
+                          {isUploading && (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Supports: JPG, PNG, GIF, WEBP, SVG, BMP (Max: 5MB)
+                        </p>
+                      </TabsContent>
+                      
+                      <TabsContent value="url" className="space-y-2">
+                        <Input
+                          type="url"
+                          value={imageUrl}
+                          onChange={(e) => handleImageUrlChange(e.target.value)}
+                          placeholder="Enter image URL"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Enter a direct URL to an image hosted elsewhere
+                        </p>
+                      </TabsContent>
+                    </Tabs>
                   </div>
                   
                   {imagePreview && (
@@ -330,7 +381,7 @@ const HomeManager = () => {
                       <ImageIcon className="h-12 w-12 text-muted-foreground/50 mb-2" />
                       <p className="text-sm text-muted-foreground">No image selected</p>
                       <p className="text-xs text-muted-foreground/70">
-                        Upload an image to use as the homepage hero background
+                        Upload an image or provide a URL to use as the homepage hero background
                       </p>
                     </div>
                   )}
