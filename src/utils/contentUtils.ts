@@ -52,11 +52,17 @@ export async function getSkillGroups() {
   // TODO: Implement actual logic as needed
   return [];
 }
-export async function createSkillGroup(category: string) {
+
+// Here is the fix! Accept items as array of SkillItems, not strings.
+export async function createSkillGroup(category: string, items: { name: string; iconUrl?: string }[] = []) {
   // TODO: Implement actual logic as needed
   return { success: true };
 }
-export async function updateSkillGroup(id: string, category: string, items: string[]) {
+export async function updateSkillGroup(
+  id: string,
+  category: string,
+  items: { name: string; iconUrl?: string }[]
+) {
   // TODO: Implement actual logic as needed
   return { success: true };
 }
