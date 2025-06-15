@@ -191,26 +191,15 @@ const Index = () => {
     <div className="flex flex-col min-h-screen">
       {/* Hero Section - Modern and Clean Design */}
       <section className="relative min-h-[90vh] flex items-center">
-        {/* Background Image */}
-        {!isHeroLoading && heroContent?.image_url && !heroImageError && (
-          <div className="absolute inset-0 -z-20">
-            <img 
-              src={heroContent.image_url} 
-              alt="Hero background" 
-              className="w-full h-full object-cover opacity-20"
-              onError={() => setHeroImageError(true)}
-            />
-          </div>
-        )}
-
         {/* Background with animated diagonal lines */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-secondary/10 to-background -z-10" />
         <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(120deg,rgba(0,0,0,.02)25%,transparent_25%,transparent_75%,rgba(0,0,0,.02)75%)]" />
 
         {/* Animated Hero content */}
         <div className="container mx-auto px-4 py-16">
-          <div className="max-w-3xl mx-auto md:mx-0">
-            <div className="space-y-8">
+          <div className="grid md:grid-cols-2 gap-16 items-center">
+            {/* Left side: Text content */}
+            <div className="space-y-8 animate-fade-in">
               <div className="space-y-2">
                 {isHeroLoading ? (
                   <>
@@ -220,15 +209,15 @@ const Index = () => {
                   </>
                 ) : heroContent ? (
                   <>
-                    <Badge variant="outline" className="border-primary/30 text-primary bg-primary/5 px-4 py-1.5 text-sm animate-fade-in">
+                    <Badge variant="outline" className="border-primary/30 text-primary bg-primary/5 px-4 py-1.5 text-sm">
                       {heroContent.subtitle}
                     </Badge>
                     <h1
-                      className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight animate-fade-in"
+                      className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight"
                       dangerouslySetInnerHTML={{ __html: heroContent.title }}
                     />
                     <p
-                      className="text-xl md:text-2xl text-muted-foreground mt-4 leading-relaxed animate-fade-in"
+                      className="text-xl md:text-2xl text-muted-foreground mt-4 leading-relaxed"
                       dangerouslySetInnerHTML={{ __html: heroContent.description }}
                     />
                   </>
@@ -237,7 +226,7 @@ const Index = () => {
               {/* Fun facts carousel */}
               <div className="my-6 text-lg/relaxed font-medium text-center md:text-left">
                 <span className="inline-flex items-center gap-2 text-primary">
-                  <span className="animate-fade-in">{funFacts[factIndex]}</span>
+                  <span>{funFacts[factIndex]}</span>
                 </span>
               </div>
               <div className="flex flex-wrap gap-4 pt-4">
@@ -268,6 +257,28 @@ const Index = () => {
                   +{expertise.skills.length - 4} more skills
                 </Link>
               </div>
+            </div>
+
+            {/* Right side: Image */}
+            <div className="hidden md:flex justify-center items-center animate-fade-in">
+              {isHeroLoading ? (
+                <Skeleton className="w-full max-w-md h-[450px] rounded-lg" />
+              ) : heroContent?.image_url && !heroImageError ? (
+                <img
+                  src={heroContent.image_url}
+                  alt="Hero"
+                  className="rounded-xl shadow-2xl w-full max-w-md h-auto object-cover"
+                  onError={() => setHeroImageError(true)}
+                  style={{ aspectRatio: '4/5' }}
+                />
+              ) : (
+                <div className="w-full max-w-md h-[450px] bg-muted/50 rounded-lg flex items-center justify-center border border-dashed">
+                  <div className="text-center text-muted-foreground">
+                    <Layout className="mx-auto h-12 w-12 mb-2" />
+                    <p>Hero image appears here</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
