@@ -95,3 +95,112 @@ export async function setupSiteImagesBucket(): Promise<boolean> {
     return false;
   }
 }
+
+/**
+ * Fetches the single expertise content row (takes the first one).
+ * Used in the index page and admin expertise manager.
+ */
+export async function getExpertiseContent() {
+  const { data, error } = await supabase
+    .from('site_content')
+    .select('*')
+    .eq('page_name', 'home')
+    .eq('section_name', 'expertise')
+    .single();
+
+  if (error) {
+    console.error('Error fetching expertise content:', error);
+    return null;
+  }
+  return data;
+}
+
+/**
+ * Updates the expertise content row.
+ */
+export async function updateExpertiseContent(id: string | null, updates: { title?: string, subtitle?: string, description?: string }) {
+  // If id is given, update. If not, insert new.
+  if (id) {
+    const { data, error } = await supabase
+      .from('site_content')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error updating expertise content:", error);
+      return { success: false, error: error.message };
+    }
+    return { success: true, data };
+  } else {
+    // Insert new
+    const input = {
+      ...updates,
+      page_name: 'home',
+      section_name: 'expertise',
+    };
+    const { data, error } = await supabase
+      .from('site_content')
+      .insert([input])
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error inserting expertise content:", error);
+      return { success: false, error: error.message };
+    }
+    return { success: true, data };
+  }
+}
+
+/**
+ * Fetch generic site content for a given page and section.
+ */
+export async function getSiteContent(pageName: string, sectionName: string) {
+  const { data, error } = await supabase
+    .from('site_content')
+    .select('*')
+    .eq('page_name', pageName)
+    .eq('section_name', sectionName)
+    .single();
+  if (error) {
+    console.error('Error fetching site content:', error);
+    return null;
+  }
+  return data;
+}
+
+/**
+ * Fetch all skill groups (for About/Skills manager pages). Expects a site_content row per group with section_name = 'skills-group'.
+ * Each group's description should be JSON with group info: { items: string[] }
+ */
+export async function getSkillGroups() {
+  const { data, error } = await supabase
+    .from('site_content')
+    .select('*')
+    .eq('section_name', 'skills-group');
+
+  if (error) {
+    console.error("Error fetching skill groups:", error);
+    return [];
+  }
+  // Map over data and parse items
+  return (data || []).map((group: any) => {
+    let items: string[] = [];
+    try {
+      const desc = group.description;
+      if (desc) {
+        const parsed = typeof desc === "string" ? JSON.parse(desc) : desc;
+        items = Array.isArray(parsed?.items) ? parsed.items : [];
+      }
+    } catch {
+      items = [];
+    }
+    return {
+      id: group.id,
+      category: group.title || "",
+      items,
+    };
+  });
+}
