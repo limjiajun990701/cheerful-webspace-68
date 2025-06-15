@@ -36,10 +36,11 @@ const MySkillManager = () => {
       const { data, error } = await supabase.from('skills' as any).select('*').order('name');
       if (error) throw error;
       
-      setSkills((data as unknown as Skill[]) || []);
-      if (data && data.length > 0 && !selectedSkill) {
-        setSelectedSkill(data[0].id);
-        fetchSkillItems(data[0].id);
+      const skillsData = (data as unknown as Skill[]) || [];
+      setSkills(skillsData);
+      if (skillsData.length > 0 && !selectedSkill) {
+        setSelectedSkill(skillsData[0].id);
+        fetchSkillItems(skillsData[0].id);
       } else if (selectedSkill) {
         fetchSkillItems(selectedSkill);
       } else {
