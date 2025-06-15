@@ -6,6 +6,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import ResumeButton from "@/components/navbar/ResumeButton";
 
 const Navbar = () => {
   const { theme } = useTheme();
@@ -54,6 +55,8 @@ const Navbar = () => {
           >
             Cheatsheets
           </Link>
+          {/* Resume button added here for desktop nav */}
+          <ResumeButton />
           <ThemeToggle />
         </nav>
 
@@ -75,6 +78,10 @@ const Navbar = () => {
               <Link to="/collections" className="hover:bg-secondary rounded-md p-2">Collections</Link>
               <Link to="/cheatsheets" className="hover:bg-secondary rounded-md p-2">Cheatsheets</Link>
             </nav>
+            {/* Resume button added here for mobile drawer nav */}
+            <div className="mt-6">
+              <ResumeButton />
+            </div>
             <ThemeToggle />
           </SheetContent>
         </Sheet>
@@ -84,3 +91,4 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
