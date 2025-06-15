@@ -74,35 +74,64 @@ const defaultAboutSection: AboutSection = {
 };
 
 const About = () => {
-  const [timelineItems, setTimelineItems] = useState<TimelineItem[]>([]);
+  const [workItems, setWorkItems] = useState<TimelineItem[]>([]);
+  const [educationItems, setEducationItems] = useState<TimelineItem[]>([]);
   const [aboutSection, setAboutSection] = useState<AboutSection | null>(null);
 
-  // Fetch only "work" experiences for timeline
+  // Fetch work experiences
   useEffect(() => {
-    async function fetchExperiences() {
+    async function fetchWork() {
       const { data, error } = await supabase
         .from('experiences')
         .select('*')
         .eq('type', 'work')
         .order('created_at', { ascending: false });
 
-      if (!error && data && data.length > 0) {
-        // Explicitly cast as TimelineItem with type 'work'
-        const safeData: TimelineItem[] = data.map((item: any) => ({
-          id: item.id,
-          type: "work",
-          title: item.title,
-          company: item.company,
-          location: item.location,
-          date: item.date,
-          description: item.description,
-        }));
-        setTimelineItems(safeData);
+      if (!error && data) {
+        setWorkItems(
+          data.map((item: any) => ({
+            id: item.id,
+            type: "work",
+            title: item.title,
+            company: item.company,
+            location: item.location,
+            date: item.date,
+            description: item.description,
+          }))
+        );
       } else {
-        setTimelineItems([]);
+        setWorkItems([]);
       }
     }
-    fetchExperiences();
+    fetchWork();
+  }, []);
+
+  // Fetch education experiences
+  useEffect(() => {
+    async function fetchEducation() {
+      const { data, error } = await supabase
+        .from('experiences')
+        .select('*')
+        .eq('type', 'education')
+        .order('created_at', { ascending: false });
+
+      if (!error && data) {
+        setEducationItems(
+          data.map((item: any) => ({
+            id: item.id,
+            type: "work", // still uses the TimelineItem interface which expects only 'work' for type
+            title: item.title,
+            company: item.company,
+            location: item.location,
+            date: item.date,
+            description: item.description,
+          }))
+        );
+      } else {
+        setEducationItems([]);
+      }
+    }
+    fetchEducation();
   }, []);
 
   // Fetch about section, do not fallback to hardcoded on null
@@ -124,9 +153,10 @@ const About = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* About Hero */}
       <DynamicHeroSection />
 
-      {/* Editable Who Am I Section (never hardcoded) */}
+      {/* Editable Who Am I Section */}
       <section className="py-10 max-w-3xl mx-auto px-4">
         <h2 className="text-2xl font-bold mb-4 text-primary">
           {aboutSection?.title ?? ""}
@@ -142,8 +172,14 @@ const About = () => {
           ))}
         </div>
       </section>
-      {/* Timeline Section - Only Work Experiences */}
-      <TimelineSection items={timelineItems} />
+
+      {/* Timeline - Work */}
+      <TimelineSection items={workItems} sectionTitle="Work Experience" />
+
+      {/* Timeline - Education */}
+      <TimelineSection items={educationItems} sectionTitle="Education" />
+
+      {/* Contact */}
       <ContactSection />
     </div>
   );

@@ -4,20 +4,21 @@ import { TimelineItem } from '@/types/TimelineItem';
 
 interface TimelineSectionProps {
   items: TimelineItem[];
+  sectionTitle?: string;
 }
 
 // Helper to alternate left/right
 const isEven = (index: number) => index % 2 === 0;
 
-const TimelineSection = ({ items }: TimelineSectionProps) => {
+const TimelineSection = ({ items, sectionTitle = "My Journey" }: TimelineSectionProps) => {
   return (
     <section className="py-20">
-      <h2 className="text-3xl font-bold mb-10 text-center">My Journey</h2>
+      <h2 className="text-3xl font-bold mb-10 text-center">{sectionTitle}</h2>
       <div className="relative max-w-3xl mx-auto">
         <div className="absolute top-0 left-1/2 w-1 h-full bg-border z-0" style={{ transform: "translateX(-50%)" }} />
         <div className="relative flex flex-col gap-12">
           {items.length === 0 && (
-            <div className="text-center text-muted-foreground py-8">No work experiences found.</div>
+            <div className="text-center text-muted-foreground py-8">No experiences found.</div>
           )}
           {items.map((item, idx) => {
             const left = isEven(idx);
@@ -34,7 +35,6 @@ const TimelineSection = ({ items }: TimelineSectionProps) => {
                 <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
                   <span className="w-5 h-5 bg-primary border-4 border-background rounded-full block" />
                 </div>
-                {/* Spacer for timeline alignment */}
                 <div className={`hidden md:block w-1/2 ${left ? "order-3" : "order-1"}`} />
               </div>
             );
