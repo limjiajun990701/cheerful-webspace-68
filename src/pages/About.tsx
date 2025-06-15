@@ -4,7 +4,18 @@ import ContactSection from '@/components/about/ContactSection';
 import TimelineSection from '@/components/about/TimelineSection';
 import { getExperienceItems } from "@/utils/contentUtils";
 
-const defaultTimelineItems = [
+// Step 1: Define TimelineItem type
+type TimelineItem = {
+  id: string;
+  type: "work" | "education";
+  title: string;
+  company: string;
+  location: string;
+  date: string;
+  description: string;
+};
+
+const defaultTimelineItems: TimelineItem[] = [
   {
     id: "default-1",
     type: "work",
@@ -44,44 +55,22 @@ const defaultTimelineItems = [
 ];
 
 const About = () => {
-  const [timelineItems, setTimelineItems] = useState(defaultTimelineItems);
+  const [timelineItems, setTimelineItems] = useState<TimelineItem[]>(defaultTimelineItems);
 
   useEffect(() => {
     async function fetchExperiences() {
       const data = await getExperienceItems();
-      if (data && data.length > 0) {
-        // Filter for allowed types
-        const safeData = data
-          .filter(
-            (item: any) => item.type === "work" || item.type === "education"
-          )
-          .map(
-            (item: any) =>
-              ({
-                ...item,
-                // This ensures the type field is exactly the allowed union type
-                type: item.type === "work" ? "work" : "education",
-              }) as {
-                id: string;
-                type: "work" | "education";
-                title: string;
-                company: string;
-                location: string;
-                date: string;
-                description: string;
-              }
-          );
 
-        // Tell TypeScript that this is TimelineItem[]
-        setTimelineItems(safeData as {
-          id: string;
-          type: "work" | "education";
-          title: string;
-          company: string;
-          location: string;
-          date: string;
-          description: string;
-        }[]);
+      if (data && data.length > 0) {
+        // Step 2: Ensure strong typing for each item
+        const safeData: TimelineItem[] = data
+          .filter((item: any) => item.type === "work" || item.type === "education")
+          .map((item: any) => ({
+            ...item,
+            type: item.type === "work" ? "work" : "education", // force type properly
+          }));
+
+        setTimelineItems(safeData);
       }
     }
     fetchExperiences();
