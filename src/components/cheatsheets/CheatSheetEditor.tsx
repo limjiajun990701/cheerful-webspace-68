@@ -180,7 +180,11 @@ const CheatSheetEditor: React.FC<CheatSheetEditorProps> = ({ cheatsheetToEdit, o
   const saveMutation = useMutation({
     mutationFn: async () => {
       setIsSaving(true);
-      // Only validate our custom auth
+
+      // ---- Remove any supabase.auth.getUser() checks! ----
+      // Use only isLoggedIn and local adminUserId for admin feature gating
+
+      // Only validate our custom admin logic for edit mode
       if (isEditMode) {
         // Update existing cheatsheet
         const { error: updateError } = await supabase
@@ -241,22 +245,31 @@ const CheatSheetEditor: React.FC<CheatSheetEditorProps> = ({ cheatsheetToEdit, o
         
       } else {
         // Create new cheatsheet
-        if (!adminUserId) throw new Error("Admin user ID could not be resolved. Please try again.");
+        // Do NOT check or fetch supabase.auth.getUser()
+        // Only use local adminUserId if required, otherwise create as "anonymous"/public allowed
+
+        // Remove these lines if present:
+        // const { data: user, error: userError } = await supabase.auth.getUser();
+        // if (!user) throw new Error("User not authenticated");
+
+        // If you want to allow non-admin creation, you may skip adminUserId entirely OR set created_by to null/empty for public users
+
+        // This will accept both admin and public users:
         const { data: cheatsheetData, error: cheatsheetError } = await supabase
           .from('cheatsheets')
           .insert({
             title,
             description,
             language,
-            created_by: adminUserId,
+            created_by: adminUserId || null, // If no adminUserId, set to null (public user)
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           })
           .select()
           .single();
-        
+
         if (cheatsheetError) throw new Error(cheatsheetError.message);
-        
+
         // Create groups with display order
         const groupsWithOrder = groups.map((group, index) => ({
           id: group.id,
