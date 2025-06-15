@@ -1,109 +1,120 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { useTheme } from "@/components/ThemeProvider";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+
+import React, { useState } from "react";
+import { NavLink, Link } from "react-router-dom";
+import {
+  NavigationMenu,
+  NavigationMenuList,
+  NavigationMenuItem,
+  NavigationMenuLink,
+} from "@/components/ui/navigation-menu";
 import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
+import { Menu, Home, User, ArrowRight, Search, Settings } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import ResumeButton from "@/components/navbar/ResumeButton";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+
+const navItems = [
+  { name: "Home", path: "/", icon: Home },
+  { name: "About", path: "/about", icon: User },
+  { name: "Skills", path: "/skills", icon: ArrowRight },
+  { name: "Projects", path: "/projects", icon: ArrowRight },
+  { name: "Certifications", path: "/certifications", icon: Settings },
+  { name: "Blogs", path: "/blogs", icon: Search },
+  { name: "Collections", path: "/collections", icon: ArrowRight },
+  { name: "Cheatsheets", path: "/cheatsheets", icon: ArrowRight },
+];
 
 const Navbar = () => {
-  const { theme } = useTheme();
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  React.useEffect(() => {
+    const handler = () => setIsScrolled(window.scrollY > 10);
+    window.addEventListener("scroll", handler);
+    return () => window.removeEventListener("scroll", handler);
+  }, []);
 
   return (
-    <div className="bg-background sticky top-0 z-50 border-b">
-      <div className="container flex items-center justify-between py-4">
-        <Link to="/" className="font-bold text-xl">
+    <header
+      className={`sticky top-0 z-50 w-full transition-all backdrop-blur-md ${
+        isScrolled
+          ? "bg-background/80 border-b border-border shadow-md"
+          : "bg-background/70"
+      }`}
+    >
+      <div className="container flex items-center justify-between py-2 md:py-3">
+        <Link to="/" className="font-bold text-xl md:text-2xl tracking-tight text-primary hover:opacity-90">
           My Portfolio
         </Link>
-
-        <nav className="flex items-center gap-2">
-          {/* Home and About links */}
-          <Link
-            to="/"
-            className="px-3 py-2 rounded text-sm hover:bg-muted transition-colors"
-          >
-            Home
-          </Link>
-          <Link
-            to="/about"
-            className="px-3 py-2 rounded text-sm hover:bg-muted transition-colors"
-          >
-            About
-          </Link>
-          {/* Skills link */}
-          <Link
-            to="/skills"
-            className="px-3 py-2 rounded text-sm hover:bg-muted transition-colors"
-          >
-            Skills
-          </Link>
-          <Link
-            to="/projects"
-            className="px-3 py-2 rounded text-sm hover:bg-muted transition-colors"
-          >
-            Projects
-          </Link>
-          <Link
-            to="/certifications"
-            className="px-3 py-2 rounded text-sm hover:bg-muted transition-colors"
-          >
-            Certifications
-          </Link>
-          <Link
-            to="/blogs"
-            className="px-3 py-2 rounded text-sm hover:bg-muted transition-colors"
-          >
-            Blogs
-          </Link>
-          <Link
-            to="/collections"
-            className="px-3 py-2 rounded text-sm hover:bg-muted transition-colors"
-          >
-            Collections
-          </Link>
-          <Link
-            to="/cheatsheets"
-            className="px-3 py-2 rounded text-sm hover:bg-muted transition-colors"
-          >
-            Cheatsheets
-          </Link>
-          {/* Resume button added here for desktop nav */}
+        {/* Desktop Nav */}
+        <nav className="hidden md:flex items-center gap-2">
+          <NavigationMenu>
+            <NavigationMenuList>
+              {navItems.map((item) => (
+                <NavigationMenuItem key={item.name}>
+                  <NavigationMenuLink asChild>
+                    <NavLink
+                      to={item.path}
+                      className={({ isActive }) =>
+                        `group px-3 py-2 rounded-lg flex items-center gap-1 font-medium text-sm underline-animation transition-colors
+                        ${
+                          isActive
+                            ? "text-primary bg-muted font-semibold"
+                            : "text-foreground hover:text-primary hover:bg-muted/80"
+                        }`
+                      }
+                    >
+                      <item.icon className="w-4 h-4 mr-1 transition-transform group-hover:scale-110" />
+                      <span>{item.name}</span>
+                    </NavLink>
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+              ))}
+            </NavigationMenuList>
+          </NavigationMenu>
           <ResumeButton />
           <ThemeToggle />
         </nav>
-
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="sm" className="md:hidden">
-              <Menu className="h-5 w-5" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="pr-0">
-            <Link to="/" className="font-bold text-3xl mb-8 block">
-              My Portfolio
-            </Link>
-            <nav className="grid gap-6 text-foreground">
-              {/* Home and About and Skills links for mobile */}
-              <Link to="/" className="hover:bg-secondary rounded-md p-2">Home</Link>
-              <Link to="/about" className="hover:bg-secondary rounded-md p-2">About</Link>
-              <Link to="/skills" className="hover:bg-secondary rounded-md p-2">Skills</Link>
-              <Link to="/projects" className="hover:bg-secondary rounded-md p-2">Projects</Link>
-              <Link to="/certifications" className="hover:bg-secondary rounded-md p-2">Certifications</Link>
-              <Link to="/blogs" className="hover:bg-secondary rounded-md p-2">Blogs</Link>
-              <Link to="/collections" className="hover:bg-secondary rounded-md p-2">Collections</Link>
-              <Link to="/cheatsheets" className="hover:bg-secondary rounded-md p-2">Cheatsheets</Link>
-            </nav>
-            {/* Resume button added here for mobile drawer nav */}
-            <div className="mt-6">
-              <ResumeButton />
-            </div>
-            <ThemeToggle />
-          </SheetContent>
-        </Sheet>
+        {/* Mobile Nav Trigger */}
+        <div className="md:hidden flex items-center gap-2">
+          <ThemeToggle />
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" aria-label="Open Navigation">
+                <Menu className="w-5 h-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="pr-0 max-w-xs w-72">
+              <div className="mt-4 mb-8">
+                <Link to="/" className="font-bold text-2xl text-primary">
+                  My Portfolio
+                </Link>
+              </div>
+              <nav className="grid gap-3">
+                {navItems.map((item) => (
+                  <NavLink
+                    to={item.path}
+                    key={item.name}
+                    className={({ isActive }) =>
+                      `flex items-center gap-2 p-2 rounded-lg text-base font-medium transition-colors underline-animation ${
+                        isActive
+                          ? "bg-primary/10 text-primary"
+                          : "text-foreground hover:bg-primary/10 hover:text-primary"
+                      }`
+                    }
+                  >
+                    <item.icon className="w-5 h-5" />
+                    {item.name}
+                  </NavLink>
+                ))}
+                <ResumeButton />
+              </nav>
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
-    </div>
+    </header>
   );
 };
 
 export default Navbar;
+
