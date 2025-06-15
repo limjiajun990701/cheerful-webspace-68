@@ -10,6 +10,8 @@ import CertificationManager from "@/components/admin/CertificationManager";
 import BlogPostManager from "@/components/admin/BlogPostManager";
 import CheatSheetManager from "@/components/admin/CheatSheetManager";
 import CollectionManager from "@/components/admin/CollectionManager";
+import MySkillManager from "@/components/admin/MySkillManager";
+import ResumeManager from "@/components/admin/ResumeManager";
 
 const Admin = () => {
   return (
@@ -25,6 +27,8 @@ const Admin = () => {
           <TabsTrigger value="experience">Experience</TabsTrigger>
           <TabsTrigger value="projects">Projects</TabsTrigger>
           <TabsTrigger value="certifications">Certifications</TabsTrigger>
+          <TabsTrigger value="skills">Skills</TabsTrigger>
+          <TabsTrigger value="resume">Resume</TabsTrigger>
           <TabsTrigger value="blog">Blog</TabsTrigger>
           <TabsTrigger value="cheatsheets">Cheat Sheets</TabsTrigger>
           <TabsTrigger value="collections">Collections</TabsTrigger>
@@ -46,6 +50,12 @@ const Admin = () => {
         </TabsContent>
         <TabsContent value="certifications">
           <CertificationManager />
+        </TabsContent>
+        <TabsContent value="skills">
+          <MySkillManager />
+        </TabsContent>
+        <TabsContent value="resume">
+          <ResumeManager />
         </TabsContent>
         <TabsContent value="blog">
           <BlogPostManager />
