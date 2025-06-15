@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +21,8 @@ interface CheatSheetEntry {
   command: string;
   description: string;
   language?: string;
+  group_id?: string;
+  display_order?: number;
 }
 
 interface CheatSheetEditorProps {
@@ -46,7 +47,7 @@ const CheatSheetEditor: React.FC<CheatSheetEditorProps> = ({ cheatsheetToEdit, o
     queryKey: ['cheatsheet-editor-groups', cheatsheetToEdit?.id],
     queryFn: async () => {
       if (!cheatsheetToEdit) return null;
-      
+
       const { data: groupsData, error: groupsError } = await supabase
         .from('cheatsheet_groups')
         .select('*')
@@ -77,7 +78,9 @@ const CheatSheetEditor: React.FC<CheatSheetEditorProps> = ({ cheatsheetToEdit, o
             entries: entriesData.map(entry => ({
               id: entry.id,
               command: entry.command || "",
-              description: entry.description || ""
+              description: entry.description || "",
+              group_id: entry.group_id,
+              display_order: entry.display_order
             }))
           };
         })
@@ -98,7 +101,13 @@ const CheatSheetEditor: React.FC<CheatSheetEditorProps> = ({ cheatsheetToEdit, o
         title: "Basic Commands",
         display_order: 0,
         entries: [
-          { id: uuidv4(), command: "Example command", description: "Description of what this command does" }
+          {
+            id: uuidv4(),
+            command: "Example command",
+            description: "Description of what this command does",
+            group_id: "",
+            display_order: 0
+          }
         ]
       }]);
     }
@@ -115,6 +124,22 @@ const CheatSheetEditor: React.FC<CheatSheetEditorProps> = ({ cheatsheetToEdit, o
     setGroups([...groups, newGroup]);
   };
 
+  const addEntry = (groupId: string) => {
+    const newEntry: CheatSheetEntry = {
+      id: uuidv4(),
+      command: "",
+      description: "",
+      group_id: groupId,
+      display_order: (groups.find(g => g.id === groupId)?.entries.length || 0)
+    };
+
+    setGroups(groups.map(group =>
+      group.id === groupId ?
+        { ...group, entries: [...group.entries, newEntry] } :
+        group
+    ));
+  };
+
   const updateGroupTitle = (groupId: string, newTitle: string) => {
     setGroups(groups.map(group => 
       group.id === groupId ? { ...group, title: newTitle } : group
@@ -123,20 +148,6 @@ const CheatSheetEditor: React.FC<CheatSheetEditorProps> = ({ cheatsheetToEdit, o
 
   const deleteGroup = (groupId: string) => {
     setGroups(groups.filter(group => group.id !== groupId));
-  };
-
-  const addEntry = (groupId: string) => {
-    const newEntry: CheatSheetEntry = {
-      id: uuidv4(),
-      command: "",
-      description: ""
-    };
-    
-    setGroups(groups.map(group => 
-      group.id === groupId ? 
-        { ...group, entries: [...group.entries, newEntry] } : 
-        group
-    ));
   };
 
   const updateEntry = (groupId: string, entryId: string, field: keyof CheatSheetEntry, value: string) => {

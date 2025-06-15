@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -132,11 +131,23 @@ const ExperienceManager = () => {
   const onSubmit = async (values: FormValues) => {
     try {
       let result;
-      
+
+      // Prepare required fields (date, title, company, location, description)
+      const reqValues = {
+        title: values.title,
+        company: values.company,
+        location: values.location,
+        date: values.date,
+        description: values.description
+      };
+
       if (values.id) {
-        result = await updateExperienceItem(values.id, values);
+        result = await updateExperienceItem(values.id, {
+          ...reqValues,
+          type: values.type,
+        });
       } else {
-        result = await createExperienceItem(values.type, values);
+        result = await createExperienceItem(values.type, reqValues);
       }
       
       if (result.success) {

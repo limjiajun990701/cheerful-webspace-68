@@ -256,11 +256,11 @@ export async function getExperienceItems(): Promise<ExperienceItem[]> {
 // Adds a new experience item. "type" is 'work'|'education'
 export async function createExperienceItem(
   type: 'work' | 'education',
-  item: Omit<ExperienceItem, 'id'|'type'> & { type?: 'work'|'education' }
+  item: { title: string, company: string, location: string, date: string, description: string }
 ): Promise<{ success: boolean }> {
   // Get existing
   const items = await getExperienceItems();
-  const newItem: ExperienceItem = {
+  const newItem = {
     id: uuidv4(),
     type,
     title: item.title,
@@ -271,7 +271,7 @@ export async function createExperienceItem(
   };
   const newItems = [newItem, ...items];
 
-  // Upsert entire array
+  // Upsert entire array (note: array param, option object as 2nd param)
   const { error } = await supabase
     .from('site_content')
     .upsert([{
