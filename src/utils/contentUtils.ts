@@ -1,400 +1,97 @@
-import { supabase } from '@/integrations/supabase/client';
+import { v4 as uuidv4 } from 'uuid';
+import { supabase } from "@/integrations/supabase/client";
+import { TablesUpdate } from "@/integrations/supabase/types";
 
-// Helper function to check if the bucket exists
-export const setupSiteImagesBucket = async () => {
+/**
+ * Uploads a site image to Supabase storage.
+ * @param file The image file to upload.
+ * @param uploadPath The path in the storage bucket where the image will be stored.
+ * @returns The public URL of the uploaded image, or null if the upload fails.
+ */
+export async function uploadSiteImage(file: File, uploadPath: string): Promise<string | null> {
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${uuidv4()}.${fileExt}`;
+  const filePath = `${uploadPath}/${fileName}`;
+
   try {
-    // Check if the bucket exists
-    const { data: buckets, error } = await supabase.storage.listBuckets();
-    
-    if (error) {
-      console.error('Error checking storage buckets:', error);
-      return false;
-    }
-    
-    const bucketExists = buckets?.some(bucket => bucket.name === 'site-images');
-    
-    if (bucketExists) {
-      console.log('Site-images bucket exists');
-      return true;
-    } else {
-      console.error('Site-images bucket not found');
-      // Instead of trying to create it, just return false since we need admin privileges
-      return false;
-    }
-  } catch (error) {
-    console.error('Error checking site-images bucket:', error);
-    return false;
-  }
-};
-
-// Helper function to get dynamic site content
-export const getSiteContent = async (pageName: string, sectionName: string) => {
-  try {
-    const { data, error } = await supabase
-      .from('site_content')
-      .select('*')
-      .eq('page_name', pageName)
-      .eq('section_name', sectionName)
-      .single();
-
-    if (error) {
-      throw error;
-    }
-
-    console.log(`Fetched ${pageName}/${sectionName} content:`, data);
-    return data;
-  } catch (error) {
-    console.error(`Error fetching ${pageName}/${sectionName} content:`, error);
-    return null;
-  }
-};
-
-// Helper function to update site content
-export const updateSiteContent = async (id: string, updates: any) => {
-  try {
-    console.log(`Updating content ID ${id} with:`, updates);
-    const { data, error } = await supabase
-      .from('site_content')
-      .update(updates)
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Error in updateSiteContent:', error);
-      throw error;
-    }
-
-    console.log('Content updated successfully:', data);
-    return { success: true, data };
-  } catch (error) {
-    console.error('Error updating site content:', error);
-    return { success: false, error };
-  }
-};
-
-// Helper to upload an image to site-images bucket
-export const uploadSiteImage = async (file: File, path: string): Promise<string | null> => {
-  try {
-    // Check if bucket exists first
-    const bucketExists = await setupSiteImagesBucket();
-    
-    if (!bucketExists) {
-      console.error('Storage bucket not available');
-      throw new Error('Storage bucket not available. Please contact administrator.');
-    }
-    
-    // Generate a unique filename with timestamp
-    const timestamp = Date.now();
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${path.replace(/\//g, '-')}-${timestamp}.${fileExt}`;
-    const filePath = `${path}/${fileName}`;
-    
-    console.log(`Uploading image: ${filePath}`, file);
-    
-    // Upload the file
     const { data, error } = await supabase.storage
       .from('site-images')
       .upload(filePath, file, {
         cacheControl: '3600',
-        upsert: true
+        upsert: false
       });
 
     if (error) {
-      console.error('Upload error:', error);
-      throw error;
+      console.error("Error uploading image:", error);
+      return null;
     }
 
-    console.log('Upload successful, data:', data);
-
-    // Get public URL
-    const { data: urlData } = supabase.storage
-      .from('site-images')
-      .getPublicUrl(data.path);
-
-    console.log('Image uploaded successfully:', urlData.publicUrl);
-    return urlData.publicUrl;
+    const imageUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${process.env.NEXT_PUBLIC_SUPABASE_BUCKET}/${data.path}`;
+    return imageUrl;
   } catch (error) {
-    console.error('Error uploading image:', error);
-    throw error; // Re-throw to be handled by calling component
-  }
-};
-
-// Helper to create a new skill group
-export const createSkillGroup = async (categoryName: string, items: string[] = []) => {
-  try {
-    const { data, error } = await supabase
-      .from('site_content')
-      .insert({
-        page_name: 'about',
-        section_name: `skill_${Date.now()}`,
-        title: categoryName,
-        description: JSON.stringify(items),
-        updated_by: 'admin'
-      })
-      .select()
-      .single();
-
-    if (error) {
-      throw error;
-    }
-
-    return { success: true, data };
-  } catch (error) {
-    console.error('Error creating skill group:', error);
-    return { success: false, error };
-  }
-};
-
-// Helper to update a skill group
-export const updateSkillGroup = async (id: string, categoryName: string, items: string[]) => {
-  try {
-    const { data, error } = await supabase
-      .from('site_content')
-      .update({
-        title: categoryName,
-        description: JSON.stringify(items),
-        updated_by: 'admin',
-        updated_at: new Date().toISOString() // Convert Date to ISO string
-      })
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) {
-      throw error;
-    }
-
-    return { success: true, data };
-  } catch (error) {
-    console.error('Error updating skill group:', error);
-    return { success: false, error };
-  }
-};
-
-// Helper to delete a skill group
-export const deleteSkillGroup = async (id: string) => {
-  try {
-    const { error } = await supabase
-      .from('site_content')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      throw error;
-    }
-
-    return { success: true };
-  } catch (error) {
-    console.error('Error deleting skill group:', error);
-    return { success: false, error };
-  }
-};
-
-// Helper to get all skill groups
-export const getSkillGroups = async () => {
-  try {
-    const { data, error } = await supabase
-      .from('site_content')
-      .select('*')
-      .eq('page_name', 'about')
-      .like('section_name', 'skill_%');
-
-    if (error) {
-      throw error;
-    }
-
-    return data.map(item => ({
-      id: item.id,
-      section_name: item.section_name,
-      category: item.title,
-      items: item.description ? JSON.parse(item.description) : []
-    }));
-  } catch (error) {
-    console.error('Error fetching skill groups:', error);
-    return [];
-  }
-};
-
-// Helper to create a new experience item
-export const createExperienceItem = async (type: 'work' | 'education', data: any) => {
-  try {
-    const { error } = await supabase
-      .from('site_content')
-      .insert({
-        page_name: 'experience',
-        section_name: `${type}_${Date.now()}`,
-        title: data.title,
-        subtitle: data.company,
-        description: data.description,
-        image_url: JSON.stringify({
-          location: data.location,
-          date: data.date,
-          type: type,
-          skills: data.skills || [],
-          achievements: data.achievements || [],
-          durationInMonths: data.durationInMonths || 0
-        }),
-        updated_by: 'admin'
-      });
-
-    if (error) {
-      throw error;
-    }
-
-    return { success: true };
-  } catch (error) {
-    console.error('Error creating experience item:', error);
-    return { success: false, error };
-  }
-};
-
-// Helper to get all experience items
-export const getExperienceItems = async () => {
-  try {
-    const { data, error } = await supabase
-      .from('site_content')
-      .select('*')
-      .eq('page_name', 'experience')
-      .or('section_name.like.work_%,section_name.like.education_%');
-
-    if (error) {
-      throw error;
-    }
-
-    return data.map(item => {
-      const metaData = item.image_url ? JSON.parse(item.image_url) : {};
-      return {
-        id: item.id,
-        type: metaData.type || (item.section_name.startsWith('work_') ? 'work' : 'education'),
-        title: item.title || '',
-        company: item.subtitle || '',
-        location: metaData.location || '',
-        date: metaData.date || '',
-        description: item.description || '',
-        skills: metaData.skills || [],
-        achievements: metaData.achievements || [],
-        durationInMonths: metaData.durationInMonths || 0
-      };
-    });
-  } catch (error) {
-    console.error('Error fetching experience items:', error);
-    return [];
-  }
-};
-
-// Helper to update an experience item
-export const updateExperienceItem = async (id: string, data: any) => {
-  try {
-    const { error } = await supabase
-      .from('site_content')
-      .update({
-        title: data.title,
-        subtitle: data.company,
-        description: data.description,
-        image_url: JSON.stringify({
-          location: data.location,
-          date: data.date,
-          type: data.type,
-          skills: data.skills || [],
-          achievements: data.achievements || [],
-          durationInMonths: data.durationInMonths || 0
-        }),
-        updated_by: 'admin',
-        updated_at: new Date().toISOString() // Convert Date to ISO string
-      })
-      .eq('id', id);
-
-    if (error) {
-      throw error;
-    }
-
-    return { success: true };
-  } catch (error) {
-    console.error('Error updating experience item:', error);
-    return { success: false, error };
-  }
-};
-
-// Helper to delete an experience item
-export const deleteExperienceItem = async (id: string) => {
-  try {
-    const { error } = await supabase
-      .from('site_content')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      throw error;
-    }
-
-    return { success: true };
-  } catch (error) {
-    console.error('Error deleting experience item:', error);
-    return { success: false, error };
-  }
-};
-
-// Helper to get expertise data
-export const getExpertiseContent = async () => {
-  try {
-    const { data, error } = await supabase
-      .from('site_content')
-      .select('*')
-      .eq('page_name', 'home')
-      .eq('section_name', 'expertise');
-
-    if (error) {
-      throw error;
-    }
-
-    return data[0] || null;
-  } catch (error) {
-    console.error('Error fetching expertise content:', error);
+    console.error("Error uploading image:", error);
     return null;
   }
-};
+}
 
-// Helper to create or update expertise content
-export const updateExpertiseContent = async (id: string | null, content: any) => {
+/**
+ * Updates site content in the Supabase database.
+ * @param id The ID of the site content to update.
+ * @param updates An object containing the fields to update.
+ * @returns An object with a success flag and an optional error message.
+ */
+export async function updateSiteContent(id: string, updates: TablesUpdate<"site_content">): Promise<{ success: boolean; error?: string }> {
   try {
-    if (id) {
-      // Update existing expertise content
-      const { data, error } = await supabase
-        .from('site_content')
-        .update({
-          title: content.title,
-          subtitle: content.subtitle,
-          description: content.description, // This will store the JSON string of expertise items
-          updated_by: 'admin',
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', id)
-        .select()
-        .single();
+    const { error } = await supabase
+      .from('site_content')
+      .update(updates)
+      .eq('id', id);
 
-      if (error) throw error;
-      return { success: true, data };
-    } else {
-      // Create new expertise content
-      const { data, error } = await supabase
-        .from('site_content')
-        .insert({
-          page_name: 'home',
-          section_name: 'expertise',
-          title: content.title,
-          subtitle: content.subtitle,
-          description: content.description, // This will store the JSON string of expertise items
-          updated_by: 'admin'
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return { success: true, data };
+    if (error) {
+      console.error("Error updating site content:", error);
+      return { success: false, error: error.message };
     }
+
+    return { success: true };
   } catch (error) {
-    console.error('Error updating expertise content:', error);
-    return { success: false, error };
+    console.error("Error updating site content:", error);
+    return { success: false, error: (error as Error).message };
   }
-};
+}
+
+/**
+ * Ensures the Supabase "site-images" bucket exists and is accessible.
+ * Returns true if ready, false otherwise.
+ */
+export async function setupSiteImagesBucket(): Promise<boolean> {
+  try {
+    // Try to create the bucket (Supabase throws if already exists)
+    // @ts-ignore Supabase v2 typing
+    const { error: createError } = await supabase.storage.createBucket('site-images', { public: true });
+
+    if (createError) {
+      // If already exists, treat as success
+      if (
+        createError.message.includes('already exists') ||
+        createError.message.toLowerCase().includes('duplicate key')
+      ) {
+        // Bucket exists! Check access to confirm it's ready
+        const { data: bucket, error: listError } = await supabase.storage.getBucket('site-images');
+        if (bucket && !listError) {
+          return true;
+        }
+        // If cannot list/access bucket, still return false
+        return false;
+      } else {
+        // Any other error means the bucket is not ready
+        return false;
+      }
+    }
+    // Bucket created successfully
+    return true;
+  } catch (err: any) {
+    // Log for debugging, fail safe: not ready
+    console.error('setupSiteImagesBucket unexpected error:', err);
+    return false;
+  }
+}
