@@ -2,6 +2,8 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
 import Navbar from "./Navbar";
+import ScrollToTop from "./ScrollToTop";
+import PageTransition from "./PageTransition";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const Layout = () => {
@@ -11,7 +13,9 @@ const Layout = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       <main className={`${isMobile ? 'pt-16 pb-16' : 'pt-20 pb-24'}`}>
-        <Outlet />
+        <PageTransition>
+          <Outlet />
+        </PageTransition>
       </main>
       <footer className="py-10 bg-secondary/40">
         <div className="container mx-auto px-4">
@@ -22,6 +26,7 @@ const Layout = () => {
           </div>
         </div>
       </footer>
+      <ScrollToTop />
     </div>
   );
 };

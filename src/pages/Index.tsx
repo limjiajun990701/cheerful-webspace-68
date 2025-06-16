@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import CollectionCarousel from "@/components/collections/CollectionCarousel";
+import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 interface ExpertiseItem {
   id: string;
@@ -28,6 +29,13 @@ const funFacts = [
 ];
 
 const Index = () => {
+  // Scroll reveal hooks for different sections
+  const heroReveal = useScrollReveal({ threshold: 0.2 });
+  const collectionsReveal = useScrollReveal({ threshold: 0.1 });
+  const expertiseReveal = useScrollReveal({ threshold: 0.1 });
+  const certificationsReveal = useScrollReveal({ threshold: 0.1 });
+  const ctaReveal = useScrollReveal({ threshold: 0.1 });
+
   const [expertise, setExpertise] = useState({
     title: 'My Expertise',
     subtitle: 'I specialize in full-stack development with experience in both mobile and web technologies.',
@@ -196,10 +204,12 @@ const Index = () => {
         <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(120deg,rgba(0,0,0,.02)25%,transparent_25%,transparent_75%,rgba(0,0,0,.02)75%)]" />
 
         {/* Animated Hero content */}
-        <div className="container mx-auto px-4 py-16">
-          <div className="grid md:grid-cols-2 gap-16 items-center">
+        <div className="container mx-auto px-4 py-16" ref={heroReveal.ref}>
+          <div className={`grid md:grid-cols-2 gap-16 items-center transition-all duration-1000 ${
+            heroReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}>
             {/* Left side: Text content */}
-            <div className="space-y-8 animate-fade-in">
+            <div className="space-y-8">
               <div className="space-y-2">
                 {isHeroLoading ? (
                   <>
@@ -209,27 +219,28 @@ const Index = () => {
                   </>
                 ) : heroContent ? (
                   <>
-                    <Badge variant="outline" className="border-primary/30 text-primary bg-primary/5 px-4 py-1.5 text-sm">
+                    <Badge variant="outline" className="border-primary/30 text-primary bg-primary/5 px-4 py-1.5 text-sm animate-fade-in">
                       {heroContent.subtitle}
                     </Badge>
                     <h1
-                      className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight"
+                      className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight animate-slide-up"
                       dangerouslySetInnerHTML={{ __html: heroContent.title }}
                     />
                     <p
-                      className="text-xl md:text-2xl text-muted-foreground mt-4 leading-relaxed"
+                      className="text-xl md:text-2xl text-muted-foreground mt-4 leading-relaxed animate-slide-up"
+                      style={{ animationDelay: '0.2s' }}
                       dangerouslySetInnerHTML={{ __html: heroContent.description }}
                     />
                   </>
                 ) : null}
               </div>
               {/* Fun facts carousel */}
-              <div className="my-6 text-lg/relaxed font-medium text-center md:text-left">
+              <div className="my-6 text-lg/relaxed font-medium text-center md:text-left animate-fade-in" style={{ animationDelay: '0.3s' }}>
                 <span className="inline-flex items-center gap-2 text-primary">
                   <span>{funFacts[factIndex]}</span>
                 </span>
               </div>
-              <div className="flex flex-wrap gap-4 pt-4">
+              <div className="flex flex-wrap gap-4 pt-4 animate-slide-up" style={{ animationDelay: '0.4s' }}>
                 <Button asChild size="lg" className="group gap-2">
                   <Link to="/projects">
                     Explore My Work
@@ -243,36 +254,37 @@ const Index = () => {
                 </Button>
               </div>
               
-              <div className="flex flex-wrap gap-5 pt-6 md:pt-10">
+              <div className="flex flex-wrap gap-5 pt-6 md:pt-10 animate-fade-in" style={{ animationDelay: '0.5s' }}>
                 {expertise.skills.slice(0, 4).map((skill, index) => (
                   <Badge 
                     key={index}
                     variant="secondary" 
-                    className={`${skill.color} px-3 py-1.5 text-sm`}
+                    className={`${skill.color} px-3 py-1.5 text-sm transform hover:scale-105 transition-transform`}
+                    style={{ animationDelay: `${0.6 + index * 0.1}s` }}
                   >
                     {skill.name}
                   </Badge>
                 ))}
-                <Link to="/about" className="inline-flex items-center gap-1 text-primary hover:underline">
+                <Link to="/about" className="inline-flex items-center gap-1 text-primary hover:underline animate-fade-in" style={{ animationDelay: '1s' }}>
                   +{expertise.skills.length - 4} more skills
                 </Link>
               </div>
             </div>
 
             {/* Right side: Image */}
-            <div className="hidden md:flex justify-center items-center animate-fade-in">
+            <div className="hidden md:flex justify-center items-center">
               {isHeroLoading ? (
                 <Skeleton className="w-full max-w-md h-[450px] rounded-lg" />
               ) : heroContent?.image_url && !heroImageError ? (
                 <img
                   src={heroContent.image_url}
                   alt="Hero"
-                  className="rounded-xl shadow-2xl w-full max-w-md h-auto object-cover"
+                  className="rounded-xl shadow-2xl w-full max-w-md h-auto object-cover animate-scale-in"
                   onError={() => setHeroImageError(true)}
-                  style={{ aspectRatio: '4/5' }}
+                  style={{ aspectRatio: '4/5', animationDelay: '0.3s' }}
                 />
               ) : (
-                <div className="w-full max-w-md h-[450px] bg-muted/50 rounded-lg flex items-center justify-center border border-dashed">
+                <div className="w-full max-w-md h-[450px] bg-muted/50 rounded-lg flex items-center justify-center border border-dashed animate-fade-in">
                   <div className="text-center text-muted-foreground">
                     <Layout className="mx-auto h-12 w-12 mb-2" />
                     <p>Hero image appears here</p>
@@ -285,10 +297,14 @@ const Index = () => {
       </section>
       
       {/* Collection Carousel Section */}
-      <CollectionCarousel />
+      <div ref={collectionsReveal.ref} className={`transition-all duration-1000 ${
+        collectionsReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+      }`}>
+        <CollectionCarousel />
+      </div>
       
       {/* Expertise Section - Clean Card Layout */}
-      <section className="py-24 bg-secondary/30">
+      <section className="py-24 bg-secondary/30" ref={expertiseReveal.ref}>
         <div className="container mx-auto px-4">
           {isLoading ? (
             <div className="space-y-10">
@@ -303,7 +319,9 @@ const Index = () => {
               </div>
             </div>
           ) : (
-            <>
+            <div className={`transition-all duration-1000 ${
+              expertiseReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}>
               <div className="max-w-4xl mx-auto text-center mb-16">
                 <h2 className="text-4xl font-bold mb-4">{expertise.title}</h2>
                 <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
@@ -312,10 +330,11 @@ const Index = () => {
               </div>
               
               <div className="grid md:grid-cols-3 gap-10 max-w-6xl mx-auto">
-                {expertise.items.map((item) => (
+                {expertise.items.map((item, index) => (
                   <Card 
                     key={item.id} 
-                    className="overflow-hidden border-none shadow-lg hover:shadow-xl transition-all duration-300 group"
+                    className="overflow-hidden border-none shadow-lg hover:shadow-xl transition-all duration-300 group animate-slide-up"
+                    style={{ animationDelay: `${index * 0.2}s` }}
                   >
                     <div className="h-2 bg-primary w-full"></div>
                     <CardContent className="p-8">
@@ -341,14 +360,16 @@ const Index = () => {
                   </Link>
                 </Button>
               </div>
-            </>
+            </div>
           )}
         </div>
       </section>
       
       {/* Certifications Section - Modern Layout */}
-      <section className="py-24 bg-background">
-        <div className="container mx-auto px-4">
+      <section className="py-24 bg-background" ref={certificationsReveal.ref}>
+        <div className={`container mx-auto px-4 transition-all duration-1000 ${
+          certificationsReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+        }`}>
           <div className="text-center mb-12">
             <Badge variant="outline" className="mb-4 px-3 py-1">Achievements</Badge>
             <h2 className="text-4xl font-bold mb-3">Certifications & Credentials</h2>
@@ -367,8 +388,10 @@ const Index = () => {
       </section>
       
       {/* CTA Section */}
-      <section className="py-20 bg-primary/10">
-        <div className="container mx-auto px-4">
+      <section className="py-20 bg-primary/10" ref={ctaReveal.ref}>
+        <div className={`container mx-auto px-4 transition-all duration-1000 ${
+          ctaReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+        }`}>
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to Work Together?</h2>
             <p className="text-lg text-muted-foreground mb-10">
