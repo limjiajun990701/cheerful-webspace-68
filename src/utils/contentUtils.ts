@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 export const getContent = async (pageName: string, sectionName: string) => {
@@ -134,38 +135,22 @@ export async function updateExpertiseContent(id: string | null, content: any) {
 }
 
 // Home & About image/file upload helpers - now fully implemented
-export async function setupSiteImagesBucket(): Promise<boolean> {
-  // Use listBuckets as a more robust way to check for bucket existence
-  const { data: buckets, error } = await supabase.storage.listBuckets();
-
-  if (error) {
-    console.error("Error listing storage buckets:", error);
-    return false;
-  }
-
-  const bucketExists = buckets.some(b => b.id === 'site-images');
-
-  if (!bucketExists) {
-    // Updated warning message for better debugging
-    console.warn("The 'site-images' bucket was not found after checking all available buckets. Please ensure the migration has run and permissions are correct.");
-    return false;
-  }
-
-  // If we found it in the list, the bucket exists.
-  return true;
-}
-
 export async function uploadSiteImage(file: File, uploadPath: string): Promise<string | null> {
   try {
+    console.log("Starting image upload...", { fileName: file.name, uploadPath });
+    
     const fileExt = file.name.split('.').pop();
     const fileName = `${Date.now()}.${fileExt}`;
     const filePath = `${uploadPath}/${fileName}`;
 
+    console.log("Uploading to path:", filePath);
+
     const { error: uploadError } = await supabase.storage
       .from('site-images')
-      .upload(filePath, file);
+      .upload(filePath, file, { upsert: true });
 
     if (uploadError) {
+      console.error("Upload error:", uploadError);
       throw uploadError;
     }
 
@@ -173,10 +158,11 @@ export async function uploadSiteImage(file: File, uploadPath: string): Promise<s
       .from('site-images')
       .getPublicUrl(filePath);
       
+    console.log("Upload successful, public URL:", publicUrl);
     return publicUrl;
   } catch (error) {
     console.error('Error uploading image:', error);
-    return null;
+    throw error;
   }
 }
 
