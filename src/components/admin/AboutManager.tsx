@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { FormEvent } from "react";
 import { Loader2, Save, AlertCircle, Upload } from "lucide-react";
-import { updateSiteContent, uploadSiteImage, setupSiteImagesBucket } from "@/utils/contentUtils";
+import { updateSiteContent, uploadSiteImage } from "@/utils/contentUtils";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import AboutWhoAmIManager from "./AboutWhoAmIManager";
 
@@ -32,23 +33,8 @@ const AboutManager = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const [isBucketReady, setIsBucketReady] = useState<boolean>(false);
 
   useEffect(() => {
-    const checkBucketStatus = async () => {
-      const status = await setupSiteImagesBucket();
-      setIsBucketReady(status);
-      
-      if (!status) {
-        toast({
-          title: "Storage Setup Required",
-          description: "Storage setup is required for image uploads. Contact administrator.",
-          variant: "destructive",
-        });
-      }
-    };
-    
-    checkBucketStatus();
     fetchContent();
   }, []);
 
@@ -117,10 +103,6 @@ const AboutManager = () => {
 
   const uploadImage = async (): Promise<string | null> => {
     if (!imageFile) return content?.image_url || null;
-    if (!isBucketReady) {
-      setUploadError('Storage bucket is not set up. Contact administrator.');
-      return null;
-    }
     
     setIsUploading(true);
     try {
