@@ -228,9 +228,7 @@ const Index = () => {
 
         {/* Animated Hero content */}
         <div className="container mx-auto px-4 py-16" ref={heroReveal.ref}>
-          <div className={`grid md:grid-cols-2 gap-16 items-center transition-all duration-1000 ${
-            heroReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          }`}>
+          <div className="grid md:grid-cols-2 gap-16 items-center">
             {/* Left side: Text content */}
             <div className="space-y-8">
               <div className="space-y-2">
@@ -320,9 +318,7 @@ const Index = () => {
       </section>
       
       {/* Collection Carousel Section with Anime.js */}
-      <div ref={collectionsReveal.ref} className={`transition-all duration-1000 ${
-        collectionsReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-      }`}>
+      <div ref={collectionsReveal.ref}>
         <CollectionCarousel />
       </div>
       
@@ -342,9 +338,7 @@ const Index = () => {
               </div>
             </div>
           ) : (
-            <div className={`transition-all duration-1000 ${
-              expertiseReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-            }`}>
+            <div>
               <div className="max-w-4xl mx-auto text-center mb-16">
                 <h2 className="text-4xl font-bold mb-4">{expertise.title}</h2>
                 <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
@@ -390,9 +384,7 @@ const Index = () => {
       
       {/* Certifications Section - Modern Layout with Anime.js */}
       <section className="py-24 bg-background" ref={certificationsReveal.ref}>
-        <div className={`container mx-auto px-4 transition-all duration-1000 ${
-          certificationsReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-        }`}>
+        <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <Badge variant="outline" className="mb-4 px-3 py-1">Achievements</Badge>
             <h2 className="text-4xl font-bold mb-3">Certifications & Credentials</h2>
@@ -412,9 +404,7 @@ const Index = () => {
       
       {/* CTA Section with Anime.js */}
       <section className="py-20 bg-primary/10" ref={ctaReveal.ref}>
-        <div className={`container mx-auto px-4 transition-all duration-1000 ${
-          ctaReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-        }`}>
+        <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to Work Together?</h2>
             <p className="text-lg text-muted-foreground mb-10">
