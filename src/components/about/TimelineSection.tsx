@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { TimelineItem } from '@/types/TimelineItem';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 
@@ -14,14 +14,16 @@ const isEven = (index: number) => index % 2 === 0;
 const TimelineSection = ({ items, sectionTitle = "My Journey" }: TimelineSectionProps) => {
   const titleReveal = useScrollReveal({ threshold: 0.5, triggerOnce: true });
 
-  // Create scroll reveal hooks for each item outside of the map function
-  const itemReveals = items.map((_, index) => 
-    useScrollReveal({ 
-      threshold: 0.3, 
-      triggerOnce: true,
-      rootMargin: '0px 0px -100px 0px'
-    })
-  );
+  // Create a stable array of hooks using useMemo to prevent hook count changes
+  const itemReveals = useMemo(() => {
+    return items.map(() => 
+      useScrollReveal({ 
+        threshold: 0.3, 
+        triggerOnce: true,
+        rootMargin: '0px 0px -100px 0px'
+      })
+    );
+  }, [items.length]); // Only recreate when items length changes
 
   return (
     <section className="py-20">
