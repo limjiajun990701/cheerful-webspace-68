@@ -14,6 +14,15 @@ const isEven = (index: number) => index % 2 === 0;
 const TimelineSection = ({ items, sectionTitle = "My Journey" }: TimelineSectionProps) => {
   const titleReveal = useScrollReveal({ threshold: 0.5, triggerOnce: true });
 
+  // Create scroll reveal hooks for each item outside of the map function
+  const itemReveals = items.map((_, index) => 
+    useScrollReveal({ 
+      threshold: 0.3, 
+      triggerOnce: true,
+      rootMargin: '0px 0px -100px 0px'
+    })
+  );
+
   return (
     <section className="py-20">
       <div ref={titleReveal.ref}>
@@ -32,11 +41,7 @@ const TimelineSection = ({ items, sectionTitle = "My Journey" }: TimelineSection
           )}
           {items.map((item, idx) => {
             const left = isEven(idx);
-            const itemReveal = useScrollReveal({ 
-              threshold: 0.3, 
-              triggerOnce: true,
-              rootMargin: '0px 0px -100px 0px'
-            });
+            const itemReveal = itemReveals[idx];
             
             return (
               <div key={item.id} ref={itemReveal.ref} className="relative flex items-center justify-between group">
