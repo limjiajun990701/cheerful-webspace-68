@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef } from 'react';
-import * as anime from 'animejs';
+import anime from 'animejs';
 import { TimelineItem } from '@/types/TimelineItem';
 import { useAnimeScrollReveal } from '@/hooks/useAnimeScrollReveal';
 

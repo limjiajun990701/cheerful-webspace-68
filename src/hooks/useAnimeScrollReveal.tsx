@@ -1,5 +1,6 @@
+
 import { useEffect, useRef } from 'react';
-import * as anime from 'animejs';
+import anime from 'animejs';
 
 interface UseAnimeScrollRevealOptions {
   threshold?: number;
@@ -23,7 +24,7 @@ export const useAnimeScrollReveal = (options: UseAnimeScrollRevealOptions = {}) 
   } = options;
 
   const ref = useRef<HTMLDivElement>(null);
-  const animationRef = useRef<anime.AnimeInstance | null>(null);
+  const animationRef = useRef<any | null>(null);
 
   useEffect(() => {
     const element = ref.current;
