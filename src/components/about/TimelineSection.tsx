@@ -1,5 +1,5 @@
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { TimelineItem } from '@/types/TimelineItem';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 
@@ -13,17 +13,45 @@ const isEven = (index: number) => index % 2 === 0;
 
 const TimelineSection = ({ items, sectionTitle = "My Journey" }: TimelineSectionProps) => {
   const titleReveal = useScrollReveal({ threshold: 0.5, triggerOnce: true });
+  const [visibleItems, setVisibleItems] = useState<Set<string>>(new Set());
+  const itemRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
-  // Create a stable array of hooks using useMemo to prevent hook count changes
-  const itemReveals = useMemo(() => {
-    return items.map(() => 
-      useScrollReveal({ 
-        threshold: 0.3, 
-        triggerOnce: true,
-        rootMargin: '0px 0px -100px 0px'
-      })
-    );
-  }, [items.length]); // Only recreate when items length changes
+  // Set up intersection observer for individual items
+  useEffect(() => {
+    const observers = new Map<string, IntersectionObserver>();
+
+    items.forEach((item) => {
+      const element = itemRefs.current.get(item.id);
+      if (element) {
+        const observer = new IntersectionObserver(
+          ([entry]) => {
+            if (entry.isIntersecting) {
+              setVisibleItems(prev => new Set([...prev, item.id]));
+              observer.unobserve(element);
+            }
+          },
+          {
+            threshold: 0.3,
+            rootMargin: '0px 0px -100px 0px'
+          }
+        );
+        observer.observe(element);
+        observers.set(item.id, observer);
+      }
+    });
+
+    return () => {
+      observers.forEach(observer => observer.disconnect());
+    };
+  }, [items]);
+
+  const setItemRef = (id: string) => (element: HTMLDivElement | null) => {
+    if (element) {
+      itemRefs.current.set(id, element);
+    } else {
+      itemRefs.current.delete(id);
+    }
+  };
 
   return (
     <section className="py-20">
@@ -43,13 +71,13 @@ const TimelineSection = ({ items, sectionTitle = "My Journey" }: TimelineSection
           )}
           {items.map((item, idx) => {
             const left = isEven(idx);
-            const itemReveal = itemReveals[idx];
+            const isVisible = visibleItems.has(item.id);
             
             return (
-              <div key={item.id} ref={itemReveal.ref} className="relative flex items-center justify-between group">
+              <div key={item.id} ref={setItemRef(item.id)} className="relative flex items-center justify-between group">
                 <div className={`w-full md:w-1/2 px-6 ${left ? "order-1 text-left" : "order-3 text-right"}`}>
                   <div className={`bg-card shadow-md rounded-lg p-6 border border-primary/10 relative z-10 transform transition-all duration-800 hover:shadow-xl hover:scale-105 ${
-                    itemReveal.isVisible 
+                    isVisible 
                       ? 'opacity-100 translate-y-0 translate-x-0' 
                       : `opacity-0 translate-y-8 ${left ? '-translate-x-8' : 'translate-x-8'}`
                   }`} style={{ transitionDelay: `${idx * 0.2}s` }}>
@@ -69,7 +97,7 @@ const TimelineSection = ({ items, sectionTitle = "My Journey" }: TimelineSection
                 </div>
                 
                 <div className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 transform transition-all duration-500 ${
-                  itemReveal.isVisible ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
+                  isVisible ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
                 }`} style={{ transitionDelay: `${idx * 0.2 + 0.3}s` }}>
                   <span className="w-5 h-5 bg-primary border-4 border-background rounded-full block animate-bounce-in" />
                 </div>
