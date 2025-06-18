@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import anime from 'animejs/lib/anime.es.js';
+import anime from 'animejs';
 
 interface UseAnimeScrollRevealOptions {
   threshold?: number;
@@ -86,8 +86,8 @@ export const useAnimeScrollReveal = (options: UseAnimeScrollRevealOptions = {}) 
             animationRef.current.pause();
           }
 
-          // Create new animation
-          animationRef.current = anime({
+          // Create new animation using (anime as any) to bypass TypeScript issues
+          animationRef.current = (anime as any)({
             targets: element,
             ...getFinalStyles(),
             duration,

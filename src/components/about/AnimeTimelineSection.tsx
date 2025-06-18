@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import anime from 'animejs/lib/anime.es.js';
+import anime from 'animejs';
 import { TimelineItem } from '@/types/TimelineItem';
 import { useAnimeScrollReveal } from '@/hooks/useAnimeScrollReveal';
 
@@ -51,10 +51,10 @@ const AnimeTimelineSection = ({ items, sectionTitle = "My Journey" }: AnimeTimel
           if (entry.isIntersecting) {
             const isLeft = isEven(index);
             
-            // Animate the timeline dot first
+            // Animate the timeline dot first using (anime as any) to bypass TypeScript issues
             const dot = element.querySelector('.timeline-dot');
             if (dot) {
-              anime({
+              (anime as any)({
                 targets: dot,
                 scale: [0, 1.2, 1],
                 opacity: [0, 1],
@@ -64,7 +64,7 @@ const AnimeTimelineSection = ({ items, sectionTitle = "My Journey" }: AnimeTimel
             }
 
             // Then animate the card with a slight delay
-            anime({
+            (anime as any)({
               targets: element.querySelector('.timeline-card'),
               opacity: [0, 1],
               translateY: [50, 0],
