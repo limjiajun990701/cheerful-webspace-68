@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import * as anime from 'animejs';
+import anime from 'animejs/lib/anime.es.js';
 
 interface UseAnimeScrollRevealOptions {
   threshold?: number;

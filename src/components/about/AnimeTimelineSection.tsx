@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import * as anime from 'animejs';
+import anime from 'animejs/lib/anime.es.js';
 import { TimelineItem } from '@/types/TimelineItem';
 import { useAnimeScrollReveal } from '@/hooks/useAnimeScrollReveal';
 
