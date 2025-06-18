@@ -1,5 +1,6 @@
+
 import { useEffect, useRef } from 'react';
-import anime from 'animejs/lib/anime.es.js';
+import anime from 'animejs';
 
 interface UseAnimeScrollRevealOptions {
   threshold?: number;
@@ -65,7 +66,7 @@ export const useAnimeScrollReveal = (options: UseAnimeScrollRevealOptions = {}) 
       }
     };
 
-    // Apply initial styles using direct style manipulation instead of anime.set
+    // Apply initial styles using direct style manipulation
     const initialStyles = getInitialStyles();
     element.style.opacity = String(initialStyles.opacity);
     if ('translateY' in initialStyles) {
