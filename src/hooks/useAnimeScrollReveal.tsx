@@ -1,6 +1,6 @@
 
 import { useEffect, useRef } from 'react';
-import anime from 'animejs';
+import * as anime from 'animejs';
 
 interface UseAnimeScrollRevealOptions {
   threshold?: number;
@@ -67,7 +67,7 @@ export const useAnimeScrollReveal = (options: UseAnimeScrollRevealOptions = {}) 
     };
 
     // Apply initial styles
-    (anime as any).set(element, getInitialStyles());
+    anime.set(element, getInitialStyles());
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -78,7 +78,7 @@ export const useAnimeScrollReveal = (options: UseAnimeScrollRevealOptions = {}) 
           }
 
           // Create new animation
-          animationRef.current = (anime as any)({
+          animationRef.current = anime({
             targets: element,
             ...getFinalStyles(),
             duration,
@@ -99,7 +99,7 @@ export const useAnimeScrollReveal = (options: UseAnimeScrollRevealOptions = {}) 
           if (animationRef.current) {
             animationRef.current.pause();
           }
-          (anime as any).set(element, getInitialStyles());
+          anime.set(element, getInitialStyles());
         }
       },
       {
@@ -115,7 +115,7 @@ export const useAnimeScrollReveal = (options: UseAnimeScrollRevealOptions = {}) 
       if (animationRef.current) {
         animationRef.current.pause();
       }
-      (anime as any).set(element, getInitialStyles());
+      anime.set(element, getInitialStyles());
     };
 
     window.addEventListener('resetScrollAnimations', handleReset);
