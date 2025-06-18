@@ -16,6 +16,9 @@ const PageTransition = ({ children }: PageTransitionProps) => {
     setIsLoading(true);
     setIsVisible(false);
 
+    // Reset all scroll reveal animations by dispatching a custom event
+    window.dispatchEvent(new CustomEvent('resetScrollAnimations'));
+
     const timer = setTimeout(() => {
       setIsLoading(false);
       setIsVisible(true);

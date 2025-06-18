@@ -16,6 +16,16 @@ const TimelineSection = ({ items, sectionTitle = "My Journey" }: TimelineSection
   const [visibleItems, setVisibleItems] = useState<Set<string>>(new Set());
   const itemRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
+  // Reset visible items when page changes
+  useEffect(() => {
+    const handleReset = () => {
+      setVisibleItems(new Set());
+    };
+
+    window.addEventListener('resetScrollAnimations', handleReset);
+    return () => window.removeEventListener('resetScrollAnimations', handleReset);
+  }, []);
+
   // Set up intersection observer for individual items
   useEffect(() => {
     const observers = new Map<string, IntersectionObserver>();

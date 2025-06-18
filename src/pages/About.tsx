@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import DynamicHeroSection from '@/components/about/DynamicHeroSection';
 import ContactSection from '@/components/about/ContactSection';
-import AnimeTimelineSection from '@/components/about/AnimeTimelineSection';
+import TimelineSection from '@/components/about/TimelineSection';
 import { supabase } from "@/integrations/supabase/client";
 import { TimelineItem } from '@/types/TimelineItem';
-import { useAnimeScrollReveal } from '@/hooks/useAnimeScrollReveal';
+import { useScrollReveal } from '@/hooks/useScrollReveal';
 
 // TimelineItem type
 // type TimelineItem = {
@@ -75,28 +75,12 @@ const defaultAboutSection: AboutSection = {
 };
 
 const About = () => {
-  // Use Anime.js scroll reveal hooks
-  const heroReveal = useAnimeScrollReveal({ 
-    threshold: 0.2, 
-    triggerOnce: true, 
-    animationType: 'fade',
-    duration: 1000
-  });
-  
-  const aboutSectionReveal = useAnimeScrollReveal({ 
-    threshold: 0.3, 
-    triggerOnce: true, 
-    animationType: 'slide-up',
-    duration: 800,
-    delay: 200
-  });
-
-  const contactReveal = useAnimeScrollReveal({ 
-    threshold: 0.2, 
-    triggerOnce: true, 
-    animationType: 'slide-up',
-    duration: 800
-  });
+  // Scroll reveal hooks for different sections
+  const heroReveal = useScrollReveal({ threshold: 0.2, triggerOnce: true });
+  const aboutSectionReveal = useScrollReveal({ threshold: 0.3, triggerOnce: true });
+  const workTimelineReveal = useScrollReveal({ threshold: 0.2, triggerOnce: true });
+  const educationTimelineReveal = useScrollReveal({ threshold: 0.2, triggerOnce: true });
+  const contactReveal = useScrollReveal({ threshold: 0.2, triggerOnce: true });
 
   const [workItems, setWorkItems] = useState<TimelineItem[]>([]);
   const [educationItems, setEducationItems] = useState<TimelineItem[]>([]);
@@ -177,25 +161,37 @@ const About = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* About Hero with Anime.js scroll animation */}
-      <div ref={heroReveal.ref}>
+      {/* About Hero with scroll animation */}
+      <div ref={heroReveal.ref} className={`transition-all duration-1000 ease-out ${
+        heroReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+      }`}>
         <DynamicHeroSection />
       </div>
 
-      {/* Editable Who Am I Section with Anime.js scroll animation */}
-      <section ref={aboutSectionReveal.ref} className="py-10 max-w-3xl mx-auto px-4">
-        <div>
-          <h2 className="text-2xl font-bold mb-4 text-primary">
+      {/* Editable Who Am I Section with scroll animation */}
+      <section 
+        ref={aboutSectionReveal.ref}
+        className={`py-10 max-w-3xl mx-auto px-4 transition-all duration-1000 ease-out ${
+          aboutSectionReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
+        }`}
+      >
+        <div className={`transform transition-all duration-800 ${
+          aboutSectionReveal.isVisible ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
+        }`} style={{ transitionDelay: '0.2s' }}>
+          <h2 className="text-2xl font-bold mb-4 text-primary animate-slide-up">
             {aboutSection?.title ?? ""}
           </h2>
-          <p className="mb-6 text-lg text-foreground/90">
+          <p className="mb-6 text-lg text-foreground/90 animate-slide-up" style={{ animationDelay: '0.1s' }}>
             {aboutSection?.body ?? ""}
           </p>
           <div className="flex flex-wrap gap-3">
             {(aboutSection?.tags ?? []).map((tag: string, index: number) => (
               <span 
                 key={tag} 
-                className="bg-primary/10 text-primary px-4 py-1 rounded-full transform transition-all duration-500 hover:scale-105"
+                className={`bg-primary/10 text-primary px-4 py-1 rounded-full transform transition-all duration-500 hover:scale-105 ${
+                  aboutSectionReveal.isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'
+                }`}
+                style={{ transitionDelay: `${0.3 + index * 0.1}s` }}
               >
                 {tag}
               </span>
@@ -204,14 +200,24 @@ const About = () => {
         </div>
       </section>
 
-      {/* Timeline - Work with Anime.js */}
-      <AnimeTimelineSection items={workItems} sectionTitle="Work Experience" />
+      {/* Timeline - Work with enhanced scroll animation */}
+      <div ref={workTimelineReveal.ref} className={`transition-all duration-1000 ease-out ${
+        workTimelineReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
+      }`}>
+        <TimelineSection items={workItems} sectionTitle="Work Experience" />
+      </div>
 
-      {/* Timeline - Education with Anime.js */}
-      <AnimeTimelineSection items={educationItems} sectionTitle="Education" />
+      {/* Timeline - Education with enhanced scroll animation */}
+      <div ref={educationTimelineReveal.ref} className={`transition-all duration-1000 ease-out ${
+        educationTimelineReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
+      }`}>
+        <TimelineSection items={educationItems} sectionTitle="Education" />
+      </div>
 
-      {/* Contact with Anime.js scroll animation */}
-      <div ref={contactReveal.ref}>
+      {/* Contact with scroll animation */}
+      <div ref={contactReveal.ref} className={`transition-all duration-1000 ease-out ${
+        contactReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
+      }`}>
         <ContactSection />
       </div>
     </div>

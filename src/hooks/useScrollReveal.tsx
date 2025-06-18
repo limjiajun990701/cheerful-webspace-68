@@ -22,6 +22,17 @@ export const useScrollReveal = (options: UseScrollRevealOptions = {}) => {
   const [hasAnimated, setHasAnimated] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
+  // Reset animation state when page changes
+  useEffect(() => {
+    const handleReset = () => {
+      setIsVisible(false);
+      setHasAnimated(false);
+    };
+
+    window.addEventListener('resetScrollAnimations', handleReset);
+    return () => window.removeEventListener('resetScrollAnimations', handleReset);
+  }, []);
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
