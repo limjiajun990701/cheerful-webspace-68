@@ -35,7 +35,8 @@ const AnimeTimelineSection = ({ items, sectionTitle = "My Journey" }: AnimeTimel
 
     // Import anime dynamically to avoid TypeScript issues
     const setupAnimations = async () => {
-      const anime = (await import('animejs')).default;
+      const animeModule = await import('animejs');
+      const anime = animeModule.default || animeModule;
 
       // Set initial states for all items using direct style manipulation
       itemElements.forEach(element => {
