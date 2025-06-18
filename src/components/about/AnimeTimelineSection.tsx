@@ -1,5 +1,5 @@
+
 import React, { useEffect, useRef } from 'react';
-import anime from 'animejs';
 import { TimelineItem } from '@/types/TimelineItem';
 import { useAnimeScrollReveal } from '@/hooks/useAnimeScrollReveal';
 
@@ -33,75 +33,82 @@ const AnimeTimelineSection = ({ items, sectionTitle = "My Journey" }: AnimeTimel
     const itemElements = Array.from(itemRefs.current.values());
     if (itemElements.length === 0) return;
 
-    // Set initial states for all items using direct style manipulation
-    itemElements.forEach(element => {
-      element.style.opacity = '0';
-      element.style.transform = 'translateY(50px) scale(0.9)';
-    });
+    // Import anime dynamically to avoid TypeScript issues
+    const setupAnimations = async () => {
+      const anime = (await import('animejs')).default;
 
-    // Set up intersection observers for each item
-    const observers: IntersectionObserver[] = [];
-
-    items.forEach((item, index) => {
-      const element = itemRefs.current.get(item.id);
-      if (!element) return;
-
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) {
-            const isLeft = isEven(index);
-            
-            // Animate the timeline dot first using (anime as any) to bypass TypeScript issues
-            const dot = element.querySelector('.timeline-dot');
-            if (dot) {
-              (anime as any)({
-                targets: dot,
-                scale: [0, 1.2, 1],
-                opacity: [0, 1],
-                duration: 600,
-                easing: 'easeOutElastic(1, 0.8)'
-              });
-            }
-
-            // Then animate the card with a slight delay
-            (anime as any)({
-              targets: element.querySelector('.timeline-card'),
-              opacity: [0, 1],
-              translateY: [50, 0],
-              translateX: isLeft ? [-30, 0] : [30, 0],
-              scale: [0.9, 1],
-              duration: 800,
-              delay: 200,
-              easing: 'easeOutQuart'
-            });
-
-            observer.unobserve(element);
-          }
-        },
-        {
-          threshold: 0.3,
-          rootMargin: '0px 0px -100px 0px'
-        }
-      );
-
-      observer.observe(element);
-      observers.push(observer);
-    });
-
-    // Reset animations on page change
-    const handleReset = () => {
+      // Set initial states for all items using direct style manipulation
       itemElements.forEach(element => {
         element.style.opacity = '0';
         element.style.transform = 'translateY(50px) scale(0.9)';
       });
+
+      // Set up intersection observers for each item
+      const observers: IntersectionObserver[] = [];
+
+      items.forEach((item, index) => {
+        const element = itemRefs.current.get(item.id);
+        if (!element) return;
+
+        const observer = new IntersectionObserver(
+          ([entry]) => {
+            if (entry.isIntersecting) {
+              const isLeft = isEven(index);
+              
+              // Animate the timeline dot first
+              const dot = element.querySelector('.timeline-dot');
+              if (dot) {
+                anime({
+                  targets: dot,
+                  scale: [0, 1.2, 1],
+                  opacity: [0, 1],
+                  duration: 600,
+                  easing: 'easeOutElastic(1, 0.8)'
+                });
+              }
+
+              // Then animate the card with a slight delay
+              anime({
+                targets: element.querySelector('.timeline-card'),
+                opacity: [0, 1],
+                translateY: [50, 0],
+                translateX: isLeft ? [-30, 0] : [30, 0],
+                scale: [0.9, 1],
+                duration: 800,
+                delay: 200,
+                easing: 'easeOutQuart'
+              });
+
+              observer.unobserve(element);
+            }
+          },
+          {
+            threshold: 0.3,
+            rootMargin: '0px 0px -100px 0px'
+          }
+        );
+
+        observer.observe(element);
+        observers.push(observer);
+      });
+
+      // Reset animations on page change
+      const handleReset = () => {
+        itemElements.forEach(element => {
+          element.style.opacity = '0';
+          element.style.transform = 'translateY(50px) scale(0.9)';
+        });
+      };
+
+      window.addEventListener('resetScrollAnimations', handleReset);
+
+      return () => {
+        observers.forEach(observer => observer.disconnect());
+        window.removeEventListener('resetScrollAnimations', handleReset);
+      };
     };
 
-    window.addEventListener('resetScrollAnimations', handleReset);
-
-    return () => {
-      observers.forEach(observer => observer.disconnect());
-      window.removeEventListener('resetScrollAnimations', handleReset);
-    };
+    setupAnimations();
   }, [items]);
 
   return (
