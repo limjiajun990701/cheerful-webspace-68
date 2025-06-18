@@ -31,7 +31,7 @@ export const useAnimeScrollReveal = (options: UseAnimeScrollRevealOptions = {}) 
 
     // Import anime dynamically to avoid TypeScript issues
     const animateElement = async () => {
-      const animeModule = await import('animejs');
+      const animeModule = await import('animejs') as any;
       const anime = animeModule.default || animeModule;
 
       // Set initial state based on animation type
