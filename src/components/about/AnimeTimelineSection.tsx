@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef } from 'react';
-import * as anime from 'animejs';
+import anime from 'animejs';
 import { TimelineItem } from '@/types/TimelineItem';
 import { useAnimeScrollReveal } from '@/hooks/useAnimeScrollReveal';
 
@@ -34,11 +34,10 @@ const AnimeTimelineSection = ({ items, sectionTitle = "My Journey" }: AnimeTimel
     const itemElements = Array.from(itemRefs.current.values());
     if (itemElements.length === 0) return;
 
-    // Set initial states for all items
-    anime.set(itemElements, {
-      opacity: 0,
-      translateY: 50,
-      scale: 0.9
+    // Set initial states for all items using direct style manipulation
+    itemElements.forEach(element => {
+      element.style.opacity = '0';
+      element.style.transform = 'translateY(50px) scale(0.9)';
     });
 
     // Set up intersection observers for each item
@@ -92,11 +91,9 @@ const AnimeTimelineSection = ({ items, sectionTitle = "My Journey" }: AnimeTimel
 
     // Reset animations on page change
     const handleReset = () => {
-      anime.set(itemElements, {
-        opacity: 0,
-        translateY: 50,
-        translateX: 0,
-        scale: 0.9
+      itemElements.forEach(element => {
+        element.style.opacity = '0';
+        element.style.transform = 'translateY(50px) scale(0.9)';
       });
     };
 

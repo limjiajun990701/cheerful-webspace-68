@@ -1,6 +1,6 @@
 
 import { useEffect, useRef } from 'react';
-import * as anime from 'animejs';
+import anime from 'animejs';
 
 interface UseAnimeScrollRevealOptions {
   threshold?: number;
@@ -66,8 +66,18 @@ export const useAnimeScrollReveal = (options: UseAnimeScrollRevealOptions = {}) 
       }
     };
 
-    // Apply initial styles
-    anime.set(element, getInitialStyles());
+    // Apply initial styles using direct style manipulation instead of anime.set
+    const initialStyles = getInitialStyles();
+    element.style.opacity = String(initialStyles.opacity);
+    if ('translateY' in initialStyles) {
+      element.style.transform = `translateY(${initialStyles.translateY}px)`;
+    }
+    if ('translateX' in initialStyles) {
+      element.style.transform = `translateX(${initialStyles.translateX}px)`;
+    }
+    if ('scale' in initialStyles) {
+      element.style.transform = `scale(${initialStyles.scale})`;
+    }
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -99,7 +109,17 @@ export const useAnimeScrollReveal = (options: UseAnimeScrollRevealOptions = {}) 
           if (animationRef.current) {
             animationRef.current.pause();
           }
-          anime.set(element, getInitialStyles());
+          const initialStyles = getInitialStyles();
+          element.style.opacity = String(initialStyles.opacity);
+          if ('translateY' in initialStyles) {
+            element.style.transform = `translateY(${initialStyles.translateY}px)`;
+          }
+          if ('translateX' in initialStyles) {
+            element.style.transform = `translateX(${initialStyles.translateX}px)`;
+          }
+          if ('scale' in initialStyles) {
+            element.style.transform = `scale(${initialStyles.scale})`;
+          }
         }
       },
       {
@@ -115,7 +135,17 @@ export const useAnimeScrollReveal = (options: UseAnimeScrollRevealOptions = {}) 
       if (animationRef.current) {
         animationRef.current.pause();
       }
-      anime.set(element, getInitialStyles());
+      const initialStyles = getInitialStyles();
+      element.style.opacity = String(initialStyles.opacity);
+      if ('translateY' in initialStyles) {
+        element.style.transform = `translateY(${initialStyles.translateY}px)`;
+      }
+      if ('translateX' in initialStyles) {
+        element.style.transform = `translateX(${initialStyles.translateX}px)`;
+      }
+      if ('scale' in initialStyles) {
+        element.style.transform = `scale(${initialStyles.scale})`;
+      }
     };
 
     window.addEventListener('resetScrollAnimations', handleReset);
