@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { ArrowRight, ExternalLink, Award, Smartphone, Code, Layout, Database, Server, Globe } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -8,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import CollectionCarousel from "@/components/collections/CollectionCarousel";
-import { useScrollReveal } from "@/hooks/useScrollReveal";
+import { useAnimeScrollReveal } from "@/hooks/useAnimeScrollReveal";
 
 interface ExpertiseItem {
   id: string;
@@ -29,12 +28,36 @@ const funFacts = [
 ];
 
 const Index = () => {
-  // Scroll reveal hooks for different sections
-  const heroReveal = useScrollReveal({ threshold: 0.2 });
-  const collectionsReveal = useScrollReveal({ threshold: 0.1 });
-  const expertiseReveal = useScrollReveal({ threshold: 0.1 });
-  const certificationsReveal = useScrollReveal({ threshold: 0.1 });
-  const ctaReveal = useScrollReveal({ threshold: 0.1 });
+  // Replace useScrollReveal with useAnimeScrollReveal for better animations
+  const heroReveal = useAnimeScrollReveal({ 
+    threshold: 0.2, 
+    animationType: 'fade', 
+    duration: 1200 
+  });
+  
+  const collectionsReveal = useAnimeScrollReveal({ 
+    threshold: 0.1, 
+    animationType: 'slide-up', 
+    duration: 800 
+  });
+  
+  const expertiseReveal = useAnimeScrollReveal({ 
+    threshold: 0.1, 
+    animationType: 'slide-up', 
+    duration: 1000 
+  });
+  
+  const certificationsReveal = useAnimeScrollReveal({ 
+    threshold: 0.1, 
+    animationType: 'slide-up', 
+    duration: 800 
+  });
+  
+  const ctaReveal = useAnimeScrollReveal({ 
+    threshold: 0.1, 
+    animationType: 'slide-up', 
+    duration: 800 
+  });
 
   const [expertise, setExpertise] = useState({
     title: 'My Expertise',
@@ -197,7 +220,7 @@ const Index = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Hero Section - Modern and Clean Design */}
+      {/* Hero Section - Modern and Clean Design with Anime.js */}
       <section className="relative min-h-[90vh] flex items-center">
         {/* Background with animated diagonal lines */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-secondary/10 to-background -z-10" />
@@ -205,9 +228,7 @@ const Index = () => {
 
         {/* Animated Hero content */}
         <div className="container mx-auto px-4 py-16" ref={heroReveal.ref}>
-          <div className={`grid md:grid-cols-2 gap-16 items-center transition-all duration-1000 ${
-            heroReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          }`}>
+          <div className="grid md:grid-cols-2 gap-16 items-center">
             {/* Left side: Text content */}
             <div className="space-y-8">
               <div className="space-y-2">
@@ -296,14 +317,12 @@ const Index = () => {
         </div>
       </section>
       
-      {/* Collection Carousel Section */}
-      <div ref={collectionsReveal.ref} className={`transition-all duration-1000 ${
-        collectionsReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-      }`}>
+      {/* Collection Carousel Section with Anime.js */}
+      <div ref={collectionsReveal.ref}>
         <CollectionCarousel />
       </div>
       
-      {/* Expertise Section - Clean Card Layout */}
+      {/* Expertise Section - Clean Card Layout with Anime.js */}
       <section className="py-24 bg-secondary/30" ref={expertiseReveal.ref}>
         <div className="container mx-auto px-4">
           {isLoading ? (
@@ -319,9 +338,7 @@ const Index = () => {
               </div>
             </div>
           ) : (
-            <div className={`transition-all duration-1000 ${
-              expertiseReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-            }`}>
+            <div>
               <div className="max-w-4xl mx-auto text-center mb-16">
                 <h2 className="text-4xl font-bold mb-4">{expertise.title}</h2>
                 <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
@@ -365,11 +382,9 @@ const Index = () => {
         </div>
       </section>
       
-      {/* Certifications Section - Modern Layout */}
+      {/* Certifications Section - Modern Layout with Anime.js */}
       <section className="py-24 bg-background" ref={certificationsReveal.ref}>
-        <div className={`container mx-auto px-4 transition-all duration-1000 ${
-          certificationsReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-        }`}>
+        <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <Badge variant="outline" className="mb-4 px-3 py-1">Achievements</Badge>
             <h2 className="text-4xl font-bold mb-3">Certifications & Credentials</h2>
@@ -387,11 +402,9 @@ const Index = () => {
         </div>
       </section>
       
-      {/* CTA Section */}
+      {/* CTA Section with Anime.js */}
       <section className="py-20 bg-primary/10" ref={ctaReveal.ref}>
-        <div className={`container mx-auto px-4 transition-all duration-1000 ${
-          ctaReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-        }`}>
+        <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to Work Together?</h2>
             <p className="text-lg text-muted-foreground mb-10">
