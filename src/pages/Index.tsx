@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { ArrowRight, ExternalLink, Award, Smartphone, Code, Layout, Database, Server, Globe } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -7,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import CollectionCarousel from "@/components/collections/CollectionCarousel";
-import { useAnimeScrollReveal } from "@/hooks/useAnimeScrollReveal";
+import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 interface ExpertiseItem {
   id: string;
@@ -28,35 +29,29 @@ const funFacts = [
 ];
 
 const Index = () => {
-  // Replace useScrollReveal with useAnimeScrollReveal for better animations
-  const heroReveal = useAnimeScrollReveal({ 
+  const heroReveal = useScrollReveal({ 
     threshold: 0.2, 
-    animationType: 'fade', 
-    duration: 1200 
+    animationType: 'fade' 
   });
   
-  const collectionsReveal = useAnimeScrollReveal({ 
+  const collectionsReveal = useScrollReveal({ 
     threshold: 0.1, 
-    animationType: 'slide-up', 
-    duration: 800 
+    animationType: 'slide-up' 
   });
   
-  const expertiseReveal = useAnimeScrollReveal({ 
+  const expertiseReveal = useScrollReveal({ 
     threshold: 0.1, 
-    animationType: 'slide-up', 
-    duration: 1000 
+    animationType: 'slide-up' 
   });
   
-  const certificationsReveal = useAnimeScrollReveal({ 
+  const certificationsReveal = useScrollReveal({ 
     threshold: 0.1, 
-    animationType: 'slide-up', 
-    duration: 800 
+    animationType: 'slide-up' 
   });
   
-  const ctaReveal = useAnimeScrollReveal({ 
+  const ctaReveal = useScrollReveal({ 
     threshold: 0.1, 
-    animationType: 'slide-up', 
-    duration: 800 
+    animationType: 'slide-up' 
   });
 
   const [expertise, setExpertise] = useState({
@@ -220,15 +215,15 @@ const Index = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Hero Section - Modern and Clean Design with Anime.js */}
+      {/* Hero Section - Modern and Clean Design */}
       <section className="relative min-h-[90vh] flex items-center">
         {/* Background with animated diagonal lines */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-secondary/10 to-background -z-10" />
         <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(120deg,rgba(0,0,0,.02)25%,transparent_25%,transparent_75%,rgba(0,0,0,.02)75%)]" />
 
-        {/* Animated Hero content */}
+        {/* Hero content */}
         <div className="container mx-auto px-4 py-16" ref={heroReveal.ref}>
-          <div className="grid md:grid-cols-2 gap-16 items-center">
+          <div className={`grid md:grid-cols-2 gap-16 items-center transition-all duration-1000 ${heroReveal.animationClasses}`}>
             {/* Left side: Text content */}
             <div className="space-y-8">
               <div className="space-y-2">
@@ -240,28 +235,27 @@ const Index = () => {
                   </>
                 ) : heroContent ? (
                   <>
-                    <Badge variant="outline" className="border-primary/30 text-primary bg-primary/5 px-4 py-1.5 text-sm animate-fade-in">
+                    <Badge variant="outline" className="border-primary/30 text-primary bg-primary/5 px-4 py-1.5 text-sm">
                       {heroContent.subtitle}
                     </Badge>
                     <h1
-                      className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight animate-slide-up"
+                      className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight"
                       dangerouslySetInnerHTML={{ __html: heroContent.title }}
                     />
                     <p
-                      className="text-xl md:text-2xl text-muted-foreground mt-4 leading-relaxed animate-slide-up"
-                      style={{ animationDelay: '0.2s' }}
+                      className="text-xl md:text-2xl text-muted-foreground mt-4 leading-relaxed"
                       dangerouslySetInnerHTML={{ __html: heroContent.description }}
                     />
                   </>
                 ) : null}
               </div>
               {/* Fun facts carousel */}
-              <div className="my-6 text-lg/relaxed font-medium text-center md:text-left animate-fade-in" style={{ animationDelay: '0.3s' }}>
+              <div className="my-6 text-lg/relaxed font-medium text-center md:text-left">
                 <span className="inline-flex items-center gap-2 text-primary">
                   <span>{funFacts[factIndex]}</span>
                 </span>
               </div>
-              <div className="flex flex-wrap gap-4 pt-4 animate-slide-up" style={{ animationDelay: '0.4s' }}>
+              <div className="flex flex-wrap gap-4 pt-4">
                 <Button asChild size="lg" className="group gap-2">
                   <Link to="/projects">
                     Explore My Work
@@ -275,18 +269,17 @@ const Index = () => {
                 </Button>
               </div>
               
-              <div className="flex flex-wrap gap-5 pt-6 md:pt-10 animate-fade-in" style={{ animationDelay: '0.5s' }}>
+              <div className="flex flex-wrap gap-5 pt-6 md:pt-10">
                 {expertise.skills.slice(0, 4).map((skill, index) => (
                   <Badge 
                     key={index}
                     variant="secondary" 
                     className={`${skill.color} px-3 py-1.5 text-sm transform hover:scale-105 transition-transform`}
-                    style={{ animationDelay: `${0.6 + index * 0.1}s` }}
                   >
                     {skill.name}
                   </Badge>
                 ))}
-                <Link to="/about" className="inline-flex items-center gap-1 text-primary hover:underline animate-fade-in" style={{ animationDelay: '1s' }}>
+                <Link to="/about" className="inline-flex items-center gap-1 text-primary hover:underline">
                   +{expertise.skills.length - 4} more skills
                 </Link>
               </div>
@@ -300,12 +293,12 @@ const Index = () => {
                 <img
                   src={heroContent.image_url}
                   alt="Hero"
-                  className="rounded-xl shadow-2xl w-full max-w-md h-auto object-cover animate-scale-in"
+                  className="rounded-xl shadow-2xl w-full max-w-md h-auto object-cover"
                   onError={() => setHeroImageError(true)}
-                  style={{ aspectRatio: '4/5', animationDelay: '0.3s' }}
+                  style={{ aspectRatio: '4/5' }}
                 />
               ) : (
-                <div className="w-full max-w-md h-[450px] bg-muted/50 rounded-lg flex items-center justify-center border border-dashed animate-fade-in">
+                <div className="w-full max-w-md h-[450px] bg-muted/50 rounded-lg flex items-center justify-center border border-dashed">
                   <div className="text-center text-muted-foreground">
                     <Layout className="mx-auto h-12 w-12 mb-2" />
                     <p>Hero image appears here</p>
@@ -317,95 +310,100 @@ const Index = () => {
         </div>
       </section>
       
-      {/* Collection Carousel Section with Anime.js */}
+      {/* Collection Carousel Section */}
       <div ref={collectionsReveal.ref}>
-        <CollectionCarousel />
+        <div className={`transition-all duration-800 ${collectionsReveal.animationClasses}`}>
+          <CollectionCarousel />
+        </div>
       </div>
       
-      {/* Expertise Section - Clean Card Layout with Anime.js */}
+      {/* Expertise Section - Clean Card Layout */}
       <section className="py-24 bg-secondary/30" ref={expertiseReveal.ref}>
         <div className="container mx-auto px-4">
-          {isLoading ? (
-            <div className="space-y-10">
-              <div className="space-y-2">
-                <Skeleton className="h-10 w-64 mx-auto" />
-                <Skeleton className="h-6 w-full max-w-2xl mx-auto" />
+          <div className={`transition-all duration-1000 ${expertiseReveal.animationClasses}`}>
+            {isLoading ? (
+              <div className="space-y-10">
+                <div className="space-y-2">
+                  <Skeleton className="h-10 w-64 mx-auto" />
+                  <Skeleton className="h-6 w-full max-w-2xl mx-auto" />
+                </div>
+                <div className="grid md:grid-cols-3 gap-8">
+                  <Skeleton className="h-72 rounded-xl" />
+                  <Skeleton className="h-72 rounded-xl" />
+                  <Skeleton className="h-72 rounded-xl" />
+                </div>
               </div>
-              <div className="grid md:grid-cols-3 gap-8">
-                <Skeleton className="h-72 rounded-xl" />
-                <Skeleton className="h-72 rounded-xl" />
-                <Skeleton className="h-72 rounded-xl" />
-              </div>
-            </div>
-          ) : (
-            <div>
-              <div className="max-w-4xl mx-auto text-center mb-16">
-                <h2 className="text-4xl font-bold mb-4">{expertise.title}</h2>
-                <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                  {expertise.subtitle}
-                </p>
-              </div>
-              
-              <div className="grid md:grid-cols-3 gap-10 max-w-6xl mx-auto">
-                {expertise.items.map((item, index) => (
-                  <Card 
-                    key={item.id} 
-                    className="overflow-hidden border-none shadow-lg hover:shadow-xl transition-all duration-300 group animate-slide-up"
-                    style={{ animationDelay: `${index * 0.2}s` }}
-                  >
-                    <div className="h-2 bg-primary w-full"></div>
-                    <CardContent className="p-8">
-                      <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-6 transition-all duration-300 group-hover:bg-primary/20 group-hover:scale-110">
-                        <div className="text-primary">
-                          {renderIcon(item.icon)}
+            ) : (
+              <div>
+                <div className="max-w-4xl mx-auto text-center mb-16">
+                  <h2 className="text-4xl font-bold mb-4">{expertise.title}</h2>
+                  <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+                    {expertise.subtitle}
+                  </p>
+                </div>
+                
+                <div className="grid md:grid-cols-3 gap-10 max-w-6xl mx-auto">
+                  {expertise.items.map((item, index) => (
+                    <Card 
+                      key={item.id} 
+                      className="overflow-hidden border-none shadow-lg hover:shadow-xl transition-all duration-300 group"
+                    >
+                      <div className="h-2 bg-primary w-full"></div>
+                      <CardContent className="p-8">
+                        <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-6 transition-all duration-300 group-hover:bg-primary/20 group-hover:scale-110">
+                          <div className="text-primary">
+                            {renderIcon(item.icon)}
+                          </div>
                         </div>
-                      </div>
-                      <h3 className="text-2xl font-bold mb-4">{item.title}</h3>
-                      <p className="text-muted-foreground leading-relaxed">
-                        {item.description}
-                      </p>
-                    </CardContent>
-                  </Card>
-                ))}
+                        <h3 className="text-2xl font-bold mb-4">{item.title}</h3>
+                        <p className="text-muted-foreground leading-relaxed">
+                          {item.description}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+                
+                <div className="text-center mt-16">
+                  <Button asChild variant="outline" size="lg" className="group">
+                    <Link to="/experience">
+                      View My Experience
+                      <ExternalLink className="ml-2 h-4 w-4 transition-all group-hover:translate-x-1" />
+                    </Link>
+                  </Button>
+                </div>
               </div>
-              
-              <div className="text-center mt-16">
-                <Button asChild variant="outline" size="lg" className="group">
-                  <Link to="/experience">
-                    View My Experience
-                    <ExternalLink className="ml-2 h-4 w-4 transition-all group-hover:translate-x-1" />
-                  </Link>
-                </Button>
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </section>
       
-      {/* Certifications Section - Modern Layout with Anime.js */}
+      {/* Certifications Section - Modern Layout */}
       <section className="py-24 bg-background" ref={certificationsReveal.ref}>
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <Badge variant="outline" className="mb-4 px-3 py-1">Achievements</Badge>
-            <h2 className="text-4xl font-bold mb-3">Certifications & Credentials</h2>
-            <div className="h-1 w-24 bg-primary/30 mx-auto"></div>
-          </div>
-          
-          <div className="flex justify-center">
-            <Button asChild variant="default" size="lg" className="gap-2">
-              <Link to="/certifications">
-                <Award className="h-5 w-5 mr-2" />
-                View All Certifications
-              </Link>
-            </Button>
+          <div className={`transition-all duration-800 ${certificationsReveal.animationClasses}`}>
+            <div className="text-center mb-12">
+              <Badge variant="outline" className="mb-4 px-3 py-1">Achievements</Badge>
+              <h2 className="text-4xl font-bold mb-3">Certifications & Credentials</h2>
+              <div className="h-1 w-24 bg-primary/30 mx-auto"></div>
+            </div>
+            
+            <div className="flex justify-center">
+              <Button asChild variant="default" size="lg" className="gap-2">
+                <Link to="/certifications">
+                  <Award className="h-5 w-5 mr-2" />
+                  View All Certifications
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
       </section>
       
-      {/* CTA Section with Anime.js */}
+      {/* CTA Section */}
       <section className="py-20 bg-primary/10" ref={ctaReveal.ref}>
         <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center">
+          <div className={`max-w-3xl mx-auto text-center transition-all duration-800 ${ctaReveal.animationClasses}`}>
             <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to Work Together?</h2>
             <p className="text-lg text-muted-foreground mb-10">
               I'm currently available for freelance projects, full-time positions, and collaborative opportunities.
